@@ -18,5 +18,6 @@
 #pragma link C++ class SKTreeValidation+;
 
 #pragma link C++ class CHToCB_E+;
+#pragma link C++ class CHToCB_M+;
 
 #endif // __CINT__
