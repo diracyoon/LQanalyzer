@@ -1585,10 +1585,9 @@ bool AnalyzerCore::isPrompt(long pdgid) {
   else return false;
 }
 
-void AnalyzerCore::EndEvent()throw( LQError ){
-  
-  delete eventbase;                                                                                                            
-
+void AnalyzerCore::EndEvent()throw( LQError )
+{
+  delete eventbase;                                                                               
 }
   
 void AnalyzerCore::CheckFile(TFile* file)throw( LQError ){
@@ -1993,30 +1992,32 @@ float AnalyzerCore::GetEff(snu::KMuon mu, TString trigname){
 
      
 
-bool AnalyzerCore::PassTrigger(vector<pair<TString,TString> > list){
-  
+bool AnalyzerCore::PassTrigger(vector<pair<TString,TString> > list)
+{
   vector<TString> triglist;
-  for(vector<pair<TString,TString>  >::iterator it = list.begin(); it != list.end(); it++){
-    if(k_channel.Contains(it->second)){
-      for(unsigned int i=0; i <  triglist.size(); i++){
-	if(PassTrigger(it->first)) return false;
-      }
-      if(PassTrigger(it->first)) return true;
-      triglist.push_back(it->first);
+  for(vector<pair<TString, TString> >::iterator it=list.begin(); it!= list.end(); it++)
+    {
+      if(k_channel.Contains(it->second))
+	{
+	  for(unsigned int i=0; i<triglist.size(); i++)
+	    {
+	      if(PassTrigger(it->first)) return false;
+	    }
+	  if(PassTrigger(it->first)) return true;
+	  triglist.push_back(it->first);
+	}
     }
-  }
+
   return false;
 }
 
-
-
-bool AnalyzerCore::PassTrigger(TString trig){
+bool AnalyzerCore::PassTrigger(TString trig)
+{
   vector<TString> list;
   list.push_back(trig);
   int  prescaler=1.;
+
   return TriggerSelector(list, eventbase->GetTrigger().GetHLTInsideDatasetTriggerNames(), eventbase->GetTrigger().GetHLTInsideDatasetTriggerDecisions(), eventbase->GetTrigger().GetHLTInsideDatasetTriggerPrescales(), prescaler);
- 
- 
 }
 
 
@@ -2101,66 +2102,78 @@ void AnalyzerCore::MakeHistograms2D(TString hname, int nbinsx,  float xbins[], i
   maphist2D[hname]->GetXaxis()->SetTitle(label);
 }
 
-bool AnalyzerCore::PassMETFilter(){
-  
-  bool pass (true);
+bool AnalyzerCore::PassMETFilter()
+{
+  bool pass(true);
   
   ///https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFilters
     
-  if(Is2015Analysis()){
-    if (!eventbase->GetEvent().PassCSCHaloFilterTight()) {
-      pass = false;
-      m_logger << DEBUG << "Event Fails PassCSCHaloFilterTight " << LQLogger::endmsg;
-    }
+  if(Is2015Analysis())
+    {
+      if(!eventbase->GetEvent().PassCSCHaloFilterTight()) 
+	{
+	  pass = false;
+	  m_logger << DEBUG << "Event Fails PassCSCHaloFilterTight " << LQLogger::endmsg;
+	}
 
-    if (!eventbase->GetEvent().PassHBHENoiseFilter()) {
-      pass = false; 
-      m_logger << DEBUG << "Event Fails PassHBHENoiseFilter " << LQLogger::endmsg;
-    }
+      if(!eventbase->GetEvent().PassHBHENoiseFilter())
+	{
+	  pass = false; 
+	  m_logger << DEBUG << "Event Fails PassHBHENoiseFilter " << LQLogger::endmsg;
+	}
 
-    if(!eventbase->GetEvent().PassEcalDeadCellTriggerPrimitiveFilter()) {
-      pass = false;
-      m_logger << DEBUG << "Event Fails PassEcalDeadCellTriggerPrimitiveFilter" << LQLogger::endmsg;
-    }
+      if(!eventbase->GetEvent().PassEcalDeadCellTriggerPrimitiveFilter())
+	{
+	  pass = false;
+	  m_logger << DEBUG << "Event Fails PassEcalDeadCellTriggerPrimitiveFilter" << LQLogger::endmsg;
+	}
 
     //Bad EE Supercrystal filter (post-ICHEP: extend to include an additional problematic SC --only for 2012)
-    if (!eventbase->GetEvent().PassBadEESupercrystalFilter()) {
-      pass = false;
-      m_logger << DEBUG << "Event Fails PassBadEESupercrystalFilter" << LQLogger::endmsg;
-    }
-  }
-  else{
+      if(!eventbase->GetEvent().PassBadEESupercrystalFilter())
+	{
+	  pass = false;
+	  m_logger << DEBUG << "Event Fails PassBadEESupercrystalFilter" << LQLogger::endmsg;
+	}
+    }//if(Is2015Analysis())
+  else
+    {
+      if(!eventbase->GetEvent().PassCSCHaloFilterTight())
+	{
+	  pass = false;
+	  m_logger << DEBUG << "Event Fails PassCSCHaloFilterTight " << LQLogger::endmsg;
+	}
     
-    if (!eventbase->GetEvent().PassCSCHaloFilterTight()) {
-      pass = false;
-      m_logger << DEBUG << "Event Fails PassCSCHaloFilterTight " << LQLogger::endmsg;
-    }
+      if(!eventbase->GetEvent().PassTightHalo2016Filter())
+	{
+	  pass = false;
+	  m_logger << DEBUG << "Event Fails PassTightHalo2016Filter " << LQLogger::endmsg;
+	}
     
-    if (!eventbase->GetEvent().PassTightHalo2016Filter()) {
-      pass = false;
-      m_logger << DEBUG << "Event Fails PassTightHalo2016Filter " << LQLogger::endmsg;
-    }
-    
-    //if(isData){
-    if (!eventbase->GetEvent().PassHBHENoiseFilter()) {
-      pass = false; 
-      m_logger << DEBUG << "Event Fails PassHBHENoiseFilter " << LQLogger::endmsg;
-    }
-    if (!eventbase->GetEvent().PassHBHENoiseIsoFilter()) {
-      pass = false;
-      m_logger << DEBUG << "Event Fails PassHBHENoiseIsoFilter " << LQLogger::endmsg;
-    }
-    if(!eventbase->GetEvent().PassEcalDeadCellTriggerPrimitiveFilter()) {
-      pass = false;
-      m_logger << DEBUG << "Event Fails PassEcalDeadCellTriggerPrimitiveFilter" << LQLogger::endmsg;
-    }
-  }
-    //Bad EE Supercrystal filter (post-ICHEP: extend to include an additional problematic SC --only for 2012)
-    //    if (!eventbase->GetEvent().PassBadEESupercrystalFilter()) {
-    //      pass = false;
-    //      m_logger << DEBUG << "Event Fails PassBadEESupercrystalFilter" << LQLogger::endmsg;
-    //    }
-    //}
+      if(!eventbase->GetEvent().PassHBHENoiseFilter())
+	{
+	  pass = false; 
+	  m_logger << DEBUG << "Event Fails PassHBHENoiseFilter " << LQLogger::endmsg;
+	}
+      
+      if(!eventbase->GetEvent().PassHBHENoiseIsoFilter())
+	{
+	  pass = false;
+	  m_logger << DEBUG << "Event Fails PassHBHENoiseIsoFilter " << LQLogger::endmsg;
+	}
+      
+      if(!eventbase->GetEvent().PassEcalDeadCellTriggerPrimitiveFilter()) {
+	pass = false;
+	m_logger << DEBUG << "Event Fails PassEcalDeadCellTriggerPrimitiveFilter" << LQLogger::endmsg;
+      }
+    }//else !Is2015Analysis()
+   
+  //Bad EE Supercrystal filter (post-ICHEP: extend to include an additional problematic SC --only for 2012)
+  //    if (!eventbase->GetEvent().PassBadEESupercrystalFilter()) {
+  //      pass = false;
+  //      m_logger << DEBUG << "Event Fails PassBadEESupercrystalFilter" << LQLogger::endmsg;
+  //    }
+  //}
+  
   return pass;
 }
 
@@ -3152,7 +3165,6 @@ vector<TLorentzVector> AnalyzerCore::MakeTLorentz(vector<snu::KJet> j){
   return tl_jet;
 }
 
-
 vector<TLorentzVector> AnalyzerCore::MakeTLorentz(vector<snu::KFatJet> j){
 
   vector<TLorentzVector> tl_jet;
@@ -3164,6 +3176,7 @@ vector<TLorentzVector> AnalyzerCore::MakeTLorentz(vector<snu::KFatJet> j){
   return tl_jet;
 }
 
-
-
-
+bool AnalyzerCore::Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1)
+{
+  return jet0.Pt() > jet1.Pt();
+}//static bool AnalyzerCore::Compare_Pt_Jet(snu::KJET& jet0, snu::KET& jet1)

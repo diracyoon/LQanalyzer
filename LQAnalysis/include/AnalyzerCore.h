@@ -1,7 +1,7 @@
-#ifndef AnalyzerCore_H
-#define AnalyzerCore_H
+#ifndef __AnalyzerCore_H__
+#define __AnalyzerCore_H__
 
-//forward declarations                                                                                                                                            
+//forward declarations                                                                                
 class Reweight;
 class EventBase;
 class MuonPlots;
@@ -24,27 +24,19 @@ class EventBase;
 #include "TNtuple.h"
 #include "TGraphAsymmErrors.h"
 
-class AnalyzerCore : public LQCycleBase {
-  
+class AnalyzerCore : public LQCycleBase 
+{
  public:
  
-  enum period  {C=0,
-		D=1,
-		CtoD=2,
-		BtoE_2016=3};
+  enum period  {C=0, D=1, CtoD=2, BtoE_2016=3};
   
-  //Default constructor
-   
   AnalyzerCore();
-
-  //destructor
   virtual ~AnalyzerCore();
-
-  // SetUpEvent CORE function: accesses event in ntuple
-  virtual void SetUpEvent(Long64_t entry, float ev_weight) throw( LQError );
-  virtual void EndEvent()throw( LQError );
-  virtual void WriteHistograms()throw( LQError );
-
+  
+  //SetUpEvent CORE function: accesses event in ntuple
+  virtual void SetUpEvent(Long64_t entry, float ev_weight) throw(LQError);
+  virtual void EndEvent() throw(LQError);
+  virtual void WriteHistograms() throw(LQError);
 
   TDirectory*   getTemporaryDirectory(void) const;
  
@@ -77,7 +69,6 @@ class AnalyzerCore : public LQCycleBase {
   void FillCorrectionHists();
   TH2F* GetCorrectionHist(TString label);
   bool CheckCorrectionHist(TString label);
-
 
   TGraphAsymmErrors* GetCorrectionGraph(TString label);
   bool CheckCorrectionGraph(TString label);
@@ -144,13 +135,10 @@ class AnalyzerCore : public LQCycleBase {
   float Get_DataDrivenWeight_E(vector<snu::KElectron> k_electrons);
   float Get_DataDrivenWeight_M(vector<snu::KMuon> k_muons, TString cutID="HN");
   float Get_DataDrivenWeight_EM(vector<snu::KMuon> k_muons, vector<snu::KElectron> k_electrons, TString cut="HN");
- 
 
   void CorrectMuonMomentum(vector<snu::KMuon>& k_muons);
 
-
   double MuonDYMassCorrection(std::vector<snu::KMuon> mu, double w);
-
   
   vector<TLorentzVector> MakeTLorentz( vector<snu::KElectron> el);
   vector<TLorentzVector> MakeTLorentz( vector<snu::KMuon> mu);
@@ -159,23 +147,17 @@ class AnalyzerCore : public LQCycleBase {
   // enum for plotting functions/classes
   enum histtype {muhist, elhist, jethist, sighist_ee, sighist_mm, sighist_em, trilephist, hnpairmm};
   
-  
-  //
-  // Useful message function 
-  //
+  //Useful message function 
   void Message(TString message, LQMsgType type=INFO);
 
-
-  //
-  //  Specify which triggers will be avaiable in KTrigger
-  //
+  //Specify which triggers will be avaiable in KTrigger
   void AddTriggerToList(TString triggername);
   
-  /// Pileup Reweighting class
+  //Pileup Reweighting class
   static const Bool_t MC_pu = true;
   Reweight *reweightPU;
 
-  //// Event base pointer. Used to get all objects for analysis
+  //Event base pointer. Used to get all objects for analysis
   EventBase* eventbase;
   
   UInt_t numberVertices;
@@ -232,17 +214,15 @@ class AnalyzerCore : public LQCycleBase {
   TH2F* MuonISO_loose_looseID;
   HNCommonLeptonFakes* m_fakeobj;
 
-
   int n_cutflowcuts;
 
-  /// Event weights
+  //Event weights
   Double_t MCweight, weight;
-
 
   bool reset_lumi_mask;
   bool changed_target_lumi;
 
-  // used to get trigger prescale
+  //used to get trigger prescale
   Int_t prescale;
   
   std::vector<TString> triggerlist;
@@ -260,30 +240,23 @@ class AnalyzerCore : public LQCycleBase {
   float WeightByTrigger(TString triggername, float tlumi);
   float WeightByTrigger(vector<TString> triggername, float tlumi);  
 
-  //
   // Function that closes rootfile
-  //
   void CloseFiles();
   
-
-  //
-  // Make Histograms and fill maphist
-  //
+  //Make Histograms and fill maphist
   void MakeHistograms();
   void MakeHistograms(TString hname, int nbins, float xmin, float xmax, TString label="");
   void MakeHistograms(TString hname, int nbins, float xbins[], TString label="");
   void MakeHistograms2D(TString hname, int nbinsx, float xbins[], int nbinsy, float ybins[], TString label="");
   void MakeHistograms2D(TString hname, int nbinsx, float xmin, float xmax, int nbinsy, float ymin, float ymax, TString label="");
-    //
-    // Makes temporary dir
-    //
-    TDirectory* GetTemporaryDirectory(void) const;                                                                                                                                 
-  //
-  // Checks if a file exists
-  //
+    
+  //Makes temporary dir
+  TDirectory* GetTemporaryDirectory(void) const;                                                                                                                                 
+  
+  //Checks if a file exists
   void CheckFile(TFile* file) throw( LQError );
   
-  //// Plotting 
+  //Plotting 
   TH1* GetHist(TString hname);
   TH2* GetHist2D(TString hname);
 
@@ -304,7 +277,6 @@ class AnalyzerCore : public LQCycleBase {
   void FillCLHist(histtype type, TString hist, vector<snu::KElectron> electrons , double weight);
   void FillCLHist(histtype type, TString hist, vector<snu::KJet> jets , double weight);
   std::map<TString,BTagSFUtil*> SetupBTagger(std::vector<TString> taggers, std::vector<TString> wps);
-
 
   // Makes clever histograms
   void MakeCleverHistograms(histtype type, TString clhistname );
@@ -337,9 +309,12 @@ class AnalyzerCore : public LQCycleBase {
   bool PassMETFilter();
 
   std::map<TString,BTagSFUtil*> MapBTagSF;
-  //  BTagSFUtil *lBTagSF, *hBTagSF;
+
+  //BTagSFUtil *lBTagSF, *hBTagSF;
   rochcor2015 *rmcor;
 
-  
+  //private methods                                                        
+  static bool Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1);  
 };
+
 #endif
