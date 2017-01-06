@@ -17,4 +17,6 @@
 #pragma link C++ class HNEMu+;
 #pragma link C++ class SKTreeValidation+;
 
+#pragma link C++ class CHToCB_E+;
+
 #endif // __CINT__
