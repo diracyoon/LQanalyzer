@@ -33,6 +33,11 @@ class Kinematic_Fitter
   void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t a_chk_b_tag[4], const TLorentzVector& a_ue);
 
  private:
+  //first index: 0 for b, 1 for c, 2 for light quark
+  //second index: four jet
+  Double_t ts_corr_value[3][4];
+  Double_t ts_corr_error[3][4];
+  
   vector<TLorentzVector> jet_vector;
   
   static TLorentzVector measured_met;
@@ -46,7 +51,6 @@ class Kinematic_Fitter
   Bool_t chk_b_tag[4];
   Bool_t reordered_b_tag[4];
   
-  Double_t error_measured_jet_pt[4];
   static Double_t error_reordered_jet_pt[4];
   static Double_t error_lepton_pt;
   static Double_t error_ue;
@@ -58,6 +62,7 @@ class Kinematic_Fitter
   ROOT::Math::Minimizer* minimizer;
   
   static Double_t Chi2_Func(const Double_t* par);
+  void Top_Specific_Correction();
   
   ClassDef(Kinematic_Fitter, 1);
 };
