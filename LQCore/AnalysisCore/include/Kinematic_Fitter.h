@@ -21,7 +21,7 @@
 
 using namespace std;
 
-class Kinematic_Fitter
+class Kinematic_Fitter 
 {
  public:
   Kinematic_Fitter(Bool_t a_chk_debug=kFALSE);
@@ -33,7 +33,7 @@ class Kinematic_Fitter
   void Get_Parameters(Double_t parameter_return[NFIT], const TString& type="BEST", const Int_t& index=-1);
   void Get_Permutation(Int_t permuatation_return[4]);
   void Print();
-  void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t a_chk_b_tag[4], const TLorentzVector& a_ue);
+  void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t a_chk_b_tag[4]);
 
  private:
   Bool_t chk_debug;
@@ -52,25 +52,24 @@ class Kinematic_Fitter
   
   vector<TLorentzVector> jet_vector;
   
+  static TLorentzVector measured_extra_jet;
   static TLorentzVector measured_met;
   static TLorentzVector measured_lepton;
   TLorentzVector measured_jet[4];
   static TLorentzVector reordered_jet[4];
-  static TLorentzVector sum_extra_jet;
-  static TLorentzVector measured_ue;
   
   Int_t n_b_tag;
   Bool_t chk_b_tag[4];
   Bool_t reordered_b_tag[4];
   
+  static Double_t error_extra_jet;
   static Double_t error_reordered_jet_pt[4];
   static Double_t error_lepton_pt;
-  static Double_t error_ue;
   
   ROOT::Math::Minimizer* minimizer;
   
   static Double_t Chi2_Func(const Double_t* par);
-  void Top_Specific_Correction();
+  //void Top_Specific_Correction(const TLorentzVector& jet, const Int_t& jet_type, Double_t par[2]);
   
   ClassDef(Kinematic_Fitter, 1);
 };

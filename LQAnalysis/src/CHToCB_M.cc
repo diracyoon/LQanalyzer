@@ -23,6 +23,8 @@ CHToCB_M::CHToCB_M() : AnalyzerCore()
   chk_debug = kFALSE;
 
   fitter = new Kinematic_Fitter(chk_debug);
+
+  ts_correction = new TS_Correction(0);
 }//CHToCB_M::CHToCB_M()
 
 //////////
@@ -175,18 +177,10 @@ void CHToCB_M::ExecuteEvents() throw(LQError)
   Int_t njet_soft = jet_soft_coll.size();
   for(Int_t i=0; i<njet_soft; i++){ jet_vector.push_back(jet_soft_coll.at(i)); }
 
-  /*Unclustered Energy*/
-  TLorentzVector ue_vector;
-  ue_vector -= met_vector;
-  ue_vector -= muon_tight_coll.at(0);
-  for(Int_t i=0; i<njet_soft; i++)
-    { 
-      ue_vector -= jet_soft_coll.at(i); 
-    }
   
   if(chk_debug) cout << "START " << eventbase->GetEvent().EventNumber() << endl;
   
-  fitter->Set(met_vector, muon_vector, jet_vector, chk_btag, ue_vector);
+  fitter->Set(met_vector, muon_vector, jet_vector, chk_btag);
   fitter->Fit();  
   
   Double_t chi2 = fitter->Get_Chi2();
