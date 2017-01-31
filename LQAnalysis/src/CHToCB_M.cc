@@ -23,8 +23,6 @@ CHToCB_M::CHToCB_M() : AnalyzerCore()
   chk_debug = kFALSE;
 
   fitter = new Kinematic_Fitter(chk_debug);
-
-  ts_correction = new TS_Correction(0);
 }//CHToCB_M::CHToCB_M()
 
 //////////

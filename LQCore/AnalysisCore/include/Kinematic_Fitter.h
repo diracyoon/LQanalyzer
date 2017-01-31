@@ -1,12 +1,15 @@
 #ifndef __KINEMATIC_FITTER_H__
 #define __KINEMATIC_FITTER_H__
 
+#include "iostream"
 #include "vector"
 
 #include "TLorentzVector.h"
 #include "Math/Minimizer.h"
 #include "Math/Factory.h"
 #include "Math/Functor.h"
+
+#include "TS_Correction.h"
 
 #define C_MASS 1.27
 #define B_MASS 4.8
@@ -16,8 +19,6 @@
 #define W_WIDTH 2.141
 
 #define NFIT 9
-
-#include "iostream"
 
 using namespace std;
 
@@ -45,10 +46,10 @@ class Kinematic_Fitter
   Double_t chi2[2][24];
   Double_t parameter[2][24][NFIT];
 
-  //first index: 0 for b, 1 for c, 2 for light quark
-  //second index: four jet
-  Double_t ts_corr_value[3][4];
-  Double_t ts_corr_error[3][4];
+  //first index: four jet
+  //second index: 0 for light, 1 for c, 2 for b
+  Double_t ts_corr_value[4][3];
+  Double_t ts_corr_error[4][3];
   
   vector<TLorentzVector> jet_vector;
   
@@ -71,6 +72,8 @@ class Kinematic_Fitter
   static Double_t Chi2_Func(const Double_t* par);
   //void Top_Specific_Correction(const TLorentzVector& jet, const Int_t& jet_type, Double_t par[2]);
   
+  TS_Correction* ts_correction;
+
   ClassDef(Kinematic_Fitter, 1);
 };
 

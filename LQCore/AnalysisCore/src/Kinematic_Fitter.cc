@@ -30,12 +30,15 @@ Kinematic_Fitter::Kinematic_Fitter(Bool_t a_chk_debug)
   minimizer->SetMaxIterations(10000);  
   minimizer->SetTolerance(0.001);
   minimizer->SetPrintLevel(chk_debug);
+
+  ts_correction = new TS_Correction(0);
 }//Kinematic_Fitter::Kinematic_Fitter()
 
 ///////////
 
 Kinematic_Fitter::~Kinematic_Fitter()
 {
+  delete ts_correction;
 }//Kinematic_Fitter::~Kinematic_Fitter()
 
 //////////
@@ -93,12 +96,25 @@ void Kinematic_Fitter::Fit()
   /*Lepton pt error*/
   error_lepton_pt = 0.01*measured_lepton.Pt();
 
+  /*Top specific correction*/
+  for(Int_t i=0;i<4; i++)
+    {
+      for(Int_t j=0; j<3; j++)
+	{
+	  Double_t value[2];
+	  ts_correction->Get_Correction(measured_jet[i], j, value);
+
+	  ts_corr_value[i][j] = value[0];
+	  ts_corr_error[i][j] = value[1];
+	}//quark type
+    }//four jet
+
+  
   /*Unclustered energy error*/
   //error_ue = 0.5*measured_ue.Et();
-  error_extra_jet = 1;
-
-  /*Top specific correction*/
-  //Top_Specific_Correction();
+  Double_t value[2];
+  ts_correction->Get_Correction(measured_extra_jet, 0, value);
+  error_extra_jet = value[1];
   
   /*Leading four jets & neutrino p_z sol permutation*/
   for(Int_t i=0; i<2; i++)
@@ -112,8 +128,8 @@ void Kinematic_Fitter::Fit()
             {
 	      //apply top specific correction
 	      Double_t ts_corr = 1;
-              if(k==3) ts_corr = ts_corr_value[1][reordering_index[k]];
-              else ts_corr = ts_corr_value[0][reordering_index[k]];
+              if(k==3) ts_corr = ts_corr_value[reordering_index[k]][1];
+              else ts_corr = ts_corr_value[reordering_index[k]][2];
 	      
               Double_t pt = measured_jet[reordering_index[k]].Pt()*ts_corr;
               Double_t eta = measured_jet[reordering_index[k]].Eta();
@@ -128,8 +144,8 @@ void Kinematic_Fitter::Fit()
               
 	      //jet pt error 
 	      Double_t jet_pt_error = 1;
-	      if(k==0) jet_pt_error = ts_corr_error[0][reordering_index[k]];
-	      else jet_pt_error = ts_corr_error[1][reordering_index[k]];
+	      if(k==0) jet_pt_error = ts_corr_error[reordering_index[k]][0];
+	      else jet_pt_error = ts_corr_error[reordering_index[k]][1];
 	      
 	      error_reordered_jet_pt[k] = jet_pt_error;
               
