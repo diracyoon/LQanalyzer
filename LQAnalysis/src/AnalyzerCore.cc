@@ -2947,7 +2947,10 @@ vector<TLorentzVector> AnalyzerCore::MakeTLorentz(vector<snu::KJet> j){
   return tl_jet;
 }
 
-
+bool AnalyzerCore::Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1)
+{
+  return jet0.Pt() > jet1.Pt();
+}
 
 
 

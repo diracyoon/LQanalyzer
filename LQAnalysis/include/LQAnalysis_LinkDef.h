@@ -16,5 +16,7 @@
 #pragma link C++ class SKTreeMakerNoCut+;
 #pragma link C++ class HNEMu+;
 #pragma link C++ class SKTreeValidation+;
+#pragma link C++ class CHToCB_E+;
+#pragma link C++ class CHToCB_M+;
 
 #endif // __CINT__

@@ -329,6 +329,7 @@ class AnalyzerCore : public LQCycleBase {
   //  BTagSFUtil *lBTagSF, *hBTagSF;
   rochcor2015 *rmcor;
 
-  
+  //private methods
+  static bool Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1);  
 };
 #endif
