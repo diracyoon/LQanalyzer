@@ -14,18 +14,18 @@ TS_Correction::TS_Correction(const Int_t& a_correction_type)
   if(correction_type==0)
     {
       n_corr_para = 4;
+      n_corr_para_error = 4;
       n_eta_bin = 9;
     }//8 TeV correction
+  else
+    {
+      n_corr_para = 4;
+      n_corr_para_error = 3;
+      n_eta_bin = 9;
+    }
 
   Parameters_Reader();
-
-  for(Int_t i=0; i<3; i++)
-    {
-      for(Int_t j=0; j<n_eta_bin; j++)
-	{
-	  
-	}//n eta bin
-    }//quark type
+  
 }//TS_Correction::TS_Correction()
 
 //////////
@@ -74,7 +74,21 @@ void TS_Correction::Get_Correction(const TLorentzVector& jet, const Int_t jet_ty
       corr_val[1] += corr_para_error[jet_type][eta_bin][2]/pt;
       corr_val[1] += corr_para_error[jet_type][eta_bin][3]*pt;
       corr_val[1] *= corr_val[0]*pt; 
-    }//correction_type==0
+    }//correction_type==0, 8 TeV correction
+  else
+    {
+      corr_val[0] = corr_para[jet_type][eta_bin][0];
+      corr_val[0] += corr_para[jet_type][eta_bin][1]*pt;
+      corr_val[0] += corr_para[jet_type][eta_bin][2]*TMath::Sqrt(pt);
+      corr_val[0] += corr_para[jet_type][eta_bin][3]/pt;
+      corr_val[0] += 1;
+      
+      corr_val[1] = corr_para_error[jet_type][eta_bin][0];
+      corr_val[1] += corr_para_error[jet_type][eta_bin][1]*pt;
+      corr_val[1] += corr_para_error[jet_type][eta_bin][2]/pt;
+      corr_val[1] = TMath::Exp(corr_val[1]);
+      corr_val[1] = corr_val[0]*corr_val[1]*pt;
+    }//13 TeV correction
 
   return;
 }//void Get_Correction(const TLorentzVector& jet, const Int_t jet_type, Double_t par[2])
@@ -115,7 +129,7 @@ void TS_Correction::Parameters_Reader()
       for(Int_t j=0; j<n_eta_bin; j++)
         {
           corr_para[i][j] = new Double_t[n_corr_para];
-          corr_para_error[i][j] = new Double_t[n_corr_para];
+          corr_para_error[i][j] = new Double_t[n_corr_para_error];
         }//n eta bin
     }//n quark type
   
@@ -147,8 +161,12 @@ void TS_Correction::Parameters_Reader()
       
       TString tbuf(buf);
       
-      if(tbuf.Contains(target)==kTRUE) break;
-    } 
+      if(tbuf.Contains(target)==kTRUE)
+	{
+	  getline(para_dat, buf);
+	  break;
+	} 
+    }
   
   //read parameters
   istringstream iss;
@@ -166,8 +184,9 @@ void TS_Correction::Parameters_Reader()
 	  iss.clear();
 	  iss.str(buf);
 	  
-	  for(Int_t k=0; k<n_corr_para; k++){ iss >> corr_para[j][i][k]; } 
-	  for(Int_t k=0; k<n_corr_para; k++){ iss >> corr_para_error[j][i][k]; }
+	  for(Int_t k=0; k<n_corr_para; k++){ iss >> corr_para[j][i][k]; } //cout << corr_para[j][i][k] << " "; } 
+	  for(Int_t k=0; k<n_corr_para_error; k++){ iss >> corr_para_error[j][i][k]; } //cout << corr_para_error[j][i][k] << " "; }
+	  //cout << endl;
 	}//n quark type
     
       getline(para_dat, buf);

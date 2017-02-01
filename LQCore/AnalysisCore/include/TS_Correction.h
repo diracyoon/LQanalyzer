@@ -24,6 +24,7 @@ class TS_Correction
   Int_t correction_type;
 
   Int_t n_corr_para;
+  Int_t n_corr_para_error;
   Int_t n_eta_bin;
  
   Double_t* corr_eta_bin;
