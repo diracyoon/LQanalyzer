@@ -3,6 +3,7 @@
 
 #include "AnalyzerCore.h"
 #include "Kinematic_Fitter.h"
+#include "Kinematic_Fitter_Old.h"
 
 #define CSV_THRESHOLD 0.679
 

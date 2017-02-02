@@ -16,12 +16,16 @@ TS_Correction::TS_Correction(const Int_t& a_correction_type)
       n_corr_para = 4;
       n_corr_para_error = 4;
       n_eta_bin = 9;
+
+      corr_func_ptr = &TS_Correction::Correction_Func_Type_Old;
     }//8 TeV correction
   else
     {
       n_corr_para = 4;
       n_corr_para_error = 3;
       n_eta_bin = 9;
+
+      corr_func_ptr = &TS_Correction::Correction_Func_Type_New;
     }
 
   Parameters_Reader();
@@ -55,43 +59,53 @@ TS_Correction::~TS_Correction()
 
 void TS_Correction::Get_Correction(const TLorentzVector& jet, const Int_t jet_type, Double_t corr_val[2])
 {
-  Double_t pt = jet.Pt();                                                                           
+  Double_t pt = jet.Pt();     
+                                                                      
   Double_t eta = TMath::Abs(jet.Eta());
-  
   Int_t eta_bin = Find_Eta_Bin(eta);
   
-  //correciton
-  if(correction_type==0)
-    {
-      corr_val[0] = corr_para[jet_type][eta_bin][0];
-      corr_val[0] += corr_para[jet_type][eta_bin][1]*TMath::Sqrt(pt);
-      corr_val[0] += corr_para[jet_type][eta_bin][2]/pt;
-      corr_val[0] += corr_para[jet_type][eta_bin][3]*pt;
-      corr_val[0] += 1;
-
-      corr_val[1] = corr_para_error[jet_type][eta_bin][0];
-      corr_val[1] += corr_para_error[jet_type][eta_bin][1]*TMath::Sqrt(pt);
-      corr_val[1] += corr_para_error[jet_type][eta_bin][2]/pt;
-      corr_val[1] += corr_para_error[jet_type][eta_bin][3]*pt;
-      corr_val[1] *= corr_val[0]*pt; 
-    }//correction_type==0, 8 TeV correction
-  else
-    {
-      corr_val[0] = corr_para[jet_type][eta_bin][0];
-      corr_val[0] += corr_para[jet_type][eta_bin][1]*pt;
-      corr_val[0] += corr_para[jet_type][eta_bin][2]*TMath::Sqrt(pt);
-      corr_val[0] += corr_para[jet_type][eta_bin][3]/pt;
-      corr_val[0] += 1;
-      
-      corr_val[1] = corr_para_error[jet_type][eta_bin][0];
-      corr_val[1] += corr_para_error[jet_type][eta_bin][1]*pt;
-      corr_val[1] += corr_para_error[jet_type][eta_bin][2]/pt;
-      corr_val[1] = TMath::Exp(corr_val[1]);
-      corr_val[1] = corr_val[0]*corr_val[1]*pt;
-    }//13 TeV correction
+  (this->*corr_func_ptr)(pt, eta_bin, jet_type, corr_val);
 
   return;
 }//void Get_Correction(const TLorentzVector& jet, const Int_t jet_type, Double_t par[2])
+
+//////////
+
+void TS_Correction::Correction_Func_Type_Old(const Double_t& pt, const Int_t& eta_bin, const Int_t& jet_type, Double_t corr_val[2])
+{
+  corr_val[0] = corr_para[jet_type][eta_bin][0];
+  corr_val[0] += corr_para[jet_type][eta_bin][1]*TMath::Sqrt(pt);
+  corr_val[0] += corr_para[jet_type][eta_bin][2]/pt;
+  corr_val[0] += corr_para[jet_type][eta_bin][3]*pt;
+  corr_val[0] += 1;
+
+  corr_val[1] = corr_para_error[jet_type][eta_bin][0];
+  corr_val[1] += corr_para_error[jet_type][eta_bin][1]*TMath::Sqrt(pt);
+  corr_val[1] += corr_para_error[jet_type][eta_bin][2]/pt;
+  corr_val[1] += corr_para_error[jet_type][eta_bin][3]*pt;
+  corr_val[1] *= corr_val[0]*pt;
+
+  return;
+}//void TS_Correction::Correction_Func_Type_Old(const Double_t& pt, const Int_t& eta_bin, const Int_t& jet_type, Double_t corr_val[2])
+
+//////////
+
+void TS_Correction::Correction_Func_Type_New(const Double_t& pt, const Int_t& eta_bin, const Int_t& jet_type, Double_t corr_val[2])
+{
+  corr_val[0] = corr_para[jet_type][eta_bin][0];
+  corr_val[0] += corr_para[jet_type][eta_bin][1]*pt;
+  corr_val[0] += corr_para[jet_type][eta_bin][2]*TMath::Sqrt(pt);
+  corr_val[0] += corr_para[jet_type][eta_bin][3]/pt;
+  corr_val[0] += 1;
+
+  corr_val[1] = corr_para_error[jet_type][eta_bin][0];
+  corr_val[1] += corr_para_error[jet_type][eta_bin][1]*pt;
+  corr_val[1] += corr_para_error[jet_type][eta_bin][2]/pt;
+  corr_val[1] = TMath::Exp(corr_val[1]);
+  corr_val[1] = corr_val[0]*corr_val[1]*pt;
+
+  return;
+}//void TS_Correction::Correction_Func_Type_New(const Double_t& pt, const Int_t& eta_bin, const Int_t& jet_type, Double_t corr_val[2])
 
 //////////
 

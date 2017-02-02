@@ -31,7 +31,7 @@ Kinematic_Fitter::Kinematic_Fitter(Bool_t a_chk_debug)
   minimizer->SetTolerance(0.001);
   minimizer->SetPrintLevel(chk_debug);
 
-  ts_correction = new TS_Correction(1);
+  ts_correction = new TS_Correction(0);
 }//Kinematic_Fitter::Kinematic_Fitter()
 
 ///////////
@@ -146,8 +146,8 @@ void Kinematic_Fitter::Fit()
               
 	      //jet pt error 
 	      Double_t jet_pt_error = 1;
-	      if(k==0) jet_pt_error = ts_corr_error[reordering_index[k]][0];
-	      else jet_pt_error = ts_corr_error[reordering_index[k]][1];
+	      if(k==0) jet_pt_error = ts_corr_error[reordering_index[k]][1];
+	      else jet_pt_error = ts_corr_error[reordering_index[k]][2];
 	      
 	      error_reordered_jet_pt[k] = jet_pt_error;
               

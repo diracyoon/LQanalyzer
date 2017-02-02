@@ -1,5 +1,5 @@
-#ifndef __KINEMATIC_FITTER_H__
-#define __KINEMATIC_FITTER_H__
+#ifndef __KINEMATIC_FITTER_OLD_H__
+#define __KINEMATIC_FITTER_OLD_H__
 
 #include "vector"
 
@@ -21,11 +21,11 @@
 
 using namespace std;
 
-class Kinematic_Fitter
+class Kinematic_Fitter_Old
 {
  public:
-  Kinematic_Fitter(Bool_t a_chk_debug=kFALSE);
-  ~Kinematic_Fitter();
+  Kinematic_Fitter_Old(Bool_t a_chk_debug=kFALSE);
+  ~Kinematic_Fitter_Old();
   
   void Clear();
   void Fit();
@@ -72,8 +72,8 @@ class Kinematic_Fitter
   static Double_t Chi2_Func(const Double_t* par);
   void Top_Specific_Correction();
   
-  ClassDef(Kinematic_Fitter, 1);
+  ClassDef(Kinematic_Fitter_Old, 1);
 };
 
-#endif /*__KINEMATIC_FITTER_H__*/
+#endif /*__KINEMATIC_FITTER_OLD_H__*/
 

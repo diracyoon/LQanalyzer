@@ -70,7 +70,6 @@ class Kinematic_Fitter
   ROOT::Math::Minimizer* minimizer;
   
   static Double_t Chi2_Func(const Double_t* par);
-  //void Top_Specific_Correction(const TLorentzVector& jet, const Int_t& jet_type, Double_t par[2]);
   
   TS_Correction* ts_correction;
 

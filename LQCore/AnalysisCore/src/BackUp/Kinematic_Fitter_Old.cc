@@ -1,24 +1,24 @@
-#include "Kinematic_Fitter.h"
+#include "Kinematic_Fitter_Old.h"
 
 //////////
 
-ClassImp(Kinematic_Fitter);
+ClassImp(Kinematic_Fitter_Old);
 
 //////////
 
-TLorentzVector Kinematic_Fitter::measured_met;
-TLorentzVector Kinematic_Fitter::measured_lepton;
-TLorentzVector Kinematic_Fitter::sum_extra_jet;
-TLorentzVector Kinematic_Fitter::measured_ue;
-TLorentzVector Kinematic_Fitter::reordered_jet[4];
+TLorentzVector Kinematic_Fitter_Old::measured_met;
+TLorentzVector Kinematic_Fitter_Old::measured_lepton;
+TLorentzVector Kinematic_Fitter_Old::sum_extra_jet;
+TLorentzVector Kinematic_Fitter_Old::measured_ue;
+TLorentzVector Kinematic_Fitter_Old::reordered_jet[4];
 
-Double_t Kinematic_Fitter::error_reordered_jet_pt[4];
-Double_t Kinematic_Fitter::error_lepton_pt;
-Double_t Kinematic_Fitter::error_ue;
+Double_t Kinematic_Fitter_Old::error_reordered_jet_pt[4];
+Double_t Kinematic_Fitter_Old::error_lepton_pt;
+Double_t Kinematic_Fitter_Old::error_ue;
 
 //////////
 
-Kinematic_Fitter::Kinematic_Fitter(Bool_t a_chk_debug)
+Kinematic_Fitter_Old::Kinematic_Fitter_Old(Bool_t a_chk_debug)
 {
   chk_debug = a_chk_debug;
   
@@ -31,17 +31,17 @@ Kinematic_Fitter::Kinematic_Fitter(Bool_t a_chk_debug)
   minimizer->SetMaxIterations(10000);  
   minimizer->SetTolerance(0.001);
   minimizer->SetPrintLevel(chk_debug);
-}//Kinematic_Fitter::Kinematic_Fitter()
+}//Kinematic_Fitter_Old::Kinematic_Fitter_Old()
 
 ///////////
 
-Kinematic_Fitter::~Kinematic_Fitter()
+Kinematic_Fitter_Old::~Kinematic_Fitter_Old()
 {
-}//Kinematic_Fitter::~Kinematic_Fitter()
+}//Kinematic_Fitter_Old::~Kinematic_Fitter_Old()
 
 //////////
 
-void Kinematic_Fitter::Clear()
+void Kinematic_Fitter_Old::Clear()
 {
   best_chi2 = 999;
   for(Int_t i=0; i<NFIT; i++){ best_parameter[i] = 999; }
@@ -61,7 +61,7 @@ void Kinematic_Fitter::Clear()
 
 //////////
 
-void Kinematic_Fitter::Fit()
+void Kinematic_Fitter_Old::Fit()
 {
   //clear result value storage
   Clear();
@@ -218,11 +218,11 @@ void Kinematic_Fitter::Fit()
     }//neutrino p_z loop
   
   return;
-}//void Kinematic_Fitter::Fit
+}//void Kinematic_Fitter_Old::Fit
 
 //////////
 
-Double_t Kinematic_Fitter::Get_Chi2(const TString& type, const Int_t& index)
+Double_t Kinematic_Fitter_Old::Get_Chi2(const TString& type, const Int_t& index)
 {
   if(type=="BEST") return best_chi2;
   else
@@ -234,11 +234,11 @@ Double_t Kinematic_Fitter::Get_Chi2(const TString& type, const Int_t& index)
     }
     
   return -1;
-}//Double_t Kinematic_Fitter::Get_Chi2(const TString& type, const Int_t& index)
+}//Double_t Kinematic_Fitter_Old::Get_Chi2(const TString& type, const Int_t& index)
 
 //////////
 
-void Kinematic_Fitter::Get_Parameters(Double_t parameter_return[NFIT], const TString& type, const Int_t& index)
+void Kinematic_Fitter_Old::Get_Parameters(Double_t parameter_return[NFIT], const TString& type, const Int_t& index)
 {
   if(type=="BEST")
     {
@@ -253,26 +253,26 @@ void Kinematic_Fitter::Get_Parameters(Double_t parameter_return[NFIT], const TSt
     }
   
   return;
-}//void Kinematic_Fitter::Get_Parameter(Double_t parameter_return[NFIT], const TString& type, const Int_t& index)
+}//void Kinematic_Fitter_Old::Get_Parameter(Double_t parameter_return[NFIT], const TString& type, const Int_t& index)
 
 //////////
 
-void Kinematic_Fitter::Get_Permutation(Int_t permutation_return[4])
+void Kinematic_Fitter_Old::Get_Permutation(Int_t permutation_return[4])
 {
   for(Int_t i=0; i<4; i++){ permutation_return[i] = best_permutation[i]; }
 
   return;
-}//void Kinematic_Fitter::Get_Permutation(Double_t permuatation_return[4])
+}//void Kinematic_Fitter_Old::Get_Permutation(Double_t permuatation_return[4])
 
 //////////
 
-void Kinematic_Fitter::Print()
+void Kinematic_Fitter_Old::Print()
 {
 }//
 
 //////////
 
-void Kinematic_Fitter::Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t a_chk_b_tag[4], const TLorentzVector& a_ue)
+void Kinematic_Fitter_Old::Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t a_chk_b_tag[4], const TLorentzVector& a_ue)
 {
   measured_met = a_met;
   measured_lepton = a_lepton;
@@ -297,11 +297,11 @@ void Kinematic_Fitter::Set(const TLorentzVector& a_met, const TLorentzVector& a_
   measured_ue = a_ue;
 
   return;
-}//void Kinematic_Fitter::Set
+}//void Kinematic_Fitter_Old::Set
 
 //////////
 
-Double_t Kinematic_Fitter::Chi2_Func(const Double_t* par)
+Double_t Kinematic_Fitter_Old::Chi2_Func(const Double_t* par)
 {
   Double_t chi2 = 0;
   
@@ -385,11 +385,11 @@ Double_t Kinematic_Fitter::Chi2_Func(const Double_t* par)
   chi2 += TMath::Power(fit_t_jjj.M()-T_MASS, 2.0)/TMath::Power(T_WIDTH, 2.0);
     
   return chi2;
-}//Double_t Kinematic_Fitter::Chi2_Func(const Double_t* par)
+}//Double_t Kinematic_Fitter_Old::Chi2_Func(const Double_t* par)
 
 //////////
 
-void Kinematic_Fitter::Top_Specific_Correction()
+void Kinematic_Fitter_Old::Top_Specific_Correction()
 {
   //correction for 8 TeV analysis
   for(Int_t i=0; i<4; i++)

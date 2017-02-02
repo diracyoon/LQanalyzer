@@ -31,6 +31,14 @@ class TS_Correction
   Double_t*** corr_para;
   Double_t*** corr_para_error;
 
+  void (TS_Correction::*corr_func_ptr)(const Double_t& pt, const Int_t& eta_bin, const Int_t& jet_type, Double_t corr_val[2]);
+    
+  //correction fuction for 8 TeV ana
+  void Correction_Func_Type_Old(const Double_t& pt, const Int_t& eta_bin, const Int_t& jet_type, Double_t corr_val[2]);
+  
+  //correction fuction for 13 TeV ana
+  void Correction_Func_Type_New(const Double_t& pt, const Int_t& eta_bin, const Int_t& jet_type, Double_t corr_val[2]);
+  
   Int_t Find_Eta_Bin(const Double_t& eta);
   void Parameters_Reader();
   
