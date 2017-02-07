@@ -31,7 +31,7 @@ Kinematic_Fitter::Kinematic_Fitter(Bool_t a_chk_debug)
   minimizer->SetTolerance(0.001);
   minimizer->SetPrintLevel(chk_debug);
 
-  ts_correction = new TS_Correction(0);
+  ts_correction = new TS_Correction(1);
 }//Kinematic_Fitter::Kinematic_Fitter()
 
 ///////////

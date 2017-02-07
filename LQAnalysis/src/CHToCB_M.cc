@@ -237,8 +237,8 @@ void CHToCB_M::InitialiseAnalysis() throw(LQError)
   MakeHistograms("Chi2_2B", 25, 0, 50);
   MakeHistograms("Chi2_3B", 25, 0, 50);
   
-  MakeHistograms2D("DiJetMass_Chi2_2B", 50, 0, 200, 25, 0, 50);
-  MakeHistograms2D("DiJetMass_Chi2_3B", 50, 0, 200, 25, 0, 50);
+  MakeHistograms2D("DiJetMass_Chi2_2B", 50, 0, 200, 100, 0, 50);
+  MakeHistograms2D("DiJetMass_Chi2_3B", 50, 0, 200, 100, 0, 50);
 
   MakeCleverHistograms(muhist, "Muon");
   MakeCleverHistograms(jethist, "Jet");
