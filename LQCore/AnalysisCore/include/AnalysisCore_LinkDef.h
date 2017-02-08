@@ -8,5 +8,7 @@
 
 #pragma link C++ class Reweight+;
 #pragma link C++ class SelectionFunctions+;
+#pragma link C++ class TS_Correction+;
+#pragma link C++ class Kinematic_Fitter+;
 
 #endif // __CINT__

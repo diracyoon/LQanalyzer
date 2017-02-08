@@ -259,5 +259,6 @@ class AnalyzerCore : public LQCycleBase {
   std::map<TString,BTagSFUtil*> MapBTagSF;
   //  BTagSFUtil *lBTagSF, *hBTagSF;
 
+  static bool Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1);X
 };
 #endif
