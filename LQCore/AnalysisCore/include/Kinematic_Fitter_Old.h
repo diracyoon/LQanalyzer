@@ -8,6 +8,8 @@
 #include "Math/Factory.h"
 #include "Math/Functor.h"
 
+#include "TS_Correction.h"
+
 #define C_MASS 1.27
 #define B_MASS 4.8
 #define T_MASS 172.5
@@ -33,7 +35,7 @@ class Kinematic_Fitter_Old
   void Get_Parameters(Double_t parameter_return[NFIT], const TString& type="BEST", const Int_t& index=-1);
   void Get_Permutation(Int_t permuatation_return[4]);
   void Print();
-  void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t a_chk_b_tag[4], const TLorentzVector& a_ue);
+  void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t a_chk_b_tag[4]);
 
  private:
   Bool_t chk_debug;
@@ -45,12 +47,10 @@ class Kinematic_Fitter_Old
   Double_t chi2[2][24];
   Double_t parameter[2][24][NFIT];
 
-  //first index: 0 for b, 1 for c, 2 for light quark
+  //first index: 0 for light, 1 for c, 2 for b
   //second index: four jet
-  Double_t ts_corr_value[3][4];
-  Double_t ts_corr_error[3][4];
-  
-  vector<TLorentzVector> jet_vector;
+  Double_t ts_corr_value[4][3];
+  Double_t ts_corr_error[4][3];
   
   static TLorentzVector measured_met;
   static TLorentzVector measured_lepton;
@@ -70,8 +70,9 @@ class Kinematic_Fitter_Old
   ROOT::Math::Minimizer* minimizer;
   
   static Double_t Chi2_Func(const Double_t* par);
-  void Top_Specific_Correction();
   
+  TS_Correction* ts_correction;
+
   ClassDef(Kinematic_Fitter_Old, 1);
 };
 
