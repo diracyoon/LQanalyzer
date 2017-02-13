@@ -20,6 +20,7 @@ Double_t Kinematic_Fitter_Old::error_ue;
 
 Kinematic_Fitter_Old::Kinematic_Fitter_Old(Bool_t a_chk_debug)
 {
+  cout << "Kinematic_Fitter type : Old" << endl;
   chk_debug = a_chk_debug;
   
   const char* min_name = "Minuit";

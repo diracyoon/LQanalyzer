@@ -9,6 +9,8 @@ ClassImp(TS_Correction);
 TS_Correction::TS_Correction(const Int_t& a_correction_type)
 {
   correction_type = a_correction_type;
+  
+  cout << "TS_Correction: corrrectio_ type " << correction_type << endl; 
 
   //8 TeV correction
   if(correction_type==0)

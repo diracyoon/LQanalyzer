@@ -181,6 +181,9 @@ void CHToCB_M::ExecuteEvents() throw(LQError)
   fitter->Set(met_vector, muon_vector, jet_vector, chk_btag);
   fitter->Fit();  
   
+  Bool_t chk_convergence = fitter->Get_Convergence();
+  if(chk_convergence==kFALSE) throw LQError("Fitter Fail", LQError::SkipEvent);  
+
   Double_t chi2 = fitter->Get_Chi2();
   
   Int_t permutation[4];
@@ -189,6 +192,8 @@ void CHToCB_M::ExecuteEvents() throw(LQError)
   Double_t para_result[9];
   fitter->Get_Parameters(para_result);
   
+  Double_t t_mass = fitter->Get_Top_Mass();
+
   if(chk_debug)
     {
       cout << "Result " << eventbase->GetEvent().EventNumber() << endl;
@@ -200,6 +205,23 @@ void CHToCB_M::ExecuteEvents() throw(LQError)
       FillHist("Chi2_2B", chi2, weight);
       FillHist("DiJetMass_2B", para_result[8], weight);
       FillHist("DiJetMass_Chi2_2B", para_result[8], chi2, weight, 0, 0, 0, 0, 0, 0);
+
+      //goodness cut study
+      for(Int_t cut_level=0; cut_level<20; cut_level++)
+	{
+	  Double_t d_cut_level = 0.05*(cut_level+1);
+	  Bool_t chk_goodness_cut = fitter->Pass_Goodness_Cut(d_cut_level);
+	  
+	  if(chk_goodness_cut==kTRUE)
+	    {
+	      TString hname = "DiJetMass_Chi2_2B_";
+	      hname += (Int_t)(100*d_cut_level);
+	      
+	      FillHist(hname, para_result[8], chi2, weight, 0, 0, 0, 0, 0, 0);
+	    }
+	}
+   
+      FillHist("Hadronic_Top_Mass", t_mass, weight);
     }
   else
     {
@@ -210,7 +232,7 @@ void CHToCB_M::ExecuteEvents() throw(LQError)
   
   FillCLHist(muhist, "Muon", muon_tight_coll, weight);
   FillCLHist(jethist, "Jet", jet_hard_coll, weight);
-
+  
   return;
 }//void CHToCB_M::ExecuteEvents()
 
@@ -237,8 +259,19 @@ void CHToCB_M::InitialiseAnalysis() throw(LQError)
   MakeHistograms("Chi2_2B", 25, 0, 50);
   MakeHistograms("Chi2_3B", 25, 0, 50);
   
+  MakeHistograms("Hadronic_Top_Mass", 200, 120, 220);
+
   MakeHistograms2D("DiJetMass_Chi2_2B", 50, 0, 200, 100, 0, 50);
   MakeHistograms2D("DiJetMass_Chi2_3B", 50, 0, 200, 100, 0, 50);
+
+  for(Int_t cut_level=0; cut_level<20; cut_level++)
+    {
+      Double_t d_cut_level = 0.05*(cut_level+1);
+      TString hname = "DiJetMass_Chi2_2B_";
+      hname += (Int_t)(100*d_cut_level);
+      
+      MakeHistograms2D(hname, 50, 0, 200, 100, 0, 50);
+    }
 
   MakeCleverHistograms(muhist, "Muon");
   MakeCleverHistograms(jethist, "Jet");
