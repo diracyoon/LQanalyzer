@@ -22,7 +22,7 @@ CHToCB_M::CHToCB_M() : AnalyzerCore()
 
   chk_debug = kFALSE;
 
-  fitter = new Kinematic_Fitter(chk_debug);
+  fitter = new Kinematic_Fitter_Old(chk_debug);
 }//CHToCB_M::CHToCB_M()
 
 //////////
@@ -192,7 +192,7 @@ void CHToCB_M::ExecuteEvents() throw(LQError)
   Double_t para_result[9];
   fitter->Get_Parameters(para_result);
   
-  Double_t t_mass = fitter->Get_Top_Mass();
+  Double_t t_mass = 0;//fitter->Get_Top_Mass();
 
   if(chk_debug)
     {

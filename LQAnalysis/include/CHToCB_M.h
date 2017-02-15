@@ -25,7 +25,7 @@ class CHToCB_M : public AnalyzerCore
  private:
   Bool_t chk_debug;
   
-  Kinematic_Fitter* fitter;
+  Kinematic_Fitter_Old* fitter;
     
   ClassDef(CHToCB_M, 1);
 };

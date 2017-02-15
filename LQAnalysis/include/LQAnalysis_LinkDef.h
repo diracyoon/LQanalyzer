@@ -18,5 +18,6 @@
 #pragma link C++ class SKTreeValidation+;
 #pragma link C++ class CHToCB_E+;
 #pragma link C++ class CHToCB_M+;
+#pragma link C++ class Fitter_Test+;
 
 #endif // __CINT__

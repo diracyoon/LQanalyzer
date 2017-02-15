@@ -46,6 +46,8 @@ Kinematic_Fitter_Old::~Kinematic_Fitter_Old()
 
 void Kinematic_Fitter_Old::Clear()
 {
+  chk_convergence = kFALSE;
+
   best_chi2 = 999;
   for(Int_t i=0; i<NFIT; i++){ best_parameter[i] = 999; }
   
@@ -123,107 +125,92 @@ void Kinematic_Fitter_Old::Fit()
 	  //jet reordering
 	  for(Int_t k=0; k<4; k++)
             {
-	      //apply top specific correction
+	      //apply top specific correction & set quark mass
 	      Double_t ts_corr = 1;
-              if(k==3) ts_corr = ts_corr_value[reordering_index[k]][1];
-              else ts_corr = ts_corr_value[reordering_index[k]][2];
-	      
+	      Double_t jet_pt_error = 1;
+              Double_t q_mass = 1;
+	      if(reordering_index[k]==3)
+                {
+		  ts_corr = ts_corr_value[reordering_index[k]][1];
+		  jet_pt_error = ts_corr_error[reordering_index[k]][1];
+
+                  q_mass = C_MASS;
+                }
+              else
+		{
+		  ts_corr = ts_corr_value[reordering_index[k]][2];
+		  jet_pt_error = ts_corr_error[reordering_index[k]][2];
+
+                  q_mass = B_MASS;
+		}
+
               Double_t pt = measured_jet[reordering_index[k]].Pt()*ts_corr;
               Double_t eta = measured_jet[reordering_index[k]].Eta();
               Double_t phi = measured_jet[reordering_index[k]].Phi();
 
-	      //set quark mass
-              Double_t q_mass;
-              if(k==3) q_mass = C_MASS;
-              else q_mass = B_MASS;
-
 	      reordered_jet[k].SetPtEtaPhiM(pt, eta, phi, q_mass);
               
 	      //jet pt error 
-	      Double_t jet_pt_error = 1;
-	      if(k==0) jet_pt_error = ts_corr_error[reordering_index[k]][1];
-	      else jet_pt_error = ts_corr_error[reordering_index[k]][2];
-	      
 	      error_reordered_jet_pt[k] = jet_pt_error;
               
 	      reordered_b_tag[k] = chk_b_tag[reordering_index[k]];
             }
 
 	  //b tag configuration check
-	  Bool_t b_tag_config_check = kFALSE;
-          if(n_b_tag==1)
-            {
-	      //[0] jet in leptonic side.
-	      //[1] jet in leptonic side.
-	      //[2] jet from hadronic w decay or charged higgs decay. In case of charged higgs, it should be a b jet.
-	      if(reordered_b_tag[0]==kTRUE || reordered_b_tag[1]==kTRUE) b_tag_config_check = kTRUE;
-            }
-          else if(n_b_tag==2)
-            {
-              if(reordered_b_tag[0]==kTRUE && reordered_b_tag[1]==kTRUE) b_tag_config_check = kTRUE;
-            }
-          else
-            {
-	      //for three b tag event, let's choose jet[3] as b tagged jet. It doesn't destroy
-	      if(reordered_b_tag[0]==kTRUE && reordered_b_tag[1]==kTRUE && reordered_b_tag[2]==kTRUE) b_tag_config_check = kTRUE;
-            }
-	  
-	  //parameters for fit
-	  string parameter_name[NFIT] = {"B_Leptonic_Side", "B_Hadronic_Side", "W_CH_Jet_0", "W_CH_Jet_1", "Lepton", "UE_PX", "UE_PY", "Neutrino_Pz", "W_Or_CH_Mass"};
-	  Double_t parameter_start[NFIT] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, neutrino_pz[i], W_MASS};
-	  Double_t parameter_step[NFIT] = {0.03, 0.03, 0.03, 0.03, 0.01, 0.1, 0.1, 1.0, 0.1};
+	  Bool_t b_tag_config_check = Pass_B_Tag_Configuration();
 
-	  ROOT::Math::Functor functor(&Chi2_Func, NFIT);
-	  minimizer->SetFunction(functor);
+	  //native top mass check
+          Bool_t native_top_mass_check = Pass_Native_Top_Mass();
 	  
-	  for(Int_t k=0; k<NFIT; k++)
-	    { 
-	      minimizer->SetVariable(k, parameter_name[k], parameter_start[k], parameter_step[k]);
+	  //if b tag configuration is failed, it is not necessary to proceed minimization step
+	  if(b_tag_config_check==kTRUE && native_top_mass_check==kTRUE)
+            {
+	      //parameters for fit
+	      string parameter_name[NFIT] = {"B_Leptonic_Side", "B_Hadronic_Side", "W_CH_Jet_0", "W_CH_Jet_1", "Lepton", "UE_PX", "UE_PY", "Neutrino_Pz", "W_Or_CH_Mass"};
+	      Double_t parameter_start[NFIT] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, neutrino_pz[i], W_MASS};
+	      Double_t parameter_step[NFIT] = {0.03, 0.03, 0.03, 0.03, 0.01, 0.1, 0.1, 1.0, 0.1};
 	      
-	      Double_t lower_limit = -1e4;
-	      Double_t upper_limit =  1e4;
+	      ROOT::Math::Functor functor(&Chi2_Func, NFIT);
+	      minimizer->SetFunction(functor);
 	      
-	      //neutrino pz
-	      if(k==7)
+	      for(Int_t k=0; k<NFIT; k++){ minimizer->SetVariable(k, parameter_name[k], parameter_start[k], parameter_step[k]); }
+	      
+	      //do minization
+	      minimizer->Minimize();
+	      
+	      //store results
+	      chi2[i][j] = minimizer->MinValue();
+	      const Double_t* parameter_result = minimizer->X();
+	      for(Int_t k=0; k<NFIT; k++){ parameter[i][j][k] = parameter_result[k]; }
+	      
+	      for(Int_t k=0; k<4; k++)
+                {
+                  Double_t pt = parameter[i][j][k]*reordered_jet[k].Pt();
+                  Double_t eta = reordered_jet[k].Eta();
+                  Double_t phi = reordered_jet[k].Phi();
+                  Double_t mass = reordered_jet[k].M();
+
+                  fitted_jet[i][j][k].SetPtEtaPhiM(pt, eta, phi, mass);
+		}
+
+	      //update best results
+	      if(chi2[i][j]<best_chi2)
 		{
-		  lower_limit = 0.5*neutrino_pz[i];
-		  upper_limit = 1.5*neutrino_pz[i];
+		  chk_convergence = kTRUE;
 		  
+		  best_chi2 = chi2[i][j];
+		  
+		  for(Int_t k=0; k<NFIT; k++){ best_parameter[k] = parameter[i][j][k]; }
+		  for(Int_t k=0; k<4; k++)
+		    {
+		      best_permutation[k] = reordering_index[k]; 
+		      best_fitted_jet[k] =  fitted_jet[i][j][k];
+		    }
 		}
-	      //W or CH mass 
-	      else if(k==8)
-		{
-		  lower_limit = 0.8*W_MASS;
-		  upper_limit = 1.2*150;//heaviest charged higss mass
-		}
-	      //rescale part
-	      else
-		{
-		  lower_limit = 0;
-		  upper_limit = 1.5; 
-		}
-		
-	      //minimizer->SetVariableLimits(k, lower_limit, upper_limit);
-	    }//loop over parameters
-	  
-	  //do minization
-	  minimizer->Minimize();
-
-	  //store results
-	  chi2[i][j] = minimizer->MinValue();
-	  const Double_t* parameter_result = minimizer->X();
-	  for(Int_t k=0; k<NFIT; k++){ parameter[i][j][k] = parameter_result[k]; }
-	  
-	  //update best results
-	  if(chi2[i][j]<best_chi2 && b_tag_config_check==kTRUE)
-	    {
-	      best_chi2 = chi2[i][j];
-
-	      for(Int_t k=0; k<NFIT; k++){ best_parameter[k] = parameter[i][j][k]; }
-	      for(Int_t k=0; k<4; k++){ best_permutation[k] = reordering_index[k]; }
-	    }
-	  	  
-	  if(chk_debug) cout << "Test " << i << " " << reordering_index[0] << " " << reordering_index[1] << " " << reordering_index[2] << " " << reordering_index[3] << " " << chi2[i][j] << endl << endl;
+	      
+	      if(chk_debug) cout << "Test " << i << " " << reordering_index[0] << " " << reordering_index[1] << " " << reordering_index[2] << " " << reordering_index[3] << " " << chi2[i][j] << endl << endl;
+	      
+	    }//if(b_tag_config_check==kTRUE)
 	  
 	  //jet ordering permutation
 	  std::next_permutation(reordering_index, reordering_index+4);
@@ -279,6 +266,43 @@ void Kinematic_Fitter_Old::Get_Permutation(Int_t permutation_return[4])
 
 //////////
 
+Double_t Kinematic_Fitter_Old::Get_Top_Mass()
+{
+  Double_t t_mass = -1;
+  
+  if(chk_convergence==kTRUE)
+    {
+      TLorentzVector t_jjj;
+      t_jjj.SetPtEtaPhiM(0, 0, 0, 0);
+      
+      for(Int_t i=0; i<4; i++)
+	{
+	  if(best_permutation[i]!=0) t_jjj += best_fitted_jet[best_permutation[i]];
+	}
+      
+      t_mass = t_jjj.M();
+    }
+  
+  return t_mass;
+}//Double_t Kinematic_Fitter::Get_Top_Mass()
+
+//////////
+
+Bool_t Kinematic_Fitter_Old::Pass_Goodness_Cut(const Double_t& cut_level)
+{
+  Bool_t chk_goodness_cut = kTRUE;
+  for(Int_t i=0; i<4; i++)
+    {
+      //sliding cut                                                                                                                                                                                            
+      if(cut_level<TMath::Abs(1-best_parameter[i])) chk_goodness_cut = kFALSE;
+
+    }
+
+  return chk_goodness_cut;
+}//Bool_t Kinematic_Fitter_Old::Pass_Goodness_Cut(const Double_t& cut_level)
+
+//////////
+
 void Kinematic_Fitter_Old::Print()
 {
 }//
@@ -315,6 +339,45 @@ void Kinematic_Fitter_Old::Set(const TLorentzVector& a_met, const TLorentzVector
 
   return;
 }//void Kinematic_Fitter_Old::Set
+
+//////////
+
+Bool_t Kinematic_Fitter_Old::Pass_B_Tag_Configuration()
+{
+  Bool_t b_tag_config_check = kFALSE;
+
+  if(n_b_tag==1)
+    {
+      //[0] jet in leptonic side
+      //[1] jet in leptonic side
+      //[2] jet from hadronic w decay or charged higgs decay. In case of charged higgs, it should be a b jet
+      if(reordered_b_tag[0]==kTRUE || reordered_b_tag[1]==kTRUE) b_tag_config_check = kTRUE;
+    }
+  else if(n_b_tag==2)
+    {
+      if(reordered_b_tag[0]==kTRUE && reordered_b_tag[1]==kTRUE) b_tag_config_check = kTRUE;
+    }
+  else
+    {
+      //for three b tag event, let's choose jet[3] as b tagged jet. It doesn't destroy
+      if(reordered_b_tag[0]==kTRUE && reordered_b_tag[1]==kTRUE && reordered_b_tag[2]==kTRUE) b_tag_config_check = kTRUE;
+    }
+
+  return b_tag_config_check;
+}//Bool_t Kinematic_Fitter_Old::Pass_B_Tag_Configuration()
+
+//////////
+
+Bool_t Kinematic_Fitter_Old::Pass_Native_Top_Mass()
+{
+  TLorentzVector t_jjj = reordered_jet[1] + reordered_jet[2] + reordered_jet[3];
+  Double_t t_mass = t_jjj.M();
+
+  Bool_t chk_native_top_mass = kFALSE;
+  if(125<t_mass && t_mass<225) chk_native_top_mass = kTRUE;
+
+  return chk_native_top_mass;
+}//Bool_t Kinematic_Fitter_Old::Pass_Native_Top_Mass()
 
 //////////
 

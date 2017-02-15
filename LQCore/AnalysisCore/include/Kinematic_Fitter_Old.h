@@ -32,20 +32,32 @@ class Kinematic_Fitter_Old
   void Clear();
   void Fit();
   Double_t Get_Chi2(const TString& type="BEST", const Int_t& index=-1);
+  Bool_t Get_Convergence(){ return chk_convergence; }
   void Get_Parameters(Double_t parameter_return[NFIT], const TString& type="BEST", const Int_t& index=-1);
   void Get_Permutation(Int_t permuatation_return[4]);
+  Double_t Get_Top_Mass();
+  Bool_t Pass_Goodness_Cut(const Double_t& cut_level);
+
   void Print();
   void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t a_chk_b_tag[4]);
 
  private:
   Bool_t chk_debug;
 
+  Bool_t chk_convergence;
+  
+  Int_t best_permutation[4];
+  
   Double_t best_chi2;
-  Double_t best_parameter[NFIT];
-  Double_t best_permutation[4];  
-
   Double_t chi2[2][24];
+  
+  Double_t best_parameter[NFIT];
   Double_t parameter[2][24][NFIT];
+
+  Bool_t b_tag_configuration[2][24];
+
+  TLorentzVector best_fitted_jet[4];
+  TLorentzVector fitted_jet[2][24][4];
 
   //first index: 0 for light, 1 for c, 2 for b
   //second index: four jet
@@ -68,7 +80,9 @@ class Kinematic_Fitter_Old
   static Double_t error_ue;
   
   ROOT::Math::Minimizer* minimizer;
-  
+
+  Bool_t Pass_B_Tag_Configuration();
+  Bool_t Pass_Native_Top_Mass();  
   static Double_t Chi2_Func(const Double_t* par);
   
   TS_Correction* ts_correction;
