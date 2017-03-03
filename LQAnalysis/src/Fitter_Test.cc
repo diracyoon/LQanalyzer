@@ -1,0 +1,473 @@
+//Core includes
+#include "EventBase.h" 
+#include "BaseSelection.h"
+
+//Local includes
+#include "Fitter_Test.h"
+
+//Needed to allow inheritance for use in LQCore/core classes
+ClassImp(Fitter_Test);
+ 
+//////////
+
+Fitter_Test::Fitter_Test() : AnalyzerCore()   
+{
+  //To have the correct name in the log:                                                          
+  SetLogName("Fitter_Test");
+  
+  m_logger << INFO << "Construct Fitter_Test." << LQLogger::endmsg;
+
+  // This function sets up Root files and histograms Needed in ExecuteEvents
+  InitialiseAnalysis();
+
+  chk_debug = kFALSE;
+
+  fitter = new Kinematic_Fitter(chk_debug);
+}//Fitter_Test::Fitter_Test()
+
+//////////
+
+Fitter_Test::~Fitter_Test() 
+{
+  m_logger << INFO << "Destruct Fitter_Test." << LQLogger::endmsg;
+
+  delete fitter;
+}//Fitter_Test::~Fitter_Test()
+
+//////////
+
+void Fitter_Test::BeginCycle() throw(LQError)
+{
+  m_logger << INFO << "BeginCycle is called." << LQLogger::endmsg;
+
+  return;
+}//void Fitter_Test::BeginCycle()
+
+//////////
+
+void Fitter_Test::BeginEvent() throw(LQError)
+{
+  m_logger << DEBUG << "BeginEvent is called." << LQLogger::endmsg;
+
+  return;
+}//void Fitter_Test::BeginEvent()
+
+//////////
+
+void Fitter_Test::ExecuteEvents() throw(LQError)
+{
+  m_logger << DEBUG << "RunNumber = " << eventbase->GetEvent().RunNumber() << ", EventNumber = " << eventbase->GetEvent().EventNumber() << LQLogger::endmsg;
+  m_logger << DEBUG << "IsData = " << isData << LQLogger::endmsg;
+
+  //Apply the gen weight 
+  if(!isData) weight*=MCweight;
+
+  FillCutFlow("NoCut", weight);
+
+  /*////////////////////*/
+  /*////////////////////*/
+  /*Gen Truth*/
+  /*////////////////////*/
+  /*////////////////////*/
+    
+  std::vector<snu::KTruth> gen_parton_coll;
+  eventbase->GetTruthSel()->Selection(gen_parton_coll);
+
+  Int_t n_parton = gen_parton_coll.size();
+ 
+  Int_t gen_truth_index[10];
+  for(Int_t i=0; i<10; i++){ gen_truth_index[i] = BLANK; }
+  
+  snu::KTruth gen_truth[10];
+  
+  for(Int_t i=0; i<n_parton; i++)
+    {
+      snu::KTruth truth = gen_parton_coll.at(i);
+      
+      Int_t gen_index = i; 
+      Int_t pdg_id =  truth.PdgId();
+      Int_t index_mother = truth.IndexMother();
+
+      //cout << gen_index << "\t" << pdg_id << "\t" << index_mother << endl;
+      
+      //top observed
+      if(pdg_id==6 && gen_truth_index[TOP]==BLANK)
+	{
+	  gen_truth[TOP] = truth;
+	  gen_truth_index[TOP]= gen_index;
+	}
+      
+      //anti_top observed
+      if(pdg_id==-6 && gen_truth_index[A_TOP]==BLANK)
+	{
+	  gen_truth[A_TOP] = truth;
+          gen_truth_index[A_TOP]= gen_index;
+	}
+      
+      //t -> b w+ or t -> b h+
+      if(index_mother==gen_truth_index[TOP] && pdg_id!=gen_truth[TOP].PdgId())
+	{
+	  //bottom from top decay observed
+	  if(pdg_id==5)
+	    {
+	      gen_truth[BOTTOM] = truth;
+	      gen_truth_index[BOTTOM]= gen_index;
+	    }
+
+	  //w+ or h+ from top decay observed
+	  else
+	    {
+	      gen_truth[D_0] = truth;
+	      gen_truth_index[D_0]= gen_index;
+	    }
+	}
+
+      //D_0 -> D_0_0 D_0_1
+      if(index_mother==gen_truth_index[D_0] && pdg_id!=gen_truth[D_0].PdgId())
+	{
+	  if(gen_truth_index[D_0_0]==BLANK)
+	    {
+	      gen_truth[D_0_0] = truth;
+              gen_truth_index[D_0_0]= gen_index;
+	    }
+	  else
+	    {
+	      gen_truth[D_0_1] = truth;
+              gen_truth_index[D_0_1]= gen_index;
+	    }
+	}
+
+      //anti_t -> anti_b w- or anti_t -> anti_b h-
+      if(index_mother==gen_truth_index[A_TOP] && pdg_id!=gen_truth[A_TOP].PdgId())
+        {
+          //anti_bottom from top decay observed
+          if(pdg_id==-5)
+            {
+	      gen_truth[A_BOTTOM]= truth;
+	      gen_truth_index[A_BOTTOM]= gen_index;
+            }
+
+          //w- or h- from top decay observed 
+          else
+            {
+	      gen_truth[D_1] = truth;
+              gen_truth_index[D_1]= gen_index;
+            }
+        }
+      
+      //D_1 -> D_1_0 D_1_1
+      if(index_mother==gen_truth_index[D_1] && pdg_id!=gen_truth[D_1].PdgId())
+	{
+          if(gen_truth_index[D_1_0]==BLANK)
+            {
+	      gen_truth[D_1_0] = truth;
+              gen_truth_index[D_1_0]= gen_index;
+            }
+          else
+	    {
+	      gen_truth[D_1_1] = truth;
+              gen_truth_index[D_1_1]= gen_index;
+            }
+        }
+
+      //tracing parton shower
+      for(Int_t j=0; j<10; j++)
+      {
+        if(index_mother==gen_truth_index[j] && pdg_id==gen_truth[j].PdgId())
+          {
+	      gen_truth[j] = truth;
+	      gen_truth_index[j] = gen_index;
+	  }
+      }      
+    }//for loop over ntruth
+  
+  // cout << endl;
+  // for(Int_t i=0; i<10; i++){ cout << gen_truth_index[i] << "\t" << gen_truth[i].PdgId() << endl; }
+  // cout << endl;
+  
+  //Check one lepton decay and one hadronic decay
+  Bool_t chk_leptonic_decay_0 = kFALSE;
+  Bool_t chk_leptonic_decay_1 = kFALSE;
+  
+  if(gen_truth[D_0_0].PdgId()==11 || gen_truth[D_0_0].PdgId()==13 || gen_truth[D_0_1].PdgId()==11 || gen_truth[D_0_1].PdgId()==13) chk_leptonic_decay_0 = kTRUE;
+  if(gen_truth[D_1_0].PdgId()==11 || gen_truth[D_1_0].PdgId()==13 || gen_truth[D_1_1].PdgId()==11 || gen_truth[D_1_1].PdgId()==13) chk_leptonic_decay_1 = kTRUE;
+  
+  if((chk_leptonic_decay_0==kTRUE && chk_leptonic_decay_1==kTRUE) || (chk_leptonic_decay_0==kFALSE && chk_leptonic_decay_1==kFALSE)) throw LQError("Fail truth cuts", LQError::SkipEvent);
+  FillCutFlow("Truth", weight);
+ 
+  //constuct gen parton array for easy handling
+  snu::KTruth four_gen_truth[4];
+  four_gen_truth[0] = gen_truth[BOTTOM];
+  four_gen_truth[1] = gen_truth[A_BOTTOM];
+  
+  if(chk_leptonic_decay_0==kFALSE)
+    {
+      four_gen_truth[2] = gen_truth[D_0_0];
+      four_gen_truth[3] = gen_truth[D_0_1];
+    }
+  else
+    {
+      four_gen_truth[2] = gen_truth[D_1_0];
+      four_gen_truth[3] = gen_truth[D_1_1];
+    }
+
+  //Vertex cut
+  if(!eventbase->GetEvent().HasGoodPrimaryVertex()) throw LQError("Fails vertex cuts", LQError::SkipEvent);
+  FillCutFlow("VertexCut", weight);
+  
+  /*MET*/
+  //Pass basic MET filter
+  if(!PassMETFilter()) throw LQError("Fail basic MET filter.", LQError::SkipEvent);
+  FillCutFlow("METCut", weight);
+  
+  //Mininum MET requirement
+  Double_t met = eventbase->GetEvent().MET();
+  Double_t met_phi = eventbase->GetEvent().METPhi();
+
+  if(met<20) throw LQError("Fail minimum MET requirement", LQError::SkipEvent);
+  FillCutFlow("MininumMET", weight);
+  
+  //construct met vector
+  TLorentzVector met_vector;
+  met_vector.SetPxPyPzE(met*TMath::Cos(met_phi), met*TMath::Sin(met_phi), 0, met);
+
+  /*Electron*/
+  std::vector<snu::KElectron> electron_tight_coll;
+  eventbase->GetElectronSel()->SelectElectrons(electron_tight_coll, BaseSelection::ELECTRON_POG_TIGHT);
+
+
+  std::vector<snu::KElectron> electron_veto_coll;
+  eventbase->GetElectronSel()->SelectElectrons(electron_veto_coll, BaseSelection::ELECTRON_POG_VETO);
+
+  //electron veto cuts
+  if(electron_veto_coll.size()>0) throw LQError("Fails electron veto cuts",  LQError::SkipEvent);
+  FillCutFlow("ElectronVeto", weight);
+  
+  /*Muon*/
+  std::vector<snu::KMuon> muon_tight_coll;
+  eventbase->GetMuonSel()->SelectMuons(muon_tight_coll, BaseSelection::MUON_POG_TIGHT);
+
+  std::vector<snu::KMuon> muon_veto_coll;
+  eventbase->GetMuonSel()->SelectMuons(muon_veto_coll, BaseSelection::MUON_POG_LOOSE);
+
+  //tight muon==1 cut
+  if(muon_tight_coll.size()!=1) throw LQError("Fails tight muon==1 cuts", LQError::SkipEvent);
+  FillCutFlow("OneTightMuon", weight);
+
+  //extra muon veto cut
+  if(muon_veto_coll.size()>1) throw LQError("Fails extra electron veto cuts", LQError::SkipEvent);
+  FillCutFlow("ExtraMuonVeto", weight);
+
+  //construct muon vector
+  TLorentzVector muon_vector(muon_tight_coll.at(0));
+
+  /*Jet*/
+  std::vector<snu::KJet> jet_hard_coll;
+  eventbase->GetJetSel()->SelectJets(isData, jet_hard_coll, muon_tight_coll, electron_tight_coll, "JET_NOCUT", 30., 2.5);
+
+  std::vector<snu::KJet> jet_soft_coll;
+  eventbase->GetJetSel()->SelectJets(isData, jet_soft_coll, muon_tight_coll, electron_tight_coll, "JET_NOCUT", 20., 2.5);
+
+  //reordering jet by pt
+  sort(jet_hard_coll.begin(), jet_hard_coll.end(), Compare_Jet_Pt);
+  sort(jet_soft_coll.begin(), jet_soft_coll.end(), Compare_Jet_Pt);
+
+  //at least four hard jets cut
+  if(jet_hard_coll.size()<4) throw LQError("Fails at least four hard jets cuts.", LQError::SkipEvent);
+  FillCutFlow("FourJets", weight);
+
+  //at leat two b jets cut
+  Bool_t chk_btag[4] = {kFALSE, kFALSE, kFALSE, kFALSE};
+  Int_t nbjet_hard = 0;
+  for(Int_t i=0; i<4; i++)
+    {
+      Double_t cvs = jet_hard_coll.at(i).BJetTaggerValue(snu::KJet::CSVv2);
+
+      if(cvs>CSV_THRESHOLD)
+        {
+          chk_btag[i] = kTRUE;
+          nbjet_hard++;
+        }
+    }
+
+  if(nbjet_hard<2) throw LQError("Fails at least four hard jets cuts.", LQError::SkipEvent);
+  FillCutFlow("TwoBJets", weight);
+
+  //jet match, mathch leading four jets and parton
+  Bool_t chk_match = Parton_Jet_Match(four_gen_truth, jet_hard_coll, chk_btag);
+  if(chk_match==kFALSE) throw LQError("Fails jet match", LQError::SkipEvent);
+  FillCutFlow("JetMatch", weight);
+  
+  /*Fitter*/
+  fitter->Set(met_vector, muon_vector, jet_soft_coll, chk_btag);
+  fitter->Fit();
+
+  Bool_t chk_convergence = fitter->Get_Convergence();
+  if(chk_convergence==kFALSE) throw LQError("Fitter Fail", LQError::SkipEvent);
+
+  Double_t chi2 = fitter->Get_Chi2();
+
+  Int_t permutation[4];
+  fitter->Get_Permutation(permutation);
+
+  Double_t para_result[9];
+  fitter->Get_Parameters(para_result);
+
+  Double_t t_mass = fitter->Get_Top_Mass();
+
+  if(chk_debug)
+    {
+      cout << "Result " << eventbase->GetEvent().EventNumber() << endl;
+      cout << "nbtag= " <<  nbjet_hard << ", Mass=" << para_result[8] << " " << permutation[0] << " " << permutation[1] << " " << permutation[2] << " " << permutation[3] << endl << endl;
+    }
+
+  if(nbjet_hard==2)
+    {
+      FillHist("Chi2_2B", chi2, weight);
+      FillHist("DiJetMass_2B", para_result[8], weight);
+      FillHist("DiJetMass_Chi2_2B", para_result[8], chi2, weight, 0, 0, 0, 0, 0, 0);
+
+      //goodness cut study
+      for(Int_t cut_level=0; cut_level<20; cut_level++)
+        {
+          Double_t d_cut_level = 0.05*(cut_level+1);
+          Bool_t chk_goodness_cut = fitter->Pass_Goodness_Cut(d_cut_level);
+
+          if(chk_goodness_cut==kTRUE)
+            {
+              TString hname = "DiJetMass_Chi2_2B_";
+              hname += (Int_t)(100*d_cut_level);
+
+              FillHist(hname, para_result[8], chi2, weight, 0, 0, 0, 0, 0, 0);
+            }
+        }
+
+      FillHist("Hadronic_Top_Mass", t_mass, weight);
+    }
+  else
+    {
+      FillHist("Chi2_3B", chi2, weight);
+      FillHist("DiJetMass_3B", para_result[8], weight);
+      FillHist("DiJetMass_Chi2_3B", para_result[8], chi2, weight, 0, 0, 0, 0, 0, 0);
+    }
+
+  FillCLHist(muhist, "Muon", muon_tight_coll, weight);
+  FillCLHist(jethist, "Jet", jet_hard_coll, weight);
+
+  return;
+}//void Fitter_Test::ExecuteEvents()
+
+//////////
+
+void Fitter_Test::EndCycle() throw(LQError)
+{
+  m_logger << INFO << "EndCyle is called." << LQLogger::endmsg;
+
+  return;
+}//void Fitter_Test::EndCycle()
+
+//////////
+
+void Fitter_Test::InitialiseAnalysis() throw(LQError)
+{
+  m_logger << INFO << "Initialise CHToCB_E analysis." << LQLogger::endmsg;
+
+  //Initialise histograms                                                                             
+  MakeHistograms();
+  MakeHistograms("DiJetMass_2B", 50, 0, 200); 
+  MakeHistograms("DiJetMass_3B", 50, 0, 200);
+  
+  MakeHistograms("Chi2_2B", 25, 0, 50);
+  MakeHistograms("Chi2_3B", 25, 0, 50);
+  
+  MakeHistograms("Hadronic_Top_Mass", 200, 120, 220);
+
+  MakeHistograms2D("DiJetMass_Chi2_2B", 50, 0, 200, 100, 0, 50);
+  MakeHistograms2D("DiJetMass_Chi2_3B", 50, 0, 200, 100, 0, 50);
+
+  for(Int_t cut_level=0; cut_level<20; cut_level++)
+    {
+      Double_t d_cut_level = 0.05*(cut_level+1);
+      TString hname = "DiJetMass_Chi2_2B_";
+      hname += (Int_t)(100*d_cut_level);
+      
+      MakeHistograms2D(hname, 50, 0, 200, 100, 0, 50);
+    }
+
+  MakeCleverHistograms(muhist, "Muon");
+  MakeCleverHistograms(jethist, "Jet");
+
+  return;
+}//void Fitter_Test::InitialiseAnalysis()
+
+//////////
+
+Double_t Fitter_Test::Distance(const snu::KTruth& truth, const snu::KJet& jet)
+{
+  Double_t truth_phi = truth.Phi();
+  Double_t truth_eta = truth.Eta();
+  
+  Double_t jet_phi = jet.Phi();
+  Double_t jet_eta = jet.Eta();
+
+  Double_t distance = TMath::Sqrt(TMath::Power(truth_phi-jet_phi, 2) + TMath::Power(truth_eta-jet_eta, 2));
+  
+  //cout << truth_phi << "\t" << truth_eta << "\t" << jet_phi << "\t" << jet_eta << "\t" << distance << endl;
+  
+  return distance;
+}//Double_t Fitter_Test::Distance(const snu::KTruth& truth, const snu::KJet& jet)
+
+//////////
+
+Bool_t Fitter_Test::Parton_Jet_Match(const snu::KTruth gen_truth[], const vector<snu::KJet>& jet_vector, const Bool_t chk_btag[])
+{
+  Bool_t match[4] = {kFALSE, kFALSE, kFALSE, kFALSE};
+  
+  for(Int_t i=0; i<4; i++)
+    {
+      for(Int_t j=0; j<4; j++)
+	{
+	  if(match[j]!=kFALSE) continue;
+	  
+	  //cout << i << "\t" << j << "\t" << chk_btag[j] << endl;
+	  
+	  snu::KJet jet = jet_vector.at(j);
+	  Double_t distance = Distance(gen_truth[i], jet);
+	  
+	  if(i==0 || i==1)
+	    {
+	      if(distance<0.2 && chk_btag[j]==kTRUE)
+		{ 
+		  match[j] = kTRUE; 
+		  //cout << "Good" << endl;
+		  break;
+		}
+	    }
+	  else
+	    { 
+	      if(distance<0.2)
+		{ 
+		  match[j] = kTRUE; 
+		  //cout << "Good" << endl;
+		  break;
+		} 
+	    }
+	}//for loop over leading four jet
+      //cout << endl;
+    }//for loop over four parton
+  //cout << endl;
+  
+  Bool_t chk_match = kTRUE;
+  for(Int_t i=0; i<4; i++)
+    {
+      if(match[i]==kFALSE)
+	{
+	  chk_match = kFALSE;
+	  break;
+	}
+    }
+
+  return chk_match;
+}//Bool_t Fitter_Test::Jet_Match()
+
+//////////
