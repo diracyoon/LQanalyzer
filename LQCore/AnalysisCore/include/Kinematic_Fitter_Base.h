@@ -65,10 +65,13 @@ class Kinematic_Fitter_Base
   static TLorentzVector measured_lepton;
   TLorentzVector measured_jet[4];
   static TLorentzVector reordered_jet[4];
+  static TLorentzVector sum_extra_jet;
+  static TLorentzVector measured_ue;
 
   static Double_t error_extra_jet;
   static Double_t error_reordered_jet_pt[4];
   static Double_t error_lepton_pt;
+  static Double_t error_ue;
 
   TLorentzVector best_fitted_jet[4];
   TLorentzVector fitted_jet[2][24][4];

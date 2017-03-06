@@ -22,7 +22,7 @@ Fitter_Test::Fitter_Test() : AnalyzerCore()
 
   chk_debug = kFALSE;
 
-  fitter = new Kinematic_Fitter(chk_debug);
+  fitter = new Kinematic_Fitter_Old(chk_debug);
 }//Fitter_Test::Fitter_Test()
 
 //////////
@@ -370,7 +370,7 @@ void Fitter_Test::EndCycle() throw(LQError)
 
 void Fitter_Test::InitialiseAnalysis() throw(LQError)
 {
-  m_logger << INFO << "Initialise CHToCB_E analysis." << LQLogger::endmsg;
+  m_logger << INFO << "Initialise Fitter_Test analysis." << LQLogger::endmsg;
 
   //Initialise histograms                                                                             
   MakeHistograms();

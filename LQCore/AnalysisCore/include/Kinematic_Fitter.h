@@ -1,97 +1,22 @@
 #ifndef __KINEMATIC_FITTER_H__
 #define __KINEMATIC_FITTER_H__
 
-#include "iostream"
-#include "vector"
-
-#include "TLorentzVector.h"
-#include "Math/Minimizer.h"
-#include "Math/Factory.h"
-#include "Math/Functor.h"
-
-#include "TS_Correction.h"
-
-#define C_MASS 1.27
-#define B_MASS 4.8
-#define T_MASS 172.5
-#define T_WIDTH 1.5
-#define W_MASS 80.398
-#define W_WIDTH 2.141
-
-#define NFIT 9
-
-#define CHI2_CUT 5
-#define GOODNESS_CUT_SLIDING 0.1
+#include "Kinematic_Fitter_Base.h"
 
 using namespace std;
 
-class Kinematic_Fitter 
+class Kinematic_Fitter : public Kinematic_Fitter_Base
 {
  public:
-  Kinematic_Fitter(Bool_t a_chk_debug=kFALSE);
-  ~Kinematic_Fitter();
+  Kinematic_Fitter(const Bool_t& a_chk_debug=kFALSE);
+  virtual ~Kinematic_Fitter();
   
-  void Clear();
-  void Fit();
-  Double_t Get_Chi2(const TString& type="BEST", const Int_t& index=-1);
-  Bool_t Get_Convergence(){ return chk_convergence; }
-  void Get_Parameters(Double_t parameter_return[NFIT], const TString& type="BEST", const Int_t& index=-1);
-  void Get_Permutation(Int_t permuatation_return[4]);
-  Double_t Get_Top_Mass();
-  Bool_t Pass_Chi2_Cut();
-  Bool_t Pass_Goodness_Cut();
-  Bool_t Pass_Goodness_Cut(const Double_t& cut_level);
+  virtual void Fit();
+  virtual void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<snu::KJet>& a_jet_vector, const Bool_t a_b_tag[4]);
   
-  void Print();
-  void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t a_chk_b_tag[4]);
-
- private:
-  Bool_t chk_debug;
-
-  Bool_t chk_convergence;
-
-  Int_t best_permutation[4];
-
-  Double_t best_chi2;
-  Double_t chi2[2][24];
-  
-  Double_t best_parameter[NFIT];
-  Double_t parameter[2][24][NFIT];
-  
-  Bool_t b_tag_configuration[2][24];
-  
-  TLorentzVector best_fitted_jet[4];
-  TLorentzVector fitted_jet[2][24][4];
-  
-  //first index: four jet
-  //second index: 0 for light, 1 for c, 2 for b
-  Double_t ts_corr_value[4][3];
-  Double_t ts_corr_error[4][3];
-  
-  vector<TLorentzVector> jet_vector;
-  
-  static TLorentzVector measured_extra_jet;
-  static TLorentzVector measured_met;
-  static TLorentzVector measured_lepton;
-  TLorentzVector measured_jet[4];
-  static TLorentzVector reordered_jet[4];
-  
-  Int_t n_b_tag;
-  Bool_t chk_b_tag[4];
-  Bool_t reordered_b_tag[4];
-  
-  static Double_t error_extra_jet;
-  static Double_t error_reordered_jet_pt[4];
-  static Double_t error_lepton_pt;
-  
-  ROOT::Math::Minimizer* minimizer;
-  
-  Bool_t Pass_B_Tag_Configuration();
-  Bool_t Pass_Native_Top_Mass();
+ protected:
   static Double_t Chi2_Func(const Double_t* par);
-
-  TS_Correction* ts_correction;
-
+  
   ClassDef(Kinematic_Fitter, 1);
 };
 

@@ -170,15 +170,9 @@ void CHToCB_M::ExecuteEvents() throw(LQError)
   if(nbjet_hard<2) throw LQError("Fails at least four hard jets cuts.", LQError::SkipEvent);
   FillCutFlow("TwoBJets", weight);
 
-  //construct jet vector for easy handling
-  vector<TLorentzVector> jet_vector;
-  Int_t njet_soft = jet_soft_coll.size();
-  for(Int_t i=0; i<njet_soft; i++){ jet_vector.push_back(jet_soft_coll.at(i)); }
-
-  
   if(chk_debug) cout << "START " << eventbase->GetEvent().EventNumber() << endl;
   
-  fitter->Set(met_vector, muon_vector, jet_vector, chk_btag);
+  fitter->Set(met_vector, muon_vector, jet_soft_coll, chk_btag);
   fitter->Fit();  
   
   Bool_t chk_convergence = fitter->Get_Convergence();

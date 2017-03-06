@@ -1,15 +1,18 @@
-ncuts 14
+ncuts 16
 webpage https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
 ###--------------------------------------------------------------------------------------------------------------------------------------------------------
 ###  -999. or 999. means no cut applied
 ###--------------------------------------------------------------------------------------------------------------------------------------------------------
-| ID                        |  ptmin  | |etamax| |  isomax03_b | isomax03_e | IsTight(POG)  | IsMedium(POG)  | IsLoose(POG) | IsVeto(POG)   | |dxymax_b|  | |dxymax_e| |  |dzmax_b| |  |dzmax_e| | GsfCtfScPix | convveto  |
-| ELECTRON_POG_TIGHT        | 10.     | 2.5     |   0.0354    | 0.0646     | true          | false          |  false       | false         | 0.0111    | 0.0351  | 0.0466   | 0.417    | false       | true      |   
-| ELECTRON_POG_MEDIUM       | 10.     | 2.5     |   0.0766    | 0.0678     | false         | true           |  false       | false         | 0.0118    | 0.0739  | 0.373    | 0.602    | false       | true      |        
-| ELECTRON_POG_LOOSE        | 10.     | 2.5     |   0.0893    | 0.121      | false         | false          |  true        | false         | 0.0261    | 0.118   | 0.41     | 0.822    | false       | true      |        
-| ELECTRON_POG_VETO         | 10.     | 2.5     |   0.126     | 0.144      | false         | false          |  false       | true          | 0.0564    | 0.222   | 0.472    | 0.921    | false       | true      |       
-| ELECTRON_HN_TIGHT         | 10.     | 2.5     |   0.0354    | 0.0646     | true          | false          |  false       | false         | 0.0111    | 0.0351  | 0.0466   | 0.417    | true        | true      |        
-| ELECTRON_HN_FAKELOOSE      | 10.     | 2.5     |   0.5       | 0.50       | true          | false          |  false       | false         | 0.0111    | 0.0351  | 0.0466   | 0.417    | true        | true      |       
-| ELECTRON_HN_FAKELOOSE_NOD0 | 10.     | 2.5     |   0.5       | 0.50       | true          | false          |  false       | false         | 999.     |  999.   | 999.    | 999.    | true        | true      |       
-| ELECTRON_HN_VETO          | 10.     | 2.5     |   0.6       | 0.60       | false         | false          |  false        | true         | 1.        | 1.      | 999.    | 999.    | false       | false      |        
-| ELECTRON_PTETA            | 10.     | 2.5     |   1000.     | 1000.      | false         | false          |  false       | false         | 10000.    | 10000.  | 1000.    | 1000.    | false       | true      |        
+| ID                        |  ptmin  | |etamax| |  isomax03_b | isomax03_e | IsTight(POG)  | IsMedium(POG)  | IsLoose(POG) | IsVeto(POG)   | |dxymax_b|  | |dxymax_e| |  |dzmax_b| |  |dzmax_e| | GsfCtfScPix | convveto  | |dxysigmin|  |  |dxysigmax| |
+| ELECTRON_POG_TIGHT        | 10.     | 2.5     |   0.0354    | 0.0646     | true          | false          |  false       | false         | 0.0111    | 0.0351  | 0.0466   | 0.417    | false       | true      |   999.         | 999.         | 
+| ELECTRON_POG_MEDIUM       | 10.     | 2.5     |   0.0766    | 0.0678     | false         | true           |  false       | false         | 0.0118    | 0.0739  | 0.373    | 0.602    | false       | true      | 999.         | 999.         |        
+| ELECTRON_POG_LOOSE        | 10.     | 2.5     |   0.0893    | 0.121      | false         | false          |  true        | false         | 0.0261    | 0.118   | 0.41     | 0.822    | false       | true      |  999.         | 999.         |       
+| ELECTRON_POG_VETO         | 10.     | 2.5     |   0.126     | 0.144      | false         | false          |  false       | true          | 0.0564    | 0.222   | 0.472    | 0.921    | false       | true      |  999.         | 999.         |      
+| ELECTRON_POG_FAKELOOSE      | 10.     | 2.5     |   0.5       | 0.50       | true          | false          |  false       | false         | 0.0111    | 0.0351  | 0.0466   | 0.417    | true        | true      | 999.         | 999.         |       
+| ELECTRON_HN_TIGHT         | 10.     | 2.5     |   0.0354    | 0.0646     | true          | false          |  false       | false         | 0.0111    | 0.0351  | 0.0466   | 0.417    | true        | true      |  999.         | 3.         |       
+| ELECTRON_HN_FAKELOOSE      | 10.     | 2.5     |   0.5       | 0.50       | true          | false          |  false       | false         | 0.0111    | 0.0351  | 0.0466   | 0.417    | true        | true      | 999.         | 3.         |       
+| ELECTRON_HN_FAKELOOSE_NOD0 | 10.     | 2.5     |   0.5       | 0.50       | true          | false          |  false       | false         | 999.     |  999.   | 999.    | 999.    | true        | true      |   999.         | 999.         |     
+| ELECTRON_HN_VETO          | 10.     | 2.5     |   0.6       | 0.60       | false         | false          |  false        | true         | 1.        | 1.      | 999.    | 999.    | false       | false      |   999.         | 999.         |      
+| ELECTRON_PTETA            | 10.     | 2.5     |   1000.     | 1000.      | false         | false          |  false       | false         | 10000.    | 10000.  | 1000.    | 1000.    | false       | true      |   999.         | 999.         |      
+| ELECTRON_HN_HIGHDXY_FAKELOOSE      | 10.     | 2.5     |   0.5       | 0.50       | true          | false          |  false       | false         | 999.    | 999.  | 0.0466   | 0.417    | true        | true      | 4.         | 999.         |
+| ELECTRON_HN_HIGHDXY_TIGHT         | 10.     | 2.5     |   0.0354    | 0.0646     | true          | false          |  false       | false         | 999.    | 999.  | 0.0466   | 0.417    | true        | true      |  4.         | 999.         |

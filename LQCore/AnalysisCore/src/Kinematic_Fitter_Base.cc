@@ -10,10 +10,13 @@ TLorentzVector Kinematic_Fitter_Base::measured_extra_jet;
 TLorentzVector Kinematic_Fitter_Base::measured_met;
 TLorentzVector Kinematic_Fitter_Base::measured_lepton;
 TLorentzVector Kinematic_Fitter_Base::reordered_jet[4];
+TLorentzVector Kinematic_Fitter_Base::sum_extra_jet;
+TLorentzVector Kinematic_Fitter_Base::measured_ue;
 
 Double_t Kinematic_Fitter_Base::error_extra_jet;
 Double_t Kinematic_Fitter_Base::error_reordered_jet_pt[4];
 Double_t Kinematic_Fitter_Base::error_lepton_pt;
+Double_t Kinematic_Fitter_Base::error_ue;
 
 /////////
 
