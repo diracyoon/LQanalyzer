@@ -22,7 +22,7 @@ Fitter_Test::Fitter_Test() : AnalyzerCore()
 
   chk_debug = kFALSE;
 
-  fitter = new Kinematic_Fitter_Old(chk_debug);
+  fitter = new Kinematic_Fitter(chk_debug);
 }//Fitter_Test::Fitter_Test()
 
 //////////
@@ -189,7 +189,7 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   Bool_t chk_leptonic_decay_0 = kFALSE;
   Bool_t chk_leptonic_decay_1 = kFALSE;
   
-  if(gen_truth[D_0_0].PdgId()==11 || gen_truth[D_0_0].PdgId()==13 || gen_truth[D_0_1].PdgId()==11 || gen_truth[D_0_1].PdgId()==13) chk_leptonic_decay_0 = kTRUE;
+  if(gen_truth[D_0_0].PdgId()==-11 || gen_truth[D_0_0].PdgId()==-13 || gen_truth[D_0_1].PdgId()==-11 || gen_truth[D_0_1].PdgId()==-13) chk_leptonic_decay_0 = kTRUE;
   if(gen_truth[D_1_0].PdgId()==11 || gen_truth[D_1_0].PdgId()==13 || gen_truth[D_1_1].PdgId()==11 || gen_truth[D_1_1].PdgId()==13) chk_leptonic_decay_1 = kTRUE;
   
   if((chk_leptonic_decay_0==kTRUE && chk_leptonic_decay_1==kTRUE) || (chk_leptonic_decay_0==kFALSE && chk_leptonic_decay_1==kFALSE)) throw LQError("Fail truth cuts", LQError::SkipEvent);
@@ -197,20 +197,28 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
  
   //constuct gen parton array for easy handling
   snu::KTruth four_gen_truth[4];
-  four_gen_truth[0] = gen_truth[BOTTOM];
-  four_gen_truth[1] = gen_truth[A_BOTTOM];
-  
+  snu::KTruth gen_neutrino;
   if(chk_leptonic_decay_0==kFALSE)
     {
+      four_gen_truth[0] = gen_truth[A_BOTTOM];
+      four_gen_truth[1] = gen_truth[BOTTOM];
       four_gen_truth[2] = gen_truth[D_0_0];
       four_gen_truth[3] = gen_truth[D_0_1];
+      
+      if(gen_truth[D_1_0].PdgId()==11 || gen_truth[D_1_0].PdgId()==13) gen_neutrino = gen_truth[D_1_1];
+      else gen_neutrino = gen_truth[D_1_0];
     }
   else
     {
+      four_gen_truth[0] = gen_truth[BOTTOM];
+      four_gen_truth[1] = gen_truth[A_BOTTOM];
       four_gen_truth[2] = gen_truth[D_1_0];
       four_gen_truth[3] = gen_truth[D_1_1];
-    }
 
+      if(gen_truth[D_0_0].PdgId()==-11 || gen_truth[D_0_0].PdgId()==-13) gen_neutrino = gen_truth[D_0_1];
+      else gen_neutrino = gen_truth[D_0_0];
+    }
+  
   //Vertex cut
   if(!eventbase->GetEvent().HasGoodPrimaryVertex()) throw LQError("Fails vertex cuts", LQError::SkipEvent);
   FillCutFlow("VertexCut", weight);
@@ -283,7 +291,7 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
     {
       Double_t cvs = jet_hard_coll.at(i).BJetTaggerValue(snu::KJet::CSVv2);
 
-      if(cvs>CSV_THRESHOLD)
+      if(cvs>CSV_THRESHOLD_TIGHT)
         {
           chk_btag[i] = kTRUE;
           nbjet_hard++;
@@ -294,7 +302,8 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   FillCutFlow("TwoBJets", weight);
 
   //jet match, mathch leading four jets and parton
-  Bool_t chk_match = Parton_Jet_Match(four_gen_truth, jet_hard_coll, chk_btag);
+  Int_t permutation_real[4] = {0, 0, 0, 0};
+  Bool_t chk_match = Parton_Jet_Match(four_gen_truth, jet_hard_coll, chk_btag, permutation_real);
   if(chk_match==kFALSE) throw LQError("Fails jet match", LQError::SkipEvent);
   FillCutFlow("JetMatch", weight);
   
@@ -302,25 +311,56 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   fitter->Set(met_vector, muon_vector, jet_soft_coll, chk_btag);
   fitter->Fit();
 
-  Bool_t chk_convergence = fitter->Get_Convergence();
+  Bool_t chk_convergence = fitter->Get_Convergence_Checker();
   if(chk_convergence==kFALSE) throw LQError("Fitter Fail", LQError::SkipEvent);
 
   Double_t chi2 = fitter->Get_Chi2();
 
-  Int_t permutation[4];
-  fitter->Get_Permutation(permutation);
-
+  Int_t permutation_fitter[4];
+  fitter->Get_Permutation(permutation_fitter);
+  
+  //check jet permutation match
+  if(permutation_real[0]==permutation_fitter[0] && permutation_real[1]==permutation_fitter[1]) FillHist("Jet_Permutation_Match", 1, weight); 
+  else FillHist("Jet_Permutation_Match", 0, weight);
+    
   Double_t para_result[9];
   fitter->Get_Parameters(para_result);
 
-  Double_t t_mass = fitter->Get_Top_Mass();
+  TLorentzVector fitted_object[6];
+  for(Int_t i=0; i<6; i++){ fitted_object[i] = fitter->Get_Fitted_Object(i); }
+  
+  TLorentzVector leptonic_w = fitted_object[4] + fitted_object[5];
+  Double_t leptonic_w_mass = leptonic_w.M();
+    
+  TLorentzVector hadronic_top = fitted_object[1] + fitted_object[2] + fitted_object[3];
+  Double_t hadronic_t_mass = hadronic_top.M();
 
-  if(chk_debug)
-    {
-      cout << "Result " << eventbase->GetEvent().EventNumber() << endl;
-      cout << "nbtag= " <<  nbjet_hard << ", Mass=" << para_result[8] << " " << permutation[0] << " " << permutation[1] << " " << permutation[2] << " " << permutation[3] << endl << endl;
-    }
+  TLorentzVector leptonic_top = fitted_object[0] + fitted_object[4] + fitted_object[5];
+  Double_t leptonic_t_mass = leptonic_top.M();
+  
+  FillHist("MET_Truth_Vs_Measured", gen_neutrino.Pt(), met, weight, 0, 0, 0, 0, 0, 0);
+  FillHist("METPhi_Truth_Vs_Measured", gen_neutrino.Phi(), met_phi, weight, 0, 0, 0, 0, 0, 0);
+  
+  FillHist("MET_Truth_Vs_Fitted", gen_neutrino.Pt(), fitted_object[5].Pt(), weight, 0, 0, 0, 0, 0, 0);
+  FillHist("METPhi_Truth_Vs_Fitted", gen_neutrino.Phi(), fitted_object[5].Phi(), weight, 0, 0, 0, 0, 0, 0);
+  FillHist("Pz_Truth_Vs_Fitted", gen_neutrino.Pz(), fitted_object[5].Pz(), weight, 0, 0, 0, 0, 0, 0);
+  FillHist("Eta_Truth_Vs_Fitted", gen_neutrino.Eta(), fitted_object[5].Eta(), weight, 0, 0, 0, 0, 0, 0);
 
+  Double_t chi2_piece[11];
+  fitter->Get_Chi2_Piece(chi2_piece);
+  
+  FillHist("Chi2_Piece_0", chi2_piece[0], weight);
+  FillHist("Chi2_Piece_1", chi2_piece[1], weight);
+  FillHist("Chi2_Piece_2", chi2_piece[2], weight);
+  FillHist("Chi2_Piece_3", chi2_piece[3], weight);
+  FillHist("Chi2_Piece_4", chi2_piece[4], weight);
+  FillHist("Chi2_Piece_5", chi2_piece[5], weight);
+  FillHist("Chi2_Piece_6", chi2_piece[6], weight);
+  FillHist("Chi2_Piece_7", chi2_piece[7], weight);
+  FillHist("Chi2_Piece_8", chi2_piece[8], weight);
+  FillHist("Chi2_Piece_9", chi2_piece[9], weight);
+  FillHist("Chi2_Piece_10", chi2_piece[10], weight);
+ 
   if(nbjet_hard==2)
     {
       FillHist("Chi2_2B", chi2, weight);
@@ -342,7 +382,9 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
             }
         }
 
-      FillHist("Hadronic_Top_Mass", t_mass, weight);
+      FillHist("Leptonic_W_Mass", leptonic_w_mass, weight);
+      FillHist("Hadronic_Top_Mass", hadronic_t_mass, weight);
+      FillHist("Leptonic_Top_Mass", leptonic_t_mass, weight);
     }
   else
     {
@@ -374,13 +416,42 @@ void Fitter_Test::InitialiseAnalysis() throw(LQError)
 
   //Initialise histograms                                                                             
   MakeHistograms();
+  
+  //jet permutation efficiency
+  MakeHistograms("Jet_Permutation_Match", 2, -0.5, 1.5);
+
+  //lepton
+
+  //neutrino 
+  MakeHistograms2D("MET_Truth_Vs_Measured", 100, 0, 200, 100, 0, 200);
+  MakeHistograms2D("METPhi_Truth_Vs_Measured", 100, -4, 4, 100, -4, 4);
+
+  MakeHistograms2D("MET_Truth_Vs_Fitted", 100, 0, 200, 100, 0, 200);
+  MakeHistograms2D("METPhi_Truth_Vs_Fitted", 100, -4, 4, 100, -4, 4);
+  MakeHistograms2D("Pz_Truth_Vs_Fitted", 100, -200, 200, 100, -200, 200);
+  MakeHistograms2D("Eta_Truth_Vs_Fitted", 100, -5, 5, 100, -5, 5);
+
   MakeHistograms("DiJetMass_2B", 50, 0, 200); 
   MakeHistograms("DiJetMass_3B", 50, 0, 200);
   
-  MakeHistograms("Chi2_2B", 25, 0, 50);
-  MakeHistograms("Chi2_3B", 25, 0, 50);
+  MakeHistograms("Chi2_2B", 100, 0, 50);
+  MakeHistograms("Chi2_3B", 100, 0, 50);
   
-  MakeHistograms("Hadronic_Top_Mass", 200, 120, 220);
+  MakeHistograms("Chi2_Piece_0", 100, 0, 50);
+  MakeHistograms("Chi2_Piece_1", 100, 0,50);
+  MakeHistograms("Chi2_Piece_2", 100, 0,50);
+  MakeHistograms("Chi2_Piece_3", 100, 0,50);
+  MakeHistograms("Chi2_Piece_4", 100, 0,50);
+  MakeHistograms("Chi2_Piece_5", 100, 0,50);
+  MakeHistograms("Chi2_Piece_6", 100, 0,50);
+  MakeHistograms("Chi2_Piece_7", 100, 0,50);
+  MakeHistograms("Chi2_Piece_8", 100, 0,50);
+  MakeHistograms("Chi2_Piece_9", 100, 0,50);
+  MakeHistograms("Chi2_Piece_10", 100, 0,50);
+
+  MakeHistograms("Leptonic_W_Mass", 50, 55, 105);
+  MakeHistograms("Hadronic_Top_Mass", 200, 150, 190);
+  MakeHistograms("Leptonic_Top_Mass", 200, 150, 190);
 
   MakeHistograms2D("DiJetMass_Chi2_2B", 50, 0, 200, 100, 0, 50);
   MakeHistograms2D("DiJetMass_Chi2_3B", 50, 0, 200, 100, 0, 50);
@@ -419,7 +490,7 @@ Double_t Fitter_Test::Distance(const snu::KTruth& truth, const snu::KJet& jet)
 
 //////////
 
-Bool_t Fitter_Test::Parton_Jet_Match(const snu::KTruth gen_truth[], const vector<snu::KJet>& jet_vector, const Bool_t chk_btag[])
+Bool_t Fitter_Test::Parton_Jet_Match(const snu::KTruth gen_truth[], const vector<snu::KJet>& jet_vector, const Bool_t chk_btag[], Int_t permutation_real[4])
 {
   Bool_t match[4] = {kFALSE, kFALSE, kFALSE, kFALSE};
   
@@ -439,6 +510,7 @@ Bool_t Fitter_Test::Parton_Jet_Match(const snu::KTruth gen_truth[], const vector
 	      if(distance<0.2 && chk_btag[j]==kTRUE)
 		{ 
 		  match[j] = kTRUE; 
+		  permutation_real[i] = j;
 		  //cout << "Good" << endl;
 		  break;
 		}
@@ -448,6 +520,7 @@ Bool_t Fitter_Test::Parton_Jet_Match(const snu::KTruth gen_truth[], const vector
 	      if(distance<0.2)
 		{ 
 		  match[j] = kTRUE; 
+		  permutation_real[i] = j;
 		  //cout << "Good" << endl;
 		  break;
 		} 

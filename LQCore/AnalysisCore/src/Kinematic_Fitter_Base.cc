@@ -9,6 +9,7 @@ ClassImp(Kinematic_Fitter_Base);
 TLorentzVector Kinematic_Fitter_Base::measured_extra_jet;
 TLorentzVector Kinematic_Fitter_Base::measured_met;
 TLorentzVector Kinematic_Fitter_Base::measured_lepton;
+TLorentzVector Kinematic_Fitter_Base::measured_jet[4];
 TLorentzVector Kinematic_Fitter_Base::reordered_jet[4];
 TLorentzVector Kinematic_Fitter_Base::sum_extra_jet;
 TLorentzVector Kinematic_Fitter_Base::measured_ue;
@@ -17,6 +18,12 @@ Double_t Kinematic_Fitter_Base::error_extra_jet;
 Double_t Kinematic_Fitter_Base::error_reordered_jet_pt[4];
 Double_t Kinematic_Fitter_Base::error_lepton_pt;
 Double_t Kinematic_Fitter_Base::error_ue;
+
+TLorentzVector Kinematic_Fitter_Base::fitting_jet[4];
+TLorentzVector Kinematic_Fitter_Base::fitting_lepton;
+TLorentzVector Kinematic_Fitter_Base::fitting_neutrino;
+
+Double_t Kinematic_Fitter_Base::f_chi2_piece[11];
 
 /////////
 
@@ -62,10 +69,10 @@ Kinematic_Fitter_Base::Kinematic_Fitter_Base(const Bool_t& a_chk_debug)
   parameter_step[2] = 0.03;
   parameter_step[3] = 0.03;
   parameter_step[4] = 0.01;
-  parameter_step[5] = 0.1;
-  parameter_step[6] = 0.1;
-  parameter_step[7] = 0.1;
-  parameter_step[8] = 0.1;
+  parameter_step[5] = 0.03;
+  parameter_step[6] = 0.03;
+  parameter_step[7] = 0.03;
+  parameter_step[8] = 0.03;
 }//Kinematic_Fitter_Base::Kinematic_Fitter_Base(const Bool_t& a_chk_debug)
 
 //////////
@@ -90,6 +97,61 @@ Double_t Kinematic_Fitter_Base::Get_Chi2(const TString& type, const Int_t& index
 
   return -1;
 }//Double_t Kinematic_Fitter_Base::Get_Chi2(const TString& type, const Int_t& index)
+
+//////////
+
+void Kinematic_Fitter_Base::Get_Chi2_Piece(Double_t chi2_piece_return[11], const TString& type, const Int_t& index)
+{
+  if(type=="BEST")
+    {
+      for(Int_t i=0; i<11; i++){ chi2_piece_return[i] = best_chi2_piece[i]; }
+      
+      return;
+    }
+  else
+    {
+      Int_t i = index/24;
+      Int_t j = index%24;
+
+      for(Int_t k=0; k<11; k++){ chi2_piece_return[k] = chi2_piece[i][j][k]; }
+
+      return;
+    }
+    
+  return;
+}//void Kinematic_Fitter_Base::Get_Chi2_Piece(Double_t chi2_return[11], const TString& type, const Int_t& index)
+
+//////////
+
+TLorentzVector Kinematic_Fitter_Base::Get_Fitted_Object(const Int_t& obj_index, const TString& type, const Int_t& index)
+{
+  Int_t i = index/24;  
+  Int_t j = index%24;
+
+  //jets
+  if(obj_index<4)
+    {
+      if(type=="BEST") return best_fitted_jet[obj_index];
+      else return fitted_jet[i][j][obj_index]; 
+    }//jets
+    
+  //lepton
+  else if(obj_index==4)
+    {
+      if(type=="BEST") return best_fitted_lepton;
+      else return fitted_lepton[i][j];
+    }
+
+  //neutrino
+  else if(obj_index==5)
+    {
+      if(type=="BEST") return best_fitted_neutrino;
+      else return fitted_neutrino[i][j];
+    }
+  
+  TLorentzVector empty;
+  return empty; 
+}//TLorentzVector Kinematic_Fitter_Base::Get_Fitted_Object(const Int_t& obj_index)
 
 //////////
 
@@ -118,23 +180,6 @@ void Kinematic_Fitter_Base::Get_Permutation(Int_t permutation_return[4])
 
   return;
 }//void Kinematic_Fitter_Base::Get_Permutation(Double_t permuatation_return[4])
-
-//////////
-
-Double_t Kinematic_Fitter_Base::Get_Top_Mass()
-{
-  TLorentzVector t_jjj;
-  t_jjj.SetPtEtaPhiM(0, 0, 0, 0);
-
-  for(Int_t i=0; i<4; i++)
-    {
-      if(best_permutation[i]!=0) t_jjj += best_fitted_jet[best_permutation[i]];
-    }
-
-  Double_t t_mass = t_jjj.M();
-
-  return t_mass;
-}//Double_t Kinematic_Fitter_Base::Get_Top_Mass()
 
 //////////
 
@@ -217,9 +262,6 @@ void Kinematic_Fitter_Base::Clear()
 //////////
 
 
-
-//////////
-
 Bool_t Kinematic_Fitter_Base::Pass_B_Tag_Configuration()
 {
   Bool_t b_tag_config_check = kFALSE;
@@ -269,18 +311,30 @@ void Kinematic_Fitter_Base::Reordering_Jets()
       Double_t jet_pt_error = 1;
       Double_t q_mass = 1;
       
-      if(reordering_index[i]==3)
+      //b quark
+      if(reordering_index[i]==0 || reordering_index[i]==1)
 	{
-	  ts_corr = ts_corr_value[reordering_index[i]][1];
-	  jet_pt_error = ts_corr_error[reordering_index[i]][1];
-	  
-	  q_mass = C_MASS;
+	  ts_corr = ts_corr_value[reordering_index[i]][2];
+          jet_pt_error = ts_corr_error[reordering_index[i]][2];
+
+          q_mass = B_MASS; 
 	}
+      
+      //c quark in charged higgs case
+      // else if(reordering_index[i]==3)
+      // 	{
+      // 	  ts_corr = ts_corr_value[reordering_index[i]][1];
+      // 	  jet_pt_error = ts_corr_error[reordering_index[i]][1];
+	  
+      // 	  q_mass = C_MASS;
+      // 	}
+      
       else 
 	{
-	  ts_corr = ts_corr_value[reordering_index[i]][2];                                  
-	  jet_pt_error = ts_corr_error[reordering_index[i]][2];                             
-	  q_mass = B_MASS;                                                                  
+	  ts_corr = ts_corr_value[reordering_index[i]][0];                                  
+	  jet_pt_error = ts_corr_error[reordering_index[i]][0];                             
+	 
+	  q_mass = 0;                                                                  
 	}   
 	  
       Double_t pt = measured_jet[reordering_index[i]].Pt()*ts_corr;                         
@@ -345,42 +399,50 @@ Bool_t Kinematic_Fitter_Base::Sol_Neutrino_Pz()
 
 void Kinematic_Fitter_Base::Store_Results(const Int_t& i, const Int_t& j)
 {
-  //store results
+  /*store results*/
+  
+  //chi2
   chi2[i][j] = minimizer->MinValue();
   
-  const Double_t* parameter_result = minimizer->X(); 
+  for(Int_t k=0; k<11; k++){ chi2_piece[i][j][k] = f_chi2_piece[k]; }
   
-  for(Int_t k=0; k<NFIT; k++)
-    {
-      parameter[i][j][k] = parameter_result[k]; 
+  //parameters 
+  const Double_t* parameter_result = minimizer->X();
+  for(Int_t k=0; k<NFIT; k++){ parameter[i][j][k] = parameter_result[k]; }
       
-      if(k<4)
-	{
-	  Double_t pt = parameter[i][j][k]*reordered_jet[k].Pt();                           
-	  Double_t eta = reordered_jet[k].Eta();                                            
-	  Double_t phi = reordered_jet[k].Phi();                                            
-	  Double_t mass = reordered_jet[k].M();                                             
-	  
-	  fitted_jet[i][j][k].SetPtEtaPhiM(pt, eta, phi, mass);
-	}
-    }
+  //fitted jets
+  for(Int_t k=0; k<4; k++){ fitted_jet[i][j][k] = fitting_jet[k]; }
   
+  //fitted lepton
+  fitted_lepton[i][j] = fitting_lepton;
+
+  //fitted neutrino
+  fitted_neutrino[i][j] = fitting_neutrino;
+
   //update best results
   if(chi2[i][j]<best_chi2) 
     {
       chk_convergence = kTRUE;
       
+      //chi
       best_chi2 = chi2[i][j];                                                           
-      for(Int_t k=0; k<NFIT; k++)
-	{
-	  best_parameter[k] = parameter[i][j][k]; 
+      for(Int_t k=0; k<11; k++){ best_chi2_piece[k] = chi2_piece[i][j][k]; } 
+
+      //parameters
+      for(Int_t k=0; k<NFIT; k++){ best_parameter[k] = parameter[i][j][k]; } 
 	  
-	  if(k<4)
-	    {
-	      best_permutation[k] = reordering_index[k];                                    
-	      best_fitted_jet[k] =  fitted_jet[i][j][k];                                    
-	    }                                                                               
-	}
+      //permutation & fitted jets
+      for(Int_t k=0; k<4; k++)
+	{
+	  best_permutation[k] = reordering_index[k];                                    
+	  best_fitted_jet[k] =  fitted_jet[i][j][k];                                    
+	}    
+      
+      //fitted lepton
+      best_fitted_lepton = fitted_lepton[i][j];
+    
+      //fitted neutrino
+      best_fitted_neutrino = fitted_neutrino[i][j];
     }
   
   return;

@@ -6,7 +6,9 @@
 #include "Kinematic_Fitter.h"
 #include "Kinematic_Fitter_Old.h"
 
-#define CSV_THRESHOLD 0.679
+#define CSV_THRESHOLD_LOOSE 0.460
+#define CSV_THRESHOLD_MEDIUM 0.800
+#define CSV_THRESHOLD_TIGHT 0.935
 #define BLANK -999
 
 class Fitter_Test : public AnalyzerCore 
@@ -32,7 +34,7 @@ class Fitter_Test : public AnalyzerCore
   Kinematic_Fitter_Base* fitter;
 
   Double_t Distance(const snu::KTruth& truth, const snu::KJet& jet);
-  Bool_t Parton_Jet_Match(const snu::KTruth gen_truth[], const vector<snu::KJet>& jet_vector, const Bool_t chk_btag[]);
+  Bool_t Parton_Jet_Match(const snu::KTruth gen_truth[], const vector<snu::KJet>& jet_vector, const Bool_t chk_btag[], Int_t permutation_real[4]);
 
   ClassDef(Fitter_Test, 1);
 };

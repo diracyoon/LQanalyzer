@@ -32,10 +32,11 @@ class Kinematic_Fitter_Base
   virtual void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<snu::KJet>& a_jet_vector, const Bool_t a_b_tag[4])=0;
     
   Double_t Get_Chi2(const TString& type="BEST", const Int_t& index=-1);
-  Bool_t Get_Convergence(){ return chk_convergence; }
+  void Get_Chi2_Piece(Double_t chi2_piece_return[11],  const TString& type="BEST", const Int_t& index=-1);
+  Bool_t Get_Convergence_Checker(){ return chk_convergence; }
+  TLorentzVector Get_Fitted_Object(const Int_t& obj_index, const TString& type="BEST", const Int_t& index=-1);
   void Get_Parameters(Double_t parameter_return[NFIT], const TString& type="BEST", const Int_t& index=-1);
   void Get_Permutation(Int_t permuatation_return[4]);
-  Double_t Get_Top_Mass();
 
   Bool_t Pass_Goodness_Cut();
   Bool_t Pass_Goodness_Cut(const Double_t& cut_level);
@@ -63,7 +64,7 @@ class Kinematic_Fitter_Base
   static TLorentzVector measured_extra_jet;
   static TLorentzVector measured_met;
   static TLorentzVector measured_lepton;
-  TLorentzVector measured_jet[4];
+  static TLorentzVector measured_jet[4];
   static TLorentzVector reordered_jet[4];
   static TLorentzVector sum_extra_jet;
   static TLorentzVector measured_ue;
@@ -73,11 +74,26 @@ class Kinematic_Fitter_Base
   static Double_t error_lepton_pt;
   static Double_t error_ue;
 
+  static TLorentzVector fitting_jet[4];
+  static TLorentzVector fitting_lepton;
+  static TLorentzVector fitting_neutrino;
+
+  static Double_t f_chi2_piece[11];
+ 
   TLorentzVector best_fitted_jet[4];
   TLorentzVector fitted_jet[2][24][4];
 
+  TLorentzVector best_fitted_lepton;
+  TLorentzVector fitted_lepton[2][24];
+  
+  TLorentzVector best_fitted_neutrino;
+  TLorentzVector fitted_neutrino[2][24];
+
   Double_t best_chi2;
   Double_t chi2[2][24];
+  
+  Double_t best_chi2_piece[11];
+  Double_t chi2_piece[2][24][11];
   
   Int_t best_permutation[4];
   Int_t permutation[2][24][4];

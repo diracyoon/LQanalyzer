@@ -175,7 +175,7 @@ void CHToCB_M::ExecuteEvents() throw(LQError)
   fitter->Set(met_vector, muon_vector, jet_soft_coll, chk_btag);
   fitter->Fit();  
   
-  Bool_t chk_convergence = fitter->Get_Convergence();
+  Bool_t chk_convergence = fitter->Get_Convergence_Checker();
   if(chk_convergence==kFALSE) throw LQError("Fitter Fail", LQError::SkipEvent);  
 
   Double_t chi2 = fitter->Get_Chi2();
