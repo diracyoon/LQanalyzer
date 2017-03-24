@@ -55,6 +55,13 @@ class MCDataCorrections{
   void CheckFile(TFile* file);
   TDirectory*   getTemporaryDirectory(void) const;
 
+  void SetupDoubleEGTriggerSF(int ileg, std::string sleg);
+  double GetEffDEG1(snu::KElectron el);
+  double GetEffDEG2(snu::KElectron el);
+
+  double GetDoubleEGTriggerEff(std::vector<snu::KElectron> el);
+
+
 
   /// Lepton Scale Factors
   double ElectronScaleFactor( TString  elid, std::vector<snu::KElectron> el, int sys=0);
@@ -90,6 +97,8 @@ class MCDataCorrections{
 
   std::map<TString, TH2F*>  CorrectionMap;
   std::map<TString, TGraphAsymmErrors*>  CorrectionMapGraph;
+  std::map<float, std::vector<float>* > deg_etaptmap_leg1;
+  std::map<float, std::vector<float>* > deg_etaptmap_leg2;
   Reweight *reweightPU;
   RoccoR *rc;
 

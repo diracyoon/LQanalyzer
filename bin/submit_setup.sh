@@ -1481,14 +1481,7 @@ if [[ $job_data_lumi == "ALL" ]];
     fi
 
 fi
-if [[ $job_data_lumi == "CtoD" ]];
-    then
-    declare -a data_periods=("C" "D")
-fi
-if [[ $job_data_lumi == "BtoE" ]];
-    then
-    declare -a data_periods=("B" "C" "D" "E")
-fi
+
 if [[ $job_data_lumi == $catdatatag  ]];
 then
     if [[ $CATVERSION == "v8-0-6" ]];then
@@ -1511,45 +1504,76 @@ then
     fi
 fi
 
+if [[ $job_data_lumi == "CtoD" ]];
+    then
+    declare -a data_periods=("C" "D")
+    export catdatatag="CtoD"
+fi
+if [[ $job_data_lumi == "BtoE" ]];
+    then
+    declare -a data_periods=("B" "C" "D" "E")
+    export catdatatag="BtoE"
+fi
+
+
 export CATAnalyzerPeriod="None"
 
 if [[ $job_data_lumi == "B" ]];
     then
     declare -a data_periods=("B")
     export CATAnalyzerPeriod="B"
+    export catdatatag="B"
+	
 fi
 
 if [[ $job_data_lumi == "C" ]];
     then
     declare -a data_periods=("C")
     export CATAnalyzerPeriod="C"
+    export catdatatag="C"
 fi
 if [[ $job_data_lumi == "D" ]];
     then
     declare -a data_periods=("D")   
     export CATAnalyzerPeriod="D"                                                                                        
+    export catdatatag="D"
+
 fi 
 if [[ $job_data_lumi == "E" ]];
     then
     declare -a data_periods=("E")
     export CATAnalyzerPeriod="E"                                                                                        
+    export catdatatag="E"
+    
 fi
 if [[ $job_data_lumi == "F" ]];
     then
     declare -a data_periods=("F")
     export CATAnalyzerPeriod="F"                                                                                        
+    export catdatatag="F"
+
 fi
 if [[ $job_data_lumi == "G" ]];
     then
     declare -a data_periods=("G")
     export CATAnalyzerPeriod="G"
+    export catdatatag="G"
+	
 fi
 if [[ $job_data_lumi == "H" ]];
     then
     declare -a data_periods=("H_v2" "H_v3")
     export CATAnalyzerPeriod="H"
+    export catdatatag="H"
+	
 fi
-
+if [[ $job_data_lumi == "GH" ]];
+    then
+    declare -a data_periods=("G" "H_v2" "H_v3")
+    export CATAnalyzerPeriod="GH"
+    export catdatatag="GH"
+	
+fi
 
 ARG1=catdataperiods
 eval getlist_cv=(\${$ARG1[@]})

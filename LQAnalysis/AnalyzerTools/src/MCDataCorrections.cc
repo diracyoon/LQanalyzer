@@ -22,15 +22,21 @@ MCDataCorrections::MCDataCorrections() {
 
   string lqdir = getenv("LQANALYZER_DIR");
   rc =  new RoccoR(lqdir + "/data/rochester/80X/rcdata.2016.v3");  
+  
+  deg_etaptmap_leg1.clear();
+  deg_etaptmap_leg2.clear();
 
 
   CorrectionMap.clear();
   CorrectionMapGraph.clear();
   
   string pileupdir = getenv("PILEUPFILEDIR");
+  
+  SetupDoubleEGTriggerSF(1,  "/data/Trigger/80X/HWW_HLT_DoubleEleLegHighPt.txt");                                                                       
+  SetupDoubleEGTriggerSF(2,  "/data/Trigger/80X/HWW_HLT_DoubleEleLegLowPt.txt");      
 
   FillCorrectionHists();
-  //reweightPU = new Reweight((pileupdir + "/" + getenv("PUFILE")).c_str());       
+  reweightPU = new Reweight((pileupdir + "/DataPileUp_2016_Moriond.root").c_str());       
 
 }
 
@@ -43,9 +49,19 @@ MCDataCorrections::MCDataCorrections(bool isdata) {
 
 MCDataCorrections::~MCDataCorrections(){
   delete rc;
-  ///  delete reweightPU;
+  delete reweightPU;
+  for( std::map<float, std::vector<float>* >::iterator mit = deg_etaptmap_leg1.begin(); mit != deg_etaptmap_leg1.end(); mit++){
+    delete mit->second;
+  }
+  for( std::map<float, std::vector<float>* >::iterator mit = deg_etaptmap_leg2.begin();mit != deg_etaptmap_leg2.end();mit++){
+    delete mit->second;
+  }
   CorrectionMap.clear();
   CorrectionMapGraph.clear();
+  deg_etaptmap_leg1.clear();
+  deg_etaptmap_leg2.clear();
+
+
 }
 
 
@@ -60,6 +76,80 @@ void MCDataCorrections::SetIsData(bool isdata){
 void MCDataCorrections::PrintSummary(){
   //// summarize results
 }
+
+
+
+void  MCDataCorrections::SetupDoubleEGTriggerSF(int ileg, string sleg){
+
+  string analysisdir = getenv("LQANALYZER_DIR");
+
+  string file = analysisdir + sleg;
+  ifstream trigsf_file(file.c_str());
+
+  bool found_unc(false);
+  int nline(0);
+
+  string sline;
+  float etaboundary(-999.);
+  while(getline(trigsf_file,sline) ){
+    std::istringstream is( sline );
+    if(TString(sline).Contains("##")) continue;
+
+    float eta_min;
+    is >> eta_min;
+    if(etaboundary != eta_min) {
+      std::vector<float>* vpt = new std::vector<float>();
+      if(ileg==1)deg_etaptmap_leg1[eta_min] = vpt;
+      if(ileg==2)deg_etaptmap_leg2[eta_min] = vpt;
+    }
+    etaboundary = eta_min;
+
+    if(sline=="END") break;
+  }
+
+  std::map<float, std::vector<float>* >::iterator it;
+  etaboundary = -999.;
+  ifstream trigsf_file2(file.c_str());
+
+  while(getline(trigsf_file2,sline) ){
+
+    std::istringstream is( sline );
+    if(TString(sline).Contains("##")) continue;
+    float eta_min, eta_max, pt_min, pt_max, _sf, _sferr;
+    is >> eta_min;
+    
+    if(ileg==1)it = deg_etaptmap_leg1.find(eta_min);
+    if(ileg==2)it = deg_etaptmap_leg2.find(eta_min);
+    if(ileg==1){
+      if(it == deg_etaptmap_leg1.end()){
+	cout << "Error in map for double eg trigger SF" << endl;
+	exit(EXIT_FAILURE);
+      }
+    }
+    if(ileg==2){
+      if(it == deg_etaptmap_leg2.end()){
+        cout << "Error in map for double eg trigger SF" << endl;
+        exit(EXIT_FAILURE);
+      }
+    }
+    is >> eta_max;
+    is >> pt_min;
+    is >> pt_max;
+    is >> _sf;
+    is >> _sferr;
+
+
+    vector<float>* v_sf = it->second;
+    v_sf->push_back(_sf);
+    if(ileg==1)deg_etaptmap_leg1[eta_min] = v_sf;
+    if(ileg==2)deg_etaptmap_leg2[eta_min] = v_sf;
+
+    if(sline=="END") break;
+  }
+
+  return;
+}
+
 
 
 
@@ -250,10 +340,9 @@ double MCDataCorrections::MuonScaleFactorPeriodDependant(TString muid, vector<sn
 
 double MCDataCorrections::TriggerScaleFactor( vector<snu::KElectron> el, vector<snu::KMuon> mu,  TString trigname, int direction){
 
-
   if(k_period < 0) {
-    /// If k_period < 0 then using ALL data periods and use weighted SF                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-
+    /// If k_period < 0 then using ALL data periods and use weighted SF                                                                                                        
+    
     double lumi_periodB = 5.929001722;
     double lumi_periodC = 2.645968083;
     double lumi_periodD = 4.35344881;
@@ -327,8 +416,10 @@ double MCDataCorrections::TriggerScaleFactorPeriodDependant( vector<snu::KElectr
     return 1.;
   }
   if(trigname == "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"){
-    //https://indico.cern.ch/event/604912/contributions/2490014/attachments/1418899/2173461/170227_wertz.pdf
+    // AN-16-172 HWW analysis (uses POGTight ID)
+
     
+
   }
   if(trigname.Contains("HLT_IsoMu") || trigname.Contains("HLT_IsoTkMu")){
     if(mu.size()==1){
@@ -397,6 +488,128 @@ double MCDataCorrections::TriggerScaleFactorPeriodDependant( vector<snu::KElectr
 
 }
 
+double  MCDataCorrections::GetDoubleEGTriggerEff(vector<snu::KElectron> el){
+  
+  if(corr_isdata) return 1.;
+  
+
+
+  // https://twiki.cern.ch/twiki/pub/CMS/HWW2016TriggerAndIdIsoScaleFactorsResults/AN-16-172_temp.pdf
+  if(el.size() <  2.) return 0.;
+  if(el.size() == 2.){
+    double eff_tl = GetEffDEG1(el[0]) * GetEffDEG2(el[1]);
+    double eff_lt = GetEffDEG2(el[0]) * GetEffDEG1(el[1]);
+    
+    double evt_eff = eff_tl + (1. - eff_lt) * eff_tl;
+    return evt_eff;
+  }
+  
+  return 1.;
+}
+
+
+double MCDataCorrections::GetEffDEG1(snu::KElectron el){
+  float el_eta = el.Eta();
+  float el_pt = el.Pt();
+  if(el_pt < 10.) return 0.;
+  if(el_pt >= 100.) el_pt = 99.;
+
+  if(fabs(el_eta ) > 2.5) return 0.;
+
+  vector<float> etabins;
+  etabins.push_back(2.1);
+  etabins.push_back(1.6);
+  etabins.push_back(1.4);
+  etabins.push_back(0.8);
+  etabins.push_back(0.);
+  etabins.push_back(-0.8);
+  etabins.push_back(-1.4);
+  etabins.push_back(-1.6);
+  etabins.push_back(-2.1);
+  etabins.push_back(-2.5);
+
+  vector<float> ptbins;
+  ptbins.push_back(23.);
+  ptbins.push_back(24.);
+  ptbins.push_back(25.);
+  ptbins.push_back(26.);
+  ptbins.push_back(30.);
+  ptbins.push_back(35.);
+  ptbins.push_back(40.);
+  ptbins.push_back(45.);
+  ptbins.push_back(50.);
+  ptbins.push_back(100.);
+
+  for(int i = 0 ; i <  etabins.size(); i++){
+    if(el_eta  > etabins[i]) {
+      std::map<float, std::vector<float>* >::iterator it = deg_etaptmap_leg1.find(etabins[i]);
+
+      if(it == deg_etaptmap_leg1.end()){
+        cout << "Error in map for double 1 eg trigger SF" << endl;
+        exit(EXIT_FAILURE);
+      }
+      for(unsigned int ipt = 0; ipt < ptbins.size(); ipt++){
+        if(el_pt < ptbins[ipt]) return it->second->at(ipt);
+      }
+    }
+  }
+  return 1.;
+}
+
+
+
+double MCDataCorrections::GetEffDEG2(snu::KElectron el){
+  float el_eta = el.Eta();
+  float el_pt = el.Pt();
+  if(el_pt < 10.) return 0.;
+  if(el_pt >= 100.) el_pt = 99.;
+
+  if(fabs(el_eta ) > 2.5) return 0.;
+
+  vector<float> etabins;
+  etabins.push_back(2.1);
+  etabins.push_back(1.6);
+  etabins.push_back(1.4);
+  etabins.push_back(0.8);
+  etabins.push_back(0.);
+  etabins.push_back(-0.8);
+  etabins.push_back(-1.4);
+  etabins.push_back(-1.6);
+  etabins.push_back(-2.1);
+  etabins.push_back(-2.5);
+
+  vector<float> ptbins;
+  ptbins.push_back(23.);
+  ptbins.push_back(24.);
+  ptbins.push_back(25.);
+  ptbins.push_back(26.);
+  ptbins.push_back(30.);
+  ptbins.push_back(35.);
+  ptbins.push_back(40.);
+  ptbins.push_back(45.);
+  ptbins.push_back(50.);
+  ptbins.push_back(100.);
+
+  for(int i = 0 ; i <  etabins.size(); i++){
+    if(el_eta > etabins[i]) {
+      std::map<float, std::vector<float>* >::iterator it = deg_etaptmap_leg2.find(etabins[i]);
+      if(it == deg_etaptmap_leg2.end()){
+        cout << "Error in map for double eg 2 trigger SF" << endl;
+        exit(EXIT_FAILURE);
+      }
+      for(unsigned int ipt = 0; ipt < ptbins.size(); ipt++){
+        if(el_pt < ptbins[ipt]) return it->second->at(ipt);
+      }
+    }
+  }
+  return 1.;
+}
+
+
+
+
+
+
 double MCDataCorrections::ElectronScaleFactor( TString elid, vector<snu::KElectron> el, int sys){
   float sf= 1.;
   if(corr_isdata) return 1.;
@@ -443,13 +656,13 @@ double MCDataCorrections::ElectronRecoScaleFactor(vector<snu::KElectron> el){
 float MCDataCorrections::UserPileupWeight(snu::KEvent ev){
   
   if(corr_isdata) return 1.;
-  return 1.;
-  //return reweightPU->GetWeight(ev.nVertices(),TString(getenv("CATVERSION")));
+  return reweightPU->GetWeight(ev.nVertices(),TString(getenv("CATVERSION")));
 }
 
 
 float MCDataCorrections::PileupWeightByPeriod(snu::KEvent ev){
-
+  
+  if(k_period < 0) return CatPileupWeight(ev,0);
   return ev.PeriodPileUpWeight(k_period);
   
 }

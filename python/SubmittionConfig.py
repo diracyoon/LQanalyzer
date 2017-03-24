@@ -187,9 +187,8 @@ def GetNFiles( deftagger,defsample,defcycle,defskim):
     if not os.path.exists(path_jobpre+"/LQAnalyzer_rootfiles_for_analysis/CATAnalyzerStatistics/MasterFile_"+ os.getenv("CATVERSION")+".txt"):
         return 1000.
 
-
     nit=2
-    avg_time=1000.
+    avg_time=-999.
     checkdate = datetime.datetime.now()
     tmpday=int(checkdate.strftime("%d"))
     diff = datetime.timedelta(days=(tmpday+1))
@@ -215,7 +214,7 @@ def GetNFiles( deftagger,defsample,defcycle,defskim):
 
         for line in read_file_jobsummary:
             if os.getenv("USER") in line:
-                tmpsample=defsample
+                tmpsample=defsample+" skim"
                 if not "True" in line:
                     continue
                 if len(defsample) == 1:
@@ -244,7 +243,7 @@ def GetAverageTime( gettinglongest, deftagger,defsample,defcycle,defskim, rundeb
     
 
     nit=2
-    avg_time=1000.
+    avg_time=-999.
     checkdate = datetime.datetime.now()
     tmpday=int(checkdate.strftime("%d"))
     diff = datetime.timedelta(days=(tmpday+1))
@@ -279,7 +278,7 @@ def GetAverageTime( gettinglongest, deftagger,defsample,defcycle,defskim, rundeb
             if not "True" in line:
                 continue
             if os.getenv("USER") in line:
-                tmpsample=defsample
+                tmpsample=defsample+" skim"
                 if len(defsample) == 1:
                     tmpsample="_"+tmpsample+" "
                 if tmpsample in line and defskim in line and defcycle in line:
@@ -305,10 +304,18 @@ def GetAverageTime( gettinglongest, deftagger,defsample,defcycle,defskim, rundeb
         read_file_jobsummary.close()
           
         if gettime_jobtime < 1.:
+            if rundebug:
+                file_debug.write("gettime_jobtime = " + str(gettime_jobtime)+"\n")
             continue
         if gettime_nfiles < 1:
+            if rundebug:
+                file_debug.write("gettime_nfiles = " + str(gettime_nfiles)+"\n")
+                
             continue
         if gettime_njobs < 1:
+            if rundebug:
+                file_debug.write("gettime_njobs = " + str(gettime_njobs)+"\n")
+
             continue
 
         if gettinglongest:
@@ -325,7 +332,7 @@ def GetAverageTime( gettinglongest, deftagger,defsample,defcycle,defskim, rundeb
     if rundebug:
         file_debug.close()
 
-    return avg_time
+    return 1000.
     
 def FreeSpaceInQueue(jobqueue, deftagger):
 
@@ -489,7 +496,6 @@ def DetermineNjobs(jobsummary, nfiles_job, longestjobtime, ncores_job, deftagger
         file_debug.write("deftagger " + deftagger + " defsample = " + defsample + " defskim = " + defskim + " defqueue = " + defqueue + "\n")
     if not os.path.exists(path_jobpre+"/LQAnalyzer_rootfiles_for_analysis/CATAnalyzerStatistics/MasterFile_"+ os.getenv("CATVERSION")+".txt"):
         return 20
-   
        
     if ncores_job == 1:
         return 1
@@ -514,6 +520,8 @@ def DetermineNjobs(jobsummary, nfiles_job, longestjobtime, ncores_job, deftagger
         file_debug.write("FreeSpaceInQueue: number of free cores = " + str(nfreeqall) +"\n" )
 
 
+    if tmplongestjobtime == 1000.:
+        return 20
 
     #### longestjobtime is time[s] to run 1 job on batch system
 
@@ -670,7 +678,7 @@ def DetermineNjobs(jobsummary, nfiles_job, longestjobtime, ncores_job, deftagger
 
 
     #### If expectedjobtime is large then submit 10 or more jobs (as few as will be finihsed bfore longest jobs time)
-    if expectedjobtime > 10000.:
+    if expectedjobtime > 5000.:
         if not longestjobtime == expectedjobtime:
             for ix in range(10, 75):
                 if float(expectedjobtime) < (float(ix)*float(longestjobtime)):
@@ -686,28 +694,42 @@ def DetermineNjobs(jobsummary, nfiles_job, longestjobtime, ncores_job, deftagger
             return 50+isbusy_addon
 
     
-
-    for i in range(2, 15):
-        if rundebug:
-            file_debug.write("range " + str(i) + "\n")
+    elif expectedjobtime > 3000.:
+    
+        for i in range(5, 15):
+            if rundebug:
+                file_debug.write("range " + str(i) + "\n")
             #### IF job will run in less than 10 minutes run max number of jobs                                                                                                                                  
-        for ix in range(i, 15):
-            if (float(expectedjobtime) / float(ix)) < longestjobtime:
-                if rundebug:
-                    file_debug.write(str((float(expectedjobtime) / float(ix)))+"\n")
-                    file_debug.write("ix = " + str(ix) +"\n")
-                    file_debug.close()
-                return ix+isbusy_addon
+            for ix in range(i, 15):
+                if (float(expectedjobtime) / float(ix)) < longestjobtime:
+                    if rundebug:
+                        file_debug.write(str((float(expectedjobtime) / float(ix)))+"\n")
+                        file_debug.write("ix = " + str(ix) +"\n")
+                        file_debug.close()
+                    return ix+isbusy_addon
 
+    elif expectedjobtime > 600.:
+
+        for i in range(2, 10):
+            if rundebug:
+                file_debug.write("range " + str(i) + "\n")
+            #### IF job will run in less than 10 minutes run max number of jobs                                                                                                                                                                                
+            for ix in range(i, 15):
+                if (float(expectedjobtime) / float(ix)) < longestjobtime:
+                    if rundebug:
+                        file_debug.write(str((float(expectedjobtime) / float(ix)))+"\n")
+                        file_debug.write("ix = " + str(ix) +"\n")
+                        file_debug.close()
+                    return ix+isbusy_addon
+
+    else:                
+        if rundebug:
+            file_debug.close()
+        return 2
     if rundebug:
         file_debug.write("After expectedtime \n")
     
 
-    ##### if < 600 run 2 jobs so job will last 600
-    if expectedjobtime < 600:
-        if rundebug:
-            file_debug.close()
-        return 2
 
     if expectedjobtime > 1.:
         if not longestjobtime == expectedjobtime:

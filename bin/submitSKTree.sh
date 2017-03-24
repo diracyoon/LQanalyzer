@@ -790,7 +790,7 @@ if [[  $job_cycle != "SKTreeMaker"* ]];
     fi
     if [[ $job_data_lumi  == $catdatatag ]]
 	then
-	dir_tag="period"+$catdatatag
+	dir_tag="period"$catdatatag"/"
     fi
 fi
 
@@ -1088,7 +1088,23 @@ if [[ $runMC  == "true" ]];
 	    then
 	    echo $data_lumi_output_message
         fi
+    elif [[ $job_data_lumi == "GH" ]]
+        then
+	job_data_lumi_exists=true
 	
+        if [[ $job_cycle != *"SKTreeMaker"* ]];
+            then
+            echo $data_lumi_output_message
+        fi
+    elif [[ $job_data_lumi == "H" ]]
+        then
+	job_data_lumi_exists=true
+
+        if [[ $job_cycle != *"SKTreeMaker"* ]];
+            then
+            echo $data_lumi_output_message
+        fi
+
     elif [[ $job_data_lumi == "ALL" ]]
 	then
 	job_data_lumi_exists=true

@@ -138,7 +138,9 @@ AnalyzerCore::AnalyzerCore() : LQCycleBase(), n_cutflowcuts(0), MCweight(-999.),
   
   cout <<  "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
 
+
 }
+
 
 
 void AnalyzerCore::setTDRStyle() {
@@ -274,6 +276,7 @@ void AnalyzerCore::SetupLuminosityMap(bool initialsetup, TString forceperiod){
     else if(singleperiod=="F")lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_276315_276811.txt";
     else if(singleperiod=="G")lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_280919_284044.txt";
     else if(singleperiod=="H")lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_278820_280385.txt";
+    else if(singleperiod=="GH")lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_280919_280385.txt";
     else {  cerr << "Wrong period setting in SetupLuminosityMap"<< endl;  exit(EXIT_FAILURE);}
   }
   ifstream triglumi2016(lumitriggerpath.Data());
@@ -463,7 +466,6 @@ int AnalyzerCore::GetDataPeriod(){
   else  if(eventbase->GetEvent().RunNumber() <= 277420) return 4; 
   else  if(eventbase->GetEvent().RunNumber() <= 278808) return 5; 
   else  if(eventbase->GetEvent().RunNumber() <= 280385) return 6; 
-  else  if(eventbase->GetEvent().RunNumber() <= 280385) return 7; 
   else  if(eventbase->GetEvent().RunNumber() <= 284044) return 7; 
   else return -1;
 }
@@ -1265,6 +1267,7 @@ float AnalyzerCore::WeightByTrigger(TString triggername, float tlumi){
 
   return 1.;
 }
+
 
 
 void AnalyzerCore::AddTriggerToList(TString triggername){

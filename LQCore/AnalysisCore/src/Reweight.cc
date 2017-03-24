@@ -34,8 +34,8 @@ Reweight::Reweight(TString filename){
   if(filename.Contains("BtoG")){
     fileMC_   = new TFile("/data1/LQAnalyzer_rootfiles_for_analysis/CATAnalysis2016/Pileup/MCPileUp2016_802.root", "READ");
   }
-  if(filename.Contains("BtoH")){
-    fileMC_   = new TFile("/data1/LQAnalyzer_rootfiles_for_analysis/CATAnalysis2016/Pileup/MCPileUp2016_802.root", "READ");
+  if(filename.Contains("Moriond")){
+    fileMC_   = new TFile("/data1/LQAnalyzer_rootfiles_for_analysis/CATAnalysis2016/Pileup/MCPileUp2016Moriond.root", "READ");
   }
 
 
@@ -50,7 +50,7 @@ Reweight::Reweight(TString filename){
     h_Data_ = dynamic_cast<TH1D*>((fileData_->Get("Nvtx_nocut_data"))->Clone());;
   }
 
-  if(filename.Contains("BtoH")){
+  if(filename.Contains("Moriond")){
     h_Data_ = dynamic_cast<TH1D*>((fileData_->Get("Nvtx_nocut_data"))->Clone());;
   }
 

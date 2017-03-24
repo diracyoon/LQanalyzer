@@ -106,8 +106,10 @@ SignalPlotsEE::SignalPlotsEE(TString name): StdPlots(name){
   
   /// MET plots
   map_sig["h_PFMET"]                  = SetupHist("h_PFMET_"               + name,"Missing Et",100,0.0,500.0);
+  map_sig["h_PFMET_t1"]                  = SetupHist("h_PFMET_t1_"               + name,"Missing Et",100,0.0,500.0);
   map_sig["h_PFMET_ST2"]                  = SetupHist("h_PFMET_ST2_"               + name,"Missing Et",100,0.0,200.0, "E_{T}/S^{2}_{T}");
   map_sig["h_PFMET_phi"]              = SetupHist("h_PFMET_phi_"           + name,"Missing Et",100,-3.2,3.2);
+  map_sig["h_PFMET_phi_t1"]              = SetupHist("h_PFMET_phi_t1_"           + name,"Missing Et",100,-3.2,3.2);
 
 
   map_sig["h_nVertices"]              = SetupHist("h_nVertices_"         + name,"number of even vertices",60,0.0,60.0);
@@ -392,7 +394,9 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
   if(debug)cout<< "Plotting [5] " << endl;
 
   Fill("h_PFMET",ev.PFMET(), weight);
+  Fill("h_PFMET_t1",ev.PFMETType1(), weight);
   Fill("h_PFMET_phi",ev.METPhi(snu::KEvent::pfmet), weight);
+  Fill("h_PFMET_phi_t1",ev.PFMETType1Phi(), weight);
   Fill("h_nVertices", ev.nVertices(), weight);
   
   

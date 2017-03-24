@@ -80,6 +80,7 @@ void HNDiElectron::InitialiseAnalysis() throw( LQError ) {
    }
    else if(functionality == HNDiElectron::VALIDATION){
      MakeCleverHistograms(sighist_ee,"OSDiElectron");
+     MakeCleverHistograms(sighist_ee,"OSDiElectronDiJet");
      MakeCleverHistograms(sighist_ee,"SSDiElectron");
      MakeCleverHistograms(sighist_ee,"SingleElectron_Wregion");
    }
@@ -103,7 +104,46 @@ void HNDiElectron::ExecuteEvents()throw( LQError ){
   if(!isData)weight*= MCweight;
   
   if (!eventbase->GetEvent().HasGoodPrimaryVertex()) return;
+  
+  
   if(!PassMETFilter()) return;     /// Initial event cuts :                                                                                                                                                                                                                 
+  if(true){
+    TString analysis_trigger="HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v";
+    std::vector<TString> triggerslist;
+    triggerslist.push_back(analysis_trigger);
+    if(PassTrigger(analysis_trigger)){
+      std::vector<snu::KElectron> electronTightColl=GetElectrons(TString("ELECTRON_POG_TIGHT"),15., 2.5);
+          
+      if(OppositeCharge(electronTightColl)){
+	if(electronTightColl.at(0).Pt() > 30. && electronTightColl.at(1).Pt() > 20.){
+	  if(GetDiLepMass(electronTightColl) < 120. && GetDiLepMass(electronTightColl)  > 60. ){
+	    if(isData) FillHist("Nvtx_nocut_data",  eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
+	    else  FillHist("Nvtx_nocut_mc",  eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
+	    if(isData) FillHist("Nint_nocut_data", eventbase->GetEvent().PileUpInteractionsTrue(),weight, 0. , 75., 75);
+	    if(isData) FillHist("Nint_nocut_mc", eventbase->GetEvent().PileUpInteractionsTrue(),weight, 0. , 75., 75);
+	  }
+	}
+      }
+    }
+    return;
+  }
+  FillHist("PFMet_uncleaned" , eventbase->GetEvent().PFMET(), MCweight,  0. , 1000., 1000);
+
+  FillHist("PFMet" , eventbase->GetEvent().PFMET(), MCweight,  0. , 1000., 1000);
+  FillHist("PFMetPhi" , eventbase->GetEvent().METPhi(snu::KEvent::pfmet), MCweight,  -3. , 3., 100);
+  FillHist("PFMet_t1" , eventbase->GetEvent().PFMETType1(), MCweight,  0. , 1000., 1000);
+  FillHist("PFMetPhi_t1" , eventbase->GetEvent().PFMETType1Phi(), MCweight,  -3. , 3., 100);
+  FillHist("PFMet_unsmeared" , eventbase->GetEvent().PFMETUnSmearedType1Pt(), MCweight,  0. , 1000., 1000);
+  FillHist("PFMetPhi_unsmeared" , eventbase->GetEvent().PFMETUnSmearedType1Phi(), MCweight,  -3. , 3., 100);
+
+  if(eventbase->GetEvent().PFMET() >  70.){
+    FillHist("PFMet_highmet" , eventbase->GetEvent().PFMET(), MCweight,  0. , 1000., 1000);
+    FillHist("PFMetPhi_highmet" , eventbase->GetEvent().METPhi(snu::KEvent::pfmet), MCweight,  -3. , 3., 100);
+    FillHist("PFMet_t1_highmet" , eventbase->GetEvent().PFMETType1(), MCweight,  0. , 1000., 1000);
+    FillHist("PFMetPhi_t1_highmet" , eventbase->GetEvent().PFMETType1Phi(), MCweight,  -3. , 3., 100);
+    FillHist("PFMet_unsmeared_highmet" , eventbase->GetEvent().PFMETUnSmearedType1Pt(), MCweight,  0. , 1000., 1000);
+    FillHist("PFMetPhi_unsmeared_highmet" , eventbase->GetEvent().PFMETUnSmearedType1Phi(), MCweight,  -3. , 3., 100);
+  }
 
 
   std::vector<snu::KElectron> electronVetoColl=GetElectrons("ELECTRON_HN_VETO");
@@ -127,7 +167,8 @@ void HNDiElectron::ExecuteEvents()throw( LQError ){
     
     if(_diel){
       /// e+e-
-      TString analysis_trigger="HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v";
+      //      TString analysis_trigger="HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v";
+      TString analysis_trigger="HLT_Ele27_WPTight_Gsf_v";
       /// Trigger List (unprescaled)
       
       
@@ -136,12 +177,15 @@ void HNDiElectron::ExecuteEvents()throw( LQError ){
       
       if(PassTrigger(analysis_trigger)){
 	counter("Trigger_diel",weight);
+
+	trigger_sf =  mcdata_correction->TriggerScaleFactor(electronTightColl, muonVetoColl, analysis_trigger);
+
 	puweight=mcdata_correction->PileupWeightByPeriod(eventbase->GetEvent());
-	
+
 	if(electronTightColl.size() == 2){
 	  counter("pog_diel",weight);
 	  
-	  if(!(muonVetoColl.size() > 0 && electronVetoColl.size() > 2)){
+	  if(!(muonVetoColl.size() > 0 ||  electronVetoColl.size() > 2)){
 	    counter("vetolepton_diel",weight);
 	    
 	    if(!isData){
@@ -149,28 +193,33 @@ void HNDiElectron::ExecuteEvents()throw( LQError ){
 	      trigger_ps= WeightByTrigger(analysis_trigger, TargetLumi)  ;
 	      reco_weight = mcdata_correction->ElectronRecoScaleFactor(electronTightColl);
 	      ev_weight = weight * trigger_sf * id_iso_sf * reco_weight * puweight*trigger_ps;
-	      
 	    }
 	    
 	    if(OppositeCharge(electronTightColl)){
 	      counter("os_diel",weight);
 	      
-	      if(electronTightColl.at(0).Pt() > 25.){
+	      if(electronTightColl.at(0).Pt() > 30. && electronTightColl.at(1).Pt() > 20.){
 		if(GetDiLepMass(electronTightColl) < 120. && GetDiLepMass(electronTightColl)  > 60. ){
 		  
-		  FillHist("zpeak_ee_nopurw", GetDiLepMass(electronTightColl), weight*id_iso_sf*trigger_sf, 0., 200.,400);
-		  FillHist("zpeak_ee_purw", GetDiLepMass(electronTightColl),    weight*id_iso_sf*trigger_sf*puweight, 0., 200.,400);
+		  FillHist("zpeak_ee_w1", GetDiLepMass(electronTightColl), weight*trigger_ps, 0., 200.,400);
+		  FillHist("zpeak_ee_w2", GetDiLepMass(electronTightColl), weight*trigger_sf*trigger_ps, 0., 200.,400);
+		  FillHist("zpeak_ee_w3", GetDiLepMass(electronTightColl),    weight*id_iso_sf*trigger_sf*trigger_ps, 0., 200.,400);
+		  FillHist("zpeak_ee_w4", GetDiLepMass(electronTightColl),    weight*id_iso_sf*trigger_sf*puweight*trigger_ps, 0., 200.,400);
+		  FillHist("zpeak_ee_w5", GetDiLepMass(electronTightColl),    weight*id_iso_sf*trigger_sf*puweight*trigger_ps*reco_weight, 0., 200.,400);
 		  
 		  
 		}
 		FillCLHist(sighist_ee, "OSDiElectron", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
-		
+		if(jets.size() > 1)                 FillCLHist(sighist_ee, "OSDiElectronDiJet", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+
 	      } // pt cuts
 	    }// e+e-
 	    else{
 	      counter("ss_diel",weight);
+              if(electronTightColl.at(0).Pt() > 30. && electronTightColl.at(1).Pt() > 15.){
 	      
-	      FillCLHist(sighist_ee, "SSDiElectron", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+		FillCLHist(sighist_ee, "SSDiElectron", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+	      }
 	    }
 	  } // veto leptons 
 	}// 2 el

@@ -439,8 +439,9 @@ if os.path.exists(path_full_sample_list):
             input = raw_input("If Yes : Type Y and Enter. (not typing Y will not update the file: ")
             if input == "Y":
                 print "replacing " + samplelist + " with  " + newsamplelist
+                os.chmod(newsamplelist, 0777)
                 os.system("cp " + newsamplelist + " " + samplelist)
-                os.system("chmod 777 " + samplelist)
+                os.chmod(samplelist, 0777)
                 print "replacing " + path_full_sample_list + " with " + path_full_sample_list_user
                 os.system("cp " + path_full_sample_list_user + " " + path_full_sample_list)
                 os.system("chmod 777 " + path_full_sample_list)
@@ -484,6 +485,9 @@ if os.path.exists(path_full_sample_list):
                 os.system("bash " + os.getenv("LQANALYZER_DIR")+"/bin/submitSKTree.sh -M True -a SKTreeMaker -list new_list -c " + catversion + " -m ' first time sample is made in current catversion'")
                 
             os.system("mv " +  os.getenv("LQANALYZER_DIR")+"/LQRun/txt/list_user_mctmp.sh " + os.getenv("LQANALYZER_DIR")+"/LQRun/txt/list_user_mc.sh")
+
+        perm_samplelist=os.getenv("LQANALYZER_DATASETFILE_DIR") +"/datasets_snu_CAT_mc_"+catversion+".txt"
+        os.chmod(perm_samplelist, 0777)
 
         if len(newxsec_list) > 0:
             EmailNewXsecList(catversion,path_newfile2)

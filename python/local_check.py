@@ -76,6 +76,7 @@ if not os.path.exists(tag_dir):
     os.system("cp " + localfiledir + "/Fake/*.root " + snufakefiledir)
     MakeDirectory(snutriggerfiledir)
     os.system("cp " + localfiledir + "/Trigger/*.root " + snutriggerfiledir)
+    os.system("cp " + localfiledir + "/Trigger/*.txt " + snutriggerfiledir)
     MakeDirectory(snupileupfiledir)
     os.system("cp " + localfiledir + "/Pileup/*.root "+ snupileupfiledir)
     MakeDirectory(snuidfiledir)
