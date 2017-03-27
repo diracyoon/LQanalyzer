@@ -21,11 +21,10 @@ map<TString, TString>  map_cv;
 map<TString, Double_t> map_lumi;
 map<TString, Double_t> neventmap;
 map<TString, Double_t> n_w_eventmap;
-void GetEffectiveLuminosityPrivateSamples(){
-  
 
+void GetEffectiveLuminosityPrivateSamples()
+{
   TString version="";;
-   
   
   map_cv.clear();
   map_lumi.clear();
@@ -43,7 +42,14 @@ void GetEffectiveLuminosityPrivateSamples(){
   //xsmap["13TeV_HN60_mumumu_width_AUTO_VmuN_0p1"] = 3.416;
   //xsmap["13TeV_HN150_mumumu_width_AUTO_VmuN_0p1"] = 0.0004561;
   //xsmap["13TeV_HN700_mumumu_width_AUTO_VmuN_0p1"] = 0.000002644;
-  xsmap["CHToCB_M125_madgraph_13TeV_2016"] = 1;
+  xsmap["CHToCB_M090_madgraph_13TeV_2016"] = 1;
+  xsmap["CHToCB_M100_madgraph_13TeV_2016"] = 1;
+  xsmap["CHToCB_M110_madgraph_13TeV_2016"] = 1;
+  xsmap["CHToCB_M120_madgraph_13TeV_2016"] = 1;
+  //xsmap["CHToCB_M125_madgraph_13TeV_2016"] = 1;
+  xsmap["CHToCB_M130_madgraph_13TeV_2016"] = 1;
+  xsmap["CHToCB_M140_madgraph_13TeV_2016"] = 1;
+  xsmap["CHToCB_M150_madgraph_13TeV_2016"] = 1;
 
   map<TString, TString> lqmap;
   //  key=  "Name of FlatCatuple dir"  = name to use in sktree -i <SAMPLENAME> 
@@ -52,8 +58,15 @@ void GetEffectiveLuminosityPrivateSamples(){
   // lqmap["13TeV_HN60_mumumu_width_AUTO_VmuN_0p1"] ="HN60_mumumu_VmuN_0p1";
   // lqmap["13TeV_HN150_mumumu_width_AUTO_VmuN_0p1"] ="HN150_mumumu_VmuN_0p1";
   // lqmap["13TeV_HN700_mumumu_width_AUTO_VmuN_0p1"] ="HN700_mumumu_VmuN_0p1";
-  lqmap["CHToCB_M125_madgraph_13TeV_2016"] = "CHToCB_M125_madgraph_13TeV_2016";
-
+  lqmap["CHToCB_M090_madgraph_13TeV_2016"] = "CHToCB_M090_madgraph_13TeV_2016";
+  lqmap["CHToCB_M100_madgraph_13TeV_2016"] = "CHToCB_M100_madgraph_13TeV_2016";
+  lqmap["CHToCB_M110_madgraph_13TeV_2016"] = "CHToCB_M110_madgraph_13TeV_2016";
+  lqmap["CHToCB_M120_madgraph_13TeV_2016"] = "CHToCB_M120_madgraph_13TeV_2016";
+  //lqmap["CHToCB_M125_madgraph_13TeV_2016"] = "CHToCB_M125_madgraph_13TeV_2016";
+  lqmap["CHToCB_M130_madgraph_13TeV_2016"] = "CHToCB_M130_madgraph_13TeV_2016";
+  lqmap["CHToCB_M140_madgraph_13TeV_2016"] = "CHToCB_M140_madgraph_13TeV_2016";
+  lqmap["CHToCB_M150_madgraph_13TeV_2016"] = "CHToCB_M150_madgraph_13TeV_2016";
+  
   //// Version must be the version in the directoy name of your flat catuples 
   map<TString, TString> catversion_map;
   
@@ -62,66 +75,81 @@ void GetEffectiveLuminosityPrivateSamples(){
   // catversion_map["13TeV_HN60_mumumu_width_AUTO_VmuN_0p1"] = "v7-6-4";
   // catversion_map["13TeV_HN150_mumumu_width_AUTO_VmuN_0p1"] = "v7-6-4";
   // catversion_map["13TeV_HN700_mumumu_width_AUTO_VmuN_0p1"] = "v7-6-4";
-  catversion_map["CHToCB_M125_madgraph_13TeV_2016"] = "v8-0-6";
-  
-  for(std::map<TString, Double_t>::iterator mit =xsmap.begin(); mit != xsmap.end();++mit){
-    std::map<TString, TString>::iterator mitv = catversion_map.find(mit->first);
-    if(mitv== catversion_map.end()) {cout << "Error in naming datasets in map" << endl; return;}
-    version= mitv->second;
-    
-    TString dir = "ls /data2/DATA/cattoflat/MC/" + version + "/"+ mit->first + "/*.root > inputlist_private.txt";
-    
-    bool use_sum_genweight(false);
-    if(mit->first.Contains("amcatnlo")) use_sum_genweight=true;
-    else use_sum_genweight=false;
-    
-    system(dir.Data());
-    
-    
-    std::ifstream fin("inputlist_private.txt");
-    std::string word;
-    
-    float number_events_processed(0.);
-    float number_events_passed(0.);
-    float sum_of_weights(0.);
-    
-    if(!use_sum_genweight) {
-      while ( fin >> word ) {
-	number_events_processed+= GetEventsProcessed(word);
-	number_events_passed+= GetEventsPassed(word);
-      }
-      sum_of_weights = number_events_processed;
-      if(number_events_processed ==0 ) {
-	cout << "Problem with input files. Are they in the correct local path?" << endl;
-        cout <<"FlatCatuples: /data2/DATA/cattoflat/MC/CATVERSION/" << endl;
-        cout <<"SKTrees: Lepton Skim : /data2/CatNtuples/CATVERSION/SKTrees/MC/" << endl;
-        cout <<"SKTrees:DiLepton Skim : /data2/CatNtuples/CATVERSION/SKTrees/MCDiLep/" << endl;
-        return;
-      }
-    }
-    else{
-      std::vector<std::string> filelist;
-      while ( fin >> word ) {
-	number_events_processed+= GetEventsProcessed(word);
-        number_events_passed+= GetEventsPassed(word);
-	filelist.push_back(word);
-      }
-      if(number_events_processed ==0 ) {
-	cout << "Problem with input files. Are they in the correct local path?" << endl;
-	cout <<"FlatCatuples: /data2/DATA/cattoflat/MC/CATVERSION/" << endl;
-	cout <<"SKTrees: Lepton Skim : /data2/CatNtuples/CATVERSION/SKTrees/MC/" << endl;
-	cout <<"SKTrees:DiLepton Skim : /data2/CatNtuples/CATVERSION/SKTrees/MCDiLep/" << endl;
-	return;
-      }
-      TString command1 = "rm -r "+ mit->first;
-      TString command2 = "mkdir "+ mit->first;
-      TString command2b = "mkdir "+ mit->first + "/output/";
+  catversion_map["CHToCB_M090_madgraph_13TeV_2016"] = "v8-0-6";
+  catversion_map["CHToCB_M100_madgraph_13TeV_2016"] = "v8-0-6";
+  catversion_map["CHToCB_M110_madgraph_13TeV_2016"] = "v8-0-6";
+  catversion_map["CHToCB_M120_madgraph_13TeV_2016"] = "v8-0-6";
+  //catversion_map["CHToCB_M125_madgraph_13TeV_2016"] = "v8-0-6";
+  catversion_map["CHToCB_M130_madgraph_13TeV_2016"] = "v8-0-6";
+  catversion_map["CHToCB_M140_madgraph_13TeV_2016"] = "v8-0-6";
+  catversion_map["CHToCB_M150_madgraph_13TeV_2016"] = "v8-0-6";
 
-      system(command1.Data());
-      system(command2.Data());
-      system(command2b.Data());
+  for(std::map<TString, Double_t>::iterator mit =xsmap.begin(); mit != xsmap.end();++mit)
+    {
+      std::map<TString, TString>::iterator mitv = catversion_map.find(mit->first);
+      if(mitv== catversion_map.end()){cout << "Error in naming datasets in map" << endl; return;}
+      version= mitv->second;
+    
+      TString dir = "ls /data2/DATA/cattoflat/MC/" + version + "/"+ mit->first + "/*.root > inputlist_private.txt";
+    
+      bool use_sum_genweight(false);
+      if(mit->first.Contains("amcatnlo")) use_sum_genweight=true;
+      else use_sum_genweight=false;
       
-      for(unsigned int i=0; i < filelist.size(); i++){
+      system(dir.Data());
+      
+      
+      std::ifstream fin("inputlist_private.txt");
+      std::string word;
+      
+      float number_events_processed(0.);
+      float number_events_passed(0.);
+      float sum_of_weights(0.);
+      
+      if(!use_sum_genweight)
+	{
+	while ( fin >> word )
+	  {
+	    number_events_processed+= GetEventsProcessed(word);
+	    number_events_passed+= GetEventsPassed(word);
+	  }
+	sum_of_weights = number_events_processed;
+	if(number_events_processed ==0 )
+	  {
+	    cout << "Problem with input files. Are they in the correct local path?" << endl;
+	    cout <<"FlatCatuples: /data2/DATA/cattoflat/MC/CATVERSION/" << endl;
+	    cout <<"SKTrees: Lepton Skim : /data2/CatNtuples/CATVERSION/SKTrees/MC/" << endl;
+	    cout <<"SKTrees:DiLepton Skim : /data2/CatNtuples/CATVERSION/SKTrees/MCDiLep/" << endl;
+	    return;
+	  }
+	}
+      else
+	{
+	  std::vector<std::string> filelist;
+	  while ( fin >> word ) 
+	    {
+	      number_events_processed+= GetEventsProcessed(word);
+	      number_events_passed+= GetEventsPassed(word);
+	      filelist.push_back(word);
+	    }
+	  if(number_events_processed ==0 )
+	    {
+	      cout << "Problem with input files. Are they in the correct local path?" << endl;
+	      cout <<"FlatCatuples: /data2/DATA/cattoflat/MC/CATVERSION/" << endl;
+	      cout <<"SKTrees: Lepton Skim : /data2/CatNtuples/CATVERSION/SKTrees/MC/" << endl;
+	      cout <<"SKTrees:DiLepton Skim : /data2/CatNtuples/CATVERSION/SKTrees/MCDiLep/" << endl;
+	      return;
+	    }
+	  TString command1 = "rm -r "+ mit->first;
+	  TString command2 = "mkdir "+ mit->first;
+	  TString command2b = "mkdir "+ mit->first + "/output/";
+	  
+	  system(command1.Data());
+	  system(command2.Data());
+	  system(command2b.Data());
+	  
+	  for(unsigned int i=0; i < filelist.size(); i++)
+	    {
       std::string istr;
       std::stringstream out;
       out << i;
