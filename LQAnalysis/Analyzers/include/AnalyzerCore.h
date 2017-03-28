@@ -340,6 +340,7 @@ class AnalyzerCore : public LQCycleBase {
   std::vector<snu::KMuon> GetHNTriMuonsByLooseRelIso(double LooseRelIsoMax, bool keepfake);
   void PrintTruth();
 
-  
+  //private methods
+  static bool Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1);
 };
 #endif

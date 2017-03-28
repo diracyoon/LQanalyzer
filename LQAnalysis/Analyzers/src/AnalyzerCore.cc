@@ -2742,6 +2742,9 @@ TNtupleD* AnalyzerCore::GetNtp(TString hname){
   return n;
 }
 
-
+bool AnalyzerCore::Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1)
+{
+  return jet0.Pt() > jet1.Pt();
+}
 
 
