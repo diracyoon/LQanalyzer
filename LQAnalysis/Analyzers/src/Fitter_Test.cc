@@ -181,9 +181,9 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
       }      
     }//for loop over ntruth
   
-  // cout << endl;
-  // for(Int_t i=0; i<10; i++){ cout << gen_truth_index[i] << "\t" << gen_truth[i].PdgId() << endl; }
-  // cout << endl;
+  //cout << endl;
+  //for(Int_t i=0; i<10; i++){ cout << gen_truth_index[i] << "\t" << gen_truth[i].PdgId() << endl; }
+  //cout << endl;
   
   //Check one lepton decay and one hadronic decay
   Bool_t chk_leptonic_decay_0 = kFALSE;
@@ -195,9 +195,12 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   if((chk_leptonic_decay_0==kTRUE && chk_leptonic_decay_1==kTRUE) || (chk_leptonic_decay_0==kFALSE && chk_leptonic_decay_1==kFALSE)) throw LQError("Fail truth cuts", LQError::SkipEvent);
   FillCutFlow("Truth", weight);
  
+  //cout << "pass 0 " << endl;
+
   //constuct gen parton array for easy handling
   snu::KTruth four_gen_truth[4];
   snu::KTruth gen_neutrino;
+  snu::KTruth gen_lepton;
   if(chk_leptonic_decay_0==kFALSE)
     {
       four_gen_truth[0] = gen_truth[A_BOTTOM];
@@ -205,8 +208,16 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
       four_gen_truth[2] = gen_truth[D_0_0];
       four_gen_truth[3] = gen_truth[D_0_1];
       
-      if(gen_truth[D_1_0].PdgId()==11 || gen_truth[D_1_0].PdgId()==13) gen_neutrino = gen_truth[D_1_1];
-      else gen_neutrino = gen_truth[D_1_0];
+      if(gen_truth[D_1_0].PdgId()==11 || gen_truth[D_1_0].PdgId()==13)
+	{
+	  gen_neutrino = gen_truth[D_1_1];
+	  gen_lepton = gen_truth[D_1_0];
+	}
+      else
+	{
+	  gen_neutrino = gen_truth[D_1_0];
+	  gen_lepton = gen_truth[D_1_1];
+	}
     }
   else
     {
@@ -215,8 +226,16 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
       four_gen_truth[2] = gen_truth[D_1_0];
       four_gen_truth[3] = gen_truth[D_1_1];
 
-      if(gen_truth[D_0_0].PdgId()==-11 || gen_truth[D_0_0].PdgId()==-13) gen_neutrino = gen_truth[D_0_1];
-      else gen_neutrino = gen_truth[D_0_0];
+      if(gen_truth[D_0_0].PdgId()==-11 || gen_truth[D_0_0].PdgId()==-13)
+	{
+	  gen_neutrino = gen_truth[D_0_1];
+	  gen_lepton = gen_truth[D_0_0];
+	}
+      else
+	{
+	  gen_neutrino = gen_truth[D_0_0];
+	  gen_lepton = gen_truth[D_0_1];
+	}
     }
   
   //Vertex cut
@@ -253,12 +272,10 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   /*Muon*/
   std::vector<snu::KMuon> muon_tight_coll;
   muon_tight_coll = GetMuons(BaseSelection::MUON_POG_TIGHT);
-  //eventbase->GetMuonSel()->SelectMuons(muon_tight_coll, BaseSelection::MUON_POG_TIGHT);
-
+  
   std::vector<snu::KMuon> muon_veto_coll;
   muon_veto_coll = GetMuons(BaseSelection::MUON_POG_LOOSE);
-  //eventbase->GetMuonSel()->SelectMuons(muon_veto_coll, BaseSelection::MUON_POG_LOOSE);
-
+  
   //tight muon==1 cut
   if(muon_tight_coll.size()!=1) throw LQError("Fails tight muon==1 cuts", LQError::SkipEvent);
   FillCutFlow("OneTightMuon", weight);
@@ -292,7 +309,7 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
     {
       Double_t cvs = jet_hard_coll.at(i).BJetTaggerValue(snu::KJet::CSVv2);
 
-      if(cvs>CSV_THRESHOLD_MEDIUM)
+      if(cvs>CSV_THRESHOLD_TIGHT)
 	{
 	  chk_btag[i] = kTRUE;
            nbjet_hard++;
@@ -304,9 +321,18 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
 
   //jet match, mathch leading four jets and parton
   Int_t permutation_real[4] = {0, 0, 0, 0};
-  Bool_t chk_match = Parton_Jet_Match(four_gen_truth, jet_hard_coll, chk_btag, permutation_real);
+  Bool_t chk_match = Parton_Jet_Match(four_gen_truth, jet_soft_coll, permutation_real);
   //if(chk_match==kFALSE) throw LQError("Fails jet match", LQError::SkipEvent);
-  FillCutFlow("JetMatch", weight);
+  FillCutFlow("JetMatchAll", weight);
+  
+  Bool_t chk_match_2 = kTRUE;
+  for(Int_t i=0; i<4; i++)
+    {
+      //cout << permutation_real[i] << endl;
+      if(permutation_real[i]>3) chk_match_2 = kFALSE;
+    }
+  //if(chk_match_2==kFALSE) throw LQError("Fails jet match", LQError::SkipEvent);
+  FillCutFlow("JetMatchLeading", weight);
   
   /*Fitter*/
   fitter->Set(met_vector, muon_vector, jet_soft_coll, chk_btag);
@@ -491,55 +517,105 @@ Double_t Fitter_Test::Distance(const snu::KTruth& truth, const snu::KJet& jet)
 
 //////////
 
-Bool_t Fitter_Test::Parton_Jet_Match(const snu::KTruth gen_truth[], const vector<snu::KJet>& jet_vector, const Bool_t chk_btag[], Int_t permutation_real[4])
+Bool_t Fitter_Test::Parton_Jet_Match(const snu::KTruth gen_truth[], const vector<snu::KJet>& jet_vector, Int_t permutation_real[4])
 {
-  Bool_t match[4] = {kFALSE, kFALSE, kFALSE, kFALSE};
+  //Bool_t chk_print = kTRUE;
+  Bool_t chk_print = kFALSE;
   
+  if(chk_print) cout << endl;
+  
+  Int_t njet = jet_vector.size();
+
+  Bool_t* match = new Bool_t[njet];
+  Bool_t* chk_btag = new Bool_t[njet];
+  Int_t nbjet = 0;
+    for(Int_t i=0; i<njet; i++)
+    {
+      match[i] = kFALSE; 
+
+      snu::KJet jet = jet_vector.at(i);
+      Double_t cvs = jet.BJetTaggerValue(snu::KJet::CSVv2);
+      if(cvs>CSV_THRESHOLD_TIGHT)
+	{
+	  chk_btag[i] = kTRUE;
+	  nbjet++;
+	}
+      else chk_btag[i] = kFALSE;
+    }
+
+    if(chk_print) cout << "njet = " << njet << ", nbjet = " << nbjet << endl;
+    
   for(Int_t i=0; i<4; i++)
     {
-      for(Int_t j=0; j<4; j++)
+      for(Int_t j=0; j<njet; j++)
 	{
-	  if(match[j]!=kFALSE) continue;
-	  
-	  //cout << i << "\t" << j << "\t" << chk_btag[j] << endl;
-	  
+	  if(match[j]==kTRUE) continue;
+
 	  snu::KJet jet = jet_vector.at(j);
 	  Double_t distance = Distance(gen_truth[i], jet);
 	  
-	  if(i==0 || i==1)
-	    {
-	      if(distance<0.2 && chk_btag[j]==kTRUE)
-		{ 
-		  match[j] = kTRUE; 
-		  permutation_real[i] = j;
-		  //cout << "Good" << endl;
-		  break;
-		}
-	    }
-	  else
+	  if(chk_print) cout << i << "\t" << gen_truth[i].PdgId() << "\t" << gen_truth[i].Pt() << "\t" << j << "\t" << jet.Pt() << "\t" << distance << "\t" << chk_btag[j] << endl;
+	  
+	  if(distance<DISTANCE_MATCH)
 	    { 
-	      if(distance<0.2)
-		{ 
-		  match[j] = kTRUE; 
-		  permutation_real[i] = j;
-		  //cout << "Good" << endl;
-		  break;
-		} 
-	    }
+	      if(chk_print) cout << "Distance Match" << endl;
+	      
+	      if(chk_btag[j]==kTRUE && (gen_truth[i].PdgId()==5||gen_truth[i].PdgId()==-5) )
+	      	{
+	      	  match[j] = kTRUE;
+	      	  permutation_real[i] = j;
+		  
+	      	  if(chk_print) cout << "Found b tag" << endl;
+		  
+	      	  break;
+	      	}//b tag jet
+	      else
+	      	{
+	      	  match[j] = kTRUE; 
+	      	  permutation_real[i] = j;
+		  
+	      	  if(chk_print) cout << "Found No b tag" << endl;
+
+	      	  break;
+	      	}//no b tag jet
+	      
+	      // if((i==0||i==1)&&chk_btag[j]==kTRUE)
+	      // 	{
+	      // 	  match[j] = kTRUE;
+	      // 	  permutation_real[i] = j;
+		  
+	      // 	  if(chk_print) cout << "Found" << endl;
+
+	      // 	  break;
+	      // 	}
+	      // else
+	      // 	{
+	      // 	  match[j] = kTRUE;
+	      // 	  permutation_real[i] = j;
+
+	      // 	  if(chk_print) cout << "Found" << endl;
+		  
+	      // 	  break;
+	      // 	}
+	    
+	    }//If distance
 	}//for loop over leading four jet
-      //cout << endl;
     }//for loop over four parton
-  //cout << endl;
   
-  Bool_t chk_match = kTRUE;
-  for(Int_t i=0; i<4; i++)
+  Int_t count = 0;
+  for(Int_t i=0; i<njet; i++){ if(match[i]==kTRUE) count++; }
+  
+  Bool_t chk_match = kFALSE;
+  if(count==4) chk_match = kTRUE;
+  
+  if(chk_print)
     {
-      if(match[i]==kFALSE)
-	{
-	  chk_match = kFALSE;
-	  break;
-	}
+      if(chk_match==kTRUE) cout << "GOOD" << endl;
+      else cout << "BAD" << endl;
     }
+  
+  delete[] match;
+  delete[] chk_btag;
 
   return chk_match;
 }//Bool_t Fitter_Test::Jet_Match()

@@ -292,9 +292,9 @@ Bool_t Kinematic_Fitter_Base::Pass_Native_Top_Mass()
 {
   TLorentzVector t_jjj = reordered_jet[1] + reordered_jet[2] + reordered_jet[3];
   Double_t t_mass = t_jjj.M();
-
+  
   Bool_t chk_native_top_mass = kFALSE;
-  if(125<t_mass && t_mass<225) chk_native_top_mass = kTRUE;
+  if(150<t_mass && t_mass<200) chk_native_top_mass = kTRUE;
 
   return chk_native_top_mass;
 }//Bool_t Kinematic_Fitter_Base::Pass_Native_Top_Mass()
