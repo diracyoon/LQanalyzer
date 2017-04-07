@@ -71,24 +71,28 @@ void Kinematic_Fitter_Old::Fit()
 
 //////////
 
-void Kinematic_Fitter_Old::Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<snu::KJet>& a_jet_vector, const Bool_t a_b_tag[4])
+void Kinematic_Fitter_Old::Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<snu::KJet>& a_jet_vector, const Bool_t* a_target_jet, const Bool_t* a_b_tag)
 {
   measured_met = a_met;
   
   measured_lepton = a_lepton;
   error_lepton_pt = 0.01*measured_lepton.Pt();
 
+  Int_t n_jet = a_jet_vector.size();
+
   n_b_tag = 0;
   sum_extra_jet.SetPtEtaPhiE(0, 0, 0, 0);
-  Int_t njet = a_jet_vector.size();
-  for(Int_t i=0; i<njet; i++)
+  Int_t target_index = 0;
+  for(Int_t i=0; i<n_jet; i++)
     {
-      if(i<4)
+      if(a_target_jet[i]==kTRUE)
 	{
-	  measured_jet[i] = a_jet_vector.at(i); 
-	  measured_b_tag[i] = a_b_tag[i];
+	  measured_jet[target_index] = a_jet_vector.at(i); 
+	  measured_b_tag[target_index] = a_b_tag[i];
 	  
-	  if(measured_b_tag[i]==kTRUE) n_b_tag++;
+	  if(measured_b_tag[target_index]==kTRUE) n_b_tag++;
+	
+	  target_index++;
 	}
       
       sum_extra_jet += a_jet_vector.at(i);

@@ -29,7 +29,7 @@ class Kinematic_Fitter_Base
   virtual ~Kinematic_Fitter_Base();
 
   virtual void Fit()=0;
-  virtual void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<snu::KJet>& a_jet_vector, const Bool_t a_b_tag[4])=0;
+  virtual void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<snu::KJet>& a_jet_vector, const Bool_t* a_target_jet,  const Bool_t* a_b_tag)=0;
     
   Double_t Get_Chi2(const TString& type="BEST", const Int_t& index=-1);
   void Get_Chi2_Piece(Double_t chi2_piece_return[11],  const TString& type="BEST", const Int_t& index=-1);

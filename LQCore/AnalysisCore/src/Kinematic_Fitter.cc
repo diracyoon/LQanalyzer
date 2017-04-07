@@ -19,7 +19,7 @@ Kinematic_Fitter::~Kinematic_Fitter()
 
 //////////
 
-void Kinematic_Fitter::Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<snu::KJet>& a_jet_vector, const Bool_t a_b_tag[4])
+void Kinematic_Fitter::Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<snu::KJet>& a_jet_vector, const Bool_t* a_target_jet, const Bool_t* a_b_tag)
 {
   measured_met = a_met;
   
@@ -27,14 +27,22 @@ void Kinematic_Fitter::Set(const TLorentzVector& a_met, const TLorentzVector& a_
   error_lepton_pt = 0.01*measured_lepton.Pt();
 
   jet_vector = a_jet_vector;
-  
+  Int_t n_jet = jet_vector.size();
+
   n_b_tag = 0;
-  for(Int_t i=0; i<4; i++)
+  Int_t target_index = 0;
+  for(Int_t i=0; i<n_jet; i++)
     {
-      measured_jet[i] = jet_vector.at(i); 
-      measured_b_tag[i] = a_b_tag[i];
       
-      if(measured_b_tag[i]==kTRUE) n_b_tag++;
+      if(a_target_jet[i]==kTRUE)
+	{
+	  measured_jet[target_index] = jet_vector.at(i); 
+	  measured_b_tag[target_index] = a_b_tag[i];
+      
+	  if(measured_b_tag[target_index]==kTRUE) n_b_tag++;
+	
+	  target_index++;
+	}
     }
        
   //construct unclustered energy
@@ -93,7 +101,7 @@ void Kinematic_Fitter::Fit()
 	      //store results
 	      Store_Results(i, j);
 	    }//if
-
+	  
 	  //jet ordering permutation                                                               
 	  std::next_permutation(reordering_index, reordering_index+4);
 	}//four jet permutation loop 4! = 24 combination
@@ -124,7 +132,7 @@ Double_t Kinematic_Fitter::Chi2_Func(const Double_t* par)
    Double_t fitting_lepton_eta = measured_lepton.Eta();
    Double_t fitting_lepton_phi = measured_lepton.Phi();
    Double_t fitting_lepton_mass = measured_lepton.M();
-  
+ 
    fitting_lepton.SetPtEtaPhiM(fitting_lepton_pt, fitting_lepton_eta, fitting_lepton_phi, fitting_lepton_mass);
   
    //contruct a vector for fit ue

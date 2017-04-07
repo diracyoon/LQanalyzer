@@ -3,19 +3,19 @@
 #include "BaseSelection.h"
 
 //Local includes
-#include "Fitter_Test.h"
+#include "Jet_Selection_Test.h"
 
 //Needed to allow inheritance for use in LQCore/core classes
-ClassImp(Fitter_Test);
+ClassImp(Jet_Selection_Test);
  
 //////////
 
-Fitter_Test::Fitter_Test() : AnalyzerCore()   
+Jet_Selection_Test::Jet_Selection_Test() : AnalyzerCore()   
 {
   //To have the correct name in the log:                                                          
-  SetLogName("Fitter_Test");
+  SetLogName("Jet_Selection_Test");
   
-  m_logger << INFO << "Construct Fitter_Test." << LQLogger::endmsg;
+  m_logger << INFO << "Construct Jet_Selection_Test." << LQLogger::endmsg;
 
   // This function sets up Root files and histograms Needed in ExecuteEvents
   InitialiseAnalysis();
@@ -24,38 +24,38 @@ Fitter_Test::Fitter_Test() : AnalyzerCore()
 
   fitter = new Kinematic_Fitter(chk_debug);
   //fitter = new Kinematic_Fitter_Old(chk_debug);
-}//Fitter_Test::Fitter_Test()
+}//Jet_Selection_Test::Jet_Selection_Test()
 
 //////////
 
-Fitter_Test::~Fitter_Test() 
+Jet_Selection_Test::~Jet_Selection_Test() 
 {
-  m_logger << INFO << "Destruct Fitter_Test." << LQLogger::endmsg;
+  m_logger << INFO << "Destruct Jet_Selection_Test." << LQLogger::endmsg;
 
   delete fitter;
-}//Fitter_Test::~Fitter_Test()
+}//Jet_Selection_Test::~Jet_Selection_Test()
 
 //////////
 
-void Fitter_Test::BeginCycle() throw(LQError)
+void Jet_Selection_Test::BeginCycle() throw(LQError)
 {
   m_logger << INFO << "BeginCycle is called." << LQLogger::endmsg;
 
   return;
-}//void Fitter_Test::BeginCycle()
+}//void Jet_Selection_Test::BeginCycle()
 
 //////////
 
-void Fitter_Test::BeginEvent() throw(LQError)
+void Jet_Selection_Test::BeginEvent() throw(LQError)
 {
   m_logger << DEBUG << "BeginEvent is called." << LQLogger::endmsg;
 
   return;
-}//void Fitter_Test::BeginEvent()
+}//void Jet_Selection_Test::BeginEvent()
 
 //////////
 
-void Fitter_Test::ExecuteEvents() throw(LQError)
+void Jet_Selection_Test::ExecuteEvents() throw(LQError)
 {
   m_logger << DEBUG << "RunNumber = " << eventbase->GetEvent().RunNumber() << ", EventNumber = " << eventbase->GetEvent().EventNumber() << LQLogger::endmsg;
   m_logger << DEBUG << "IsData = " << isData << LQLogger::endmsg;
@@ -434,22 +434,22 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   FillCLHist(jethist, "Jet", jet_hard_coll, weight);
 
   return;
-}//void Fitter_Test::ExecuteEvents()
+}//void Jet_Selection_Test::ExecuteEvents()
 
 //////////
 
-void Fitter_Test::EndCycle() throw(LQError)
+void Jet_Selection_Test::EndCycle() throw(LQError)
 {
   m_logger << INFO << "EndCyle is called." << LQLogger::endmsg;
 
   return;
-}//void Fitter_Test::EndCycle()
+}//void Jet_Selection_Test::EndCycle()
 
 //////////
 
-void Fitter_Test::InitialiseAnalysis() throw(LQError)
+void Jet_Selection_Test::InitialiseAnalysis() throw(LQError)
 {
-  m_logger << INFO << "Initialise Fitter_Test analysis." << LQLogger::endmsg;
+  m_logger << INFO << "Initialise Jet_Selection_Test analysis." << LQLogger::endmsg;
 
   //Initialise histograms                                                                             
   MakeHistograms();
@@ -506,11 +506,11 @@ void Fitter_Test::InitialiseAnalysis() throw(LQError)
   MakeCleverHistograms(jethist, "Jet");
 
   return;
-}//void Fitter_Test::InitialiseAnalysis()
+}//void Jet_Selection_Test::InitialiseAnalysis()
 
 //////////
 
-Double_t Fitter_Test::Distance(const snu::KTruth& truth, const snu::KJet& jet)
+Double_t Jet_Selection_Test::Distance(const snu::KTruth& truth, const snu::KJet& jet)
 {
   Double_t truth_phi = truth.Phi();
   Double_t truth_eta = truth.Eta();
@@ -523,11 +523,11 @@ Double_t Fitter_Test::Distance(const snu::KTruth& truth, const snu::KJet& jet)
   //cout << truth_phi << "\t" << truth_eta << "\t" << jet_phi << "\t" << jet_eta << "\t" << distance << endl;
   
   return distance;
-}//Double_t Fitter_Test::Distance(const snu::KTruth& truth, const snu::KJet& jet)
+}//Double_t Jet_Selection_Test::Distance(const snu::KTruth& truth, const snu::KJet& jet)
 
 //////////
 
-Bool_t Fitter_Test::Parton_Jet_Match(const snu::KTruth gen_truth[], const vector<snu::KJet>& jet_vector, Int_t permutation_real[4])
+Bool_t Jet_Selection_Test::Parton_Jet_Match(const snu::KTruth gen_truth[], const vector<snu::KJet>& jet_vector, Int_t permutation_real[4])
 {
   //Bool_t chk_print = kTRUE;
   Bool_t chk_print = kFALSE;
@@ -628,6 +628,6 @@ Bool_t Fitter_Test::Parton_Jet_Match(const snu::KTruth gen_truth[], const vector
   delete[] chk_btag;
 
   return chk_match;
-}//Bool_t Fitter_Test::Jet_Match()
+}//Bool_t Jet_Selection_Test::Jet_Match()
 
 //////////

@@ -295,7 +295,7 @@ Bool_t Kinematic_Fitter_Base::Pass_Native_Top_Mass()
   
   Bool_t chk_native_top_mass = kFALSE;
   if(150<t_mass && t_mass<200) chk_native_top_mass = kTRUE;
-
+  
   return chk_native_top_mass;
 }//Bool_t Kinematic_Fitter_Base::Pass_Native_Top_Mass()
 
@@ -320,7 +320,7 @@ void Kinematic_Fitter_Base::Reordering_Jets()
           q_mass = B_MASS; 
 	}
       
-      //c quark in charged higgs case
+      // //c quark in charged higgs case
       // else if(reordering_index[i]==3)
       // 	{
       // 	  ts_corr = ts_corr_value[reordering_index[i]][1];
@@ -330,12 +330,12 @@ void Kinematic_Fitter_Base::Reordering_Jets()
       // 	}
       
       else 
-	{
-	  ts_corr = ts_corr_value[reordering_index[i]][0];                                  
-	  jet_pt_error = ts_corr_error[reordering_index[i]][0];                             
+      	{
+      	  ts_corr = ts_corr_value[reordering_index[i]][0];                                  
+      	  jet_pt_error = ts_corr_error[reordering_index[i]][0];                             
 	 
-	  q_mass = 0;                                                                  
-	}   
+      	  q_mass = 0;                                                                  
+      	}   
 	  
       Double_t pt = measured_jet[reordering_index[i]].Pt()*ts_corr;                         
       Double_t eta = measured_jet[reordering_index[i]].Eta();                               
