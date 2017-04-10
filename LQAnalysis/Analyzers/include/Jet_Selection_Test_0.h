@@ -1,5 +1,5 @@
-#ifndef __Jet_Selection_Test_h__
-#define __Jet_Selection_Test_h__
+#ifndef __Jet_Selection_Test_0_h__
+#define __Jet_Selection_Test_0_h__
 
 #include "AnalyzerCore.h"
 #include "Kinematic_Fitter_Base.h"
@@ -14,12 +14,12 @@
 
 #define BLANK -999
 
-class Jet_Selection_Test : public AnalyzerCore 
+class Jet_Selection_Test_0 : public AnalyzerCore 
 {
  public:
   //constructors                                                                                   
-  Jet_Selection_Test();
-  ~Jet_Selection_Test();
+  Jet_Selection_Test_0();
+  ~Jet_Selection_Test_0();
 
   //Functions from core
   virtual void BeginCycle() throw(LQError);
@@ -39,7 +39,7 @@ class Jet_Selection_Test : public AnalyzerCore
   Double_t Distance(const snu::KTruth& truth, const snu::KJet& jet);
   Bool_t Parton_Jet_Match(const snu::KTruth gen_truth[], const vector<snu::KJet>& jet_vector, Int_t permutation_real[4]);
 
-  ClassDef(Jet_Selection_Test, 1);
+  ClassDef(Jet_Selection_Test_0, 1);
 };
 
-#endif /* __Jet_Selection_Test_h__ */
+#endif /* __Jet_Selection_Test_0_h__ */
