@@ -317,8 +317,23 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
       Double_t cvs = jet_soft_coll.at(i).BJetTaggerValue(snu::KJet::CSVv2);
 
       if(cvs>CSV_THRESHOLD_MEDIUM)  chk_btag[i] = kTRUE;
+      //if(cvs>CSV_THRESHOLD_TIGHT)  chk_btag[i] = kTRUE;
     }
 
+  //parton-jet matching for all jets
+  Int_t permutation_real[4] = {0, 0, 0, 0};
+  Bool_t chk_match_all = Parton_Jet_Match(four_gen_truth, jet_soft_coll, permutation_real);
+  
+  if(chk_match_all==kFALSE) throw LQError("Fails parton-jet match for all jets", LQError::SkipEvent);
+  FillCutFlow("JetMatchAll", weight);
+
+  //parton-jet matching for leading four jets
+  Bool_t chk_match_leading = kTRUE;
+  for(Int_t i=0; i<4; i++){ if(permutation_real[i]>3) chk_match_leading = kFALSE; }
+  
+  if(chk_match_leading==kFALSE) throw LQError("Fails parton-jet match for leading jets", LQError::SkipEvent);
+  FillCutFlow("JetMatchLeading", weight);
+  
   //target jet select
   for(Int_t i=0; i<4; i++){ target_jet[i] = kTRUE; }
 
@@ -328,19 +343,7 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   
   if(nbjet_target<2) throw LQError("Fails at least four hard jets cuts.", LQError::SkipEvent);
   FillCutFlow("TwoBJets", weight);
-
-  //parton-jet mathching for all jets pt>20 GeV 
-  Int_t permutation_real[4] = {0, 0, 0, 0};
-  Bool_t chk_match_all = Parton_Jet_Match(four_gen_truth, jet_soft_coll, permutation_real);
-  if(chk_match_all==kFALSE) throw LQError("Fails jet match", LQError::SkipEvent);
-  FillCutFlow("JetMatchAll", weight);
-  
-  //parton-jet matching for leading four jets.
-  Bool_t chk_match_leading = kTRUE;
-  for(Int_t i=0; i<4; i++){ if(permutation_real[i]>3) chk_match_leading = kFALSE; }
-  if(chk_match_leading==kFALSE) throw LQError("Fails jet match", LQError::SkipEvent);
-  FillCutFlow("JetMatchLeading", weight);
-  
+    
   /*Fitter*/  
   fitter->Set(met_vector, muon_vector, jet_soft_coll, target_jet, chk_btag);
   fitter->Fit();

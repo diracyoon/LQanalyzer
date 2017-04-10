@@ -312,35 +312,58 @@ void Jet_Selection_Test::ExecuteEvents() throw(LQError)
     }
 
   //find b tag jet
+  Int_t n_bjet_soft = 0;
   for(Int_t i=0; i<n_soft_jet; i++)
     {
       Double_t cvs = jet_soft_coll.at(i).BJetTaggerValue(snu::KJet::CSVv2);
 
-      if(cvs>CSV_THRESHOLD_MEDIUM)  chk_btag[i] = kTRUE;
+      if(cvs>CSV_THRESHOLD_MEDIUM)
+	{
+	  chk_btag[i] = kTRUE;
+	  n_bjet_soft++;
+	}
     }
-
-  //target jet select
-  for(Int_t i=0; i<4; i++){ target_jet[i] = kTRUE; }
-
-  //count b tag jets in target jets
-  Int_t nbjet_target= 0;
-  for(Int_t i=0; i<n_soft_jet; i++){ if(target_jet[i]==kTRUE && chk_btag[i]==kTRUE) nbjet_target++; }
   
-  if(nbjet_target<2) throw LQError("Fails at least four hard jets cuts.", LQError::SkipEvent);
-  FillCutFlow("TwoBJets", weight);
-
-  //parton-jet mathching for all jets pt>20 GeV 
+  //parton-jet matching for all jets
   Int_t permutation_real[4] = {0, 0, 0, 0};
   Bool_t chk_match_all = Parton_Jet_Match(four_gen_truth, jet_soft_coll, permutation_real);
+
   if(chk_match_all==kFALSE) throw LQError("Fails jet match", LQError::SkipEvent);
   FillCutFlow("JetMatchAll", weight);
   
-  //parton-jet matching for leading four jets.
-  Bool_t chk_match_leading = kTRUE;
-  for(Int_t i=0; i<4; i++){ if(permutation_real[i]>3) chk_match_leading = kFALSE; }
-  if(chk_match_leading==kFALSE) throw LQError("Fails jet match", LQError::SkipEvent);
-  FillCutFlow("JetMatchLeading", weight);
+  //ordering permutation_real
+  Int_t permutation_real_temp[4];
+  Int_t permutation_real_order[4];
+  for(Int_t i=0; i<4; i++){ permutation_real_temp[i] = permutation_real[i]; }
+
+  sort(permutation_real_temp, permutation_real_temp+4);
+
+  for(Int_t i=0; i<4; i++)
+    {
+      for(Int_t j=0; j<4; j++)
+        {
+          if(permutation_real[i] == permutation_real_temp[j]) permutation_real_order[i] = j;
+        }
+    }
+    
+  /////////////////////////
+  /*target jets selection*/
+  /////////////////////////
   
+
+  //leading four jets
+  //for(Int_t i=0; i<4; i++){ target_jet[i] = kTRUE; }
+
+  //jet match
+  for(Int_t i=0; i<4; i++){ target_jet[permutation_real[i]] = kTRUE; }
+
+  //count b tagged jets in target jets
+  Int_t n_bjet_target = 0;
+  for(Int_t i=0; i<n_soft_jet; i++){ if(chk_btag[i]==kTRUE && target_jet[i]==kTRUE) n_bjet_target++; }
+  
+  if(n_bjet_target<2) throw LQError("Fails at least two b tagged jets", LQError::SkipEvent);
+  FillCutFlow("TwoBJets", weight);
+    
   /*Fitter*/  
   fitter->Set(met_vector, muon_vector, jet_soft_coll, target_jet, chk_btag);
   fitter->Fit();
@@ -352,13 +375,14 @@ void Jet_Selection_Test::ExecuteEvents() throw(LQError)
   if(chk_convergence==kFALSE) throw LQError("Fitter Fail", LQError::SkipEvent);
 
   Double_t chi2 = fitter->Get_Chi2();
-  
+
   Int_t permutation_fitter[4];
   fitter->Get_Permutation(permutation_fitter);
   
   //check jet permutation match
-  if(permutation_real[0]==permutation_fitter[0] && permutation_real[1]==permutation_fitter[1]) FillHist("Jet_Permutation_Match", 1, weight); 
-  else FillHist("Jet_Permutation_Match", 0, weight);
+  Int_t jet_permutation_match = 0;
+  if(permutation_real_order[0]==permutation_fitter[0] && permutation_real_order[1]==permutation_fitter[1]) jet_permutation_match = 1;
+  else jet_permutation_match = 0;
     
   Double_t para_result[9];
   fitter->Get_Parameters(para_result);
@@ -402,12 +426,15 @@ void Jet_Selection_Test::ExecuteEvents() throw(LQError)
   FillHist("Chi2_Piece_9", chi2_piece[9], weight);
   FillHist("Chi2_Piece_10", chi2_piece[10], weight);
   
-  if(nbjet_target==2)
+  if(n_bjet_target==2)
     {
       FillHist("Chi2_2B", chi2, weight);
       FillHist("DiJetMass_2B", para_result[8], weight);
       FillHist("DiJetMass_Chi2_2B", para_result[8], chi2, weight, 0, 0, 0, 0, 0, 0);
 
+      //check jet permutation match
+      FillHist("Jet_Permutation_Match_2B", jet_permutation_match, weight);
+      
       //goodness cut study
       for(Int_t cut_level=0; cut_level<20; cut_level++)
         {
@@ -428,6 +455,9 @@ void Jet_Selection_Test::ExecuteEvents() throw(LQError)
       FillHist("Chi2_3B", chi2, weight);
       FillHist("DiJetMass_3B", para_result[8], weight);
       FillHist("DiJetMass_Chi2_3B", para_result[8], chi2, weight, 0, 0, 0, 0, 0, 0);
+   
+      //check jet permutation match
+      FillHist("Jet_Permutation_Match_3B", jet_permutation_match, weight);
     }
 
   FillCLHist(muhist, "Muon", muon_tight_coll, weight);
@@ -455,8 +485,9 @@ void Jet_Selection_Test::InitialiseAnalysis() throw(LQError)
   MakeHistograms();
   
   //jet permutation efficiency
-  MakeHistograms("Jet_Permutation_Match", 2, -0.5, 1.5);
-
+  MakeHistograms("Jet_Permutation_Match_2B", 2, -0.5, 1.5);
+  MakeHistograms("Jet_Permutation_Match_3B", 2, -0.5, 1.5);
+  
   //lepton
 
   //neutrino 
