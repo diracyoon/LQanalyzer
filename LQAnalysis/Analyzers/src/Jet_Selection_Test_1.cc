@@ -353,6 +353,7 @@ void Jet_Selection_Test_1::ExecuteEvents() throw(LQError)
   /*target jets selection*/
   /////////////////////////
   
+  cout << endl;
   if(n_bjet_soft==4)
     {
       //in case of 4 b tagged jets events, just use the 4 b tagged jets
@@ -363,15 +364,45 @@ void Jet_Selection_Test_1::ExecuteEvents() throw(LQError)
       fitter->Set(met_vector, muon_vector, jet_soft_coll, target_jet, chk_btag);
       fitter->Fit();
     }//if(n_bjet_soft==4)
-  else if(n_bjet_soft==3)
+  
+ else if(n_bjet_soft==3)
     {
       //in case of 3 b tagged jets events, use the 3 b tagged jets, and iterate the other non-b tagged jets.
-      //then, 
-    }
-  else 
-    {
+      //then, choose jet with lowest chi^2 
+      
       throw LQError("No b", LQError::SkipEvent);
-    }
+    }//
+ 
+  else if(n_bjet_soft==2)
+    {
+      //in case of 2 b tagged jets events, user the 2 b tagged jets, and iterate all the combitation of choosing 2 non-b tagged jets
+      //then, choose 2 non b tagged jets combination with lowest chi^2
+
+      //let's choose 2 b tagged jet first
+      for(Int_t i=0; i<n_jet_soft; i++){ if(chk_btag[i]==kTRUE) target_jet[i] = kTRUE; 
+
+      for(Int_t i=0; i<n_jet_soft; i++)
+	{
+	  //clear first
+	  for(Int_t j=0; j<n_jet_soft; j++){ if(chk_btag[i]==kFALSE) target_jet[j] = kFALSE; }
+	  
+	  //let's iterate 
+	  if(chk_btag[i]==kFALSE) target_jet[i] = kTRUE;
+	  
+	  for(Int_t j=0; j<n_jet_soft; j++)
+	    {
+	      if(i<j) continue;
+	      
+	      cout << i << "\t" << j << endl;
+	      
+	      //
+	      if(chk_btag[j]==kFALSE) target_jet[j] = kTRUE;
+
+	      
+	    }//for loop over j
+	}//for loop over i
+      
+      }//if(n_bjet_soft==2)
     
   delete[] chk_btag;
   delete[] target_jet;
