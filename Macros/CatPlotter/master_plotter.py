@@ -73,8 +73,8 @@ skim=""
 periodtag=""
 analyzer=""
 stream=""
+plottag="Default"
 outputlist=[]
-
 input_configfile = open(configinputfile,"r")
 for line in input_configfile:
     if "*********************" in line:
@@ -96,9 +96,18 @@ for line in input_configfile:
     elif "analyzer" in line:
         sline = line.split()
         analyzer  =sline[2]
+    elif "plottag" in line:
+        sline = line.split()
+        plottag  =sline[2]
     elif "stream" in line:
         sline = line.split()
         stream  =sline[2]
+    elif "caption" in line:
+        sline = line.replace("# caption","")
+        sline = sline.replace("...",'.";')
+        cap= open("caption.txt","w")
+        cap.write(sline)
+        cap.close()
     elif "## h" in line:
         sline = line.split()
         histlist.append(sline[1])
@@ -114,10 +123,10 @@ for line in input_configfile:
 
         if not os.path.exists("~/CATAnalyzerPlots/"):
             os.system("mkdir ~/CATAnalyzerPlots/")
-        outputlist.append("https://jalmond.web.cern.ch/jalmond/SNU/CATAnalyzerPlots/HN13TeV_" + analyzer+"_"+os.getenv("CATVERSION")+"_"+periodtag+"_"+cut+"/histograms/CAT2016_"+os.getenv("CATVERSION")+"/indexCMS.html")
+        outputlist.append("https://jalmond.web.cern.ch/jalmond/SNU/CATAnalyzerPlots/HN13TeV_" + analyzer+"_"+os.getenv("CATVERSION")+"_"+periodtag+"_"+cut+"/histograms/CAT2016_"+os.getenv("CATVERSION")+plottag+"/indexCMS.html")
 
     
-        os.system('python  ' + os.getenv("LQANALYZER_DIR") + '/Macros/CatPlotter/setupplotter.py -i ' + inputfile + ' -d ' + inputdir + ' -x ' + jobdir + ' -s ' + stream + ' -a ' + analyzer + ' -S ' + skim + ' -p ' + periodtag + ' -C ' + cutlist[0] + ' -M ' + configinputfile)
+        os.system('python  ' + os.getenv("LQANALYZER_DIR") + '/Macros/CatPlotter/setupplotter.py -i ' + inputfile + ' -d ' + inputdir + ' -x ' + jobdir + ' -s ' + stream + ' -a ' + analyzer + ' -S ' + skim + ' -p ' + periodtag + ' -C ' + cutlist[0] + ' -M ' + configinputfile + ' -c ' + plottag)
         histlist=[]
         binlist=[]
         xminlist=[]

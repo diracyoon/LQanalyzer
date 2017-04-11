@@ -81,6 +81,7 @@ class LQController  {
   /// Other class functions
   void RunEvent(Long64_t ev);
   void RunNtupleEvent(Long64_t ev);
+  void RunTauMode(TString np);
   void RunNonPrompt(TString np);
   void RunChargeFlip(TString cf);
 
@@ -99,6 +100,7 @@ class LQController  {
   TString completename;
   bool runnp;
   bool runcf;
+  bool runtau;
   mutable LQLogger m_logger;
   
   float target_luminosity;

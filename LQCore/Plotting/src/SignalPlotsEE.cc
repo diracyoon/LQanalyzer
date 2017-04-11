@@ -11,61 +11,101 @@ using namespace std;
 
 
 
-SignalPlotsEE::SignalPlotsEE(TString name): StdPlots(name){
+SignalPlotsEE::SignalPlotsEE(TString name, int nel): StdPlots(name){
 
   TH1::SetDefaultSumw2(true);
   
   
+  bool singleel = (nel < 0)  ?   true : (nel == 1);
+  bool doubleel = (nel < 0)  ?   true : (nel == 2);
+  bool triel = (nel < 0)  ?   true : (nel == 3);
+  bool quadel = (nel < 0)  ?   true : (nel == 4);
+
   /// Mass plots
+  if (quadel){
+    map_sig["h_zzmass"]               = SetupHist("h_zzmass_"          + name,"Invariant mass of the os pairs" ,50,100,150,"M_{ll} GeV");
+    map_sig["h_llllmass"]                 = SetupHist("h_llllmass_"           + name,"Invariant mass of the two leading electrons",200,0,1000,"M_{llll} GeV");
+    map_sig["h_z1mass"]               = SetupHist("h_z1mass_"          + name,"Invariant mass of the os pairs" ,80,0,400,"M_{ll} GeV");
+    map_sig["h_z2mass"]               = SetupHist("h_z2mass_"          + name,"Invariant mass of the os pairs" ,80,0,400,"M_{ll} GeV");
+    map_sig["h_llllpt"]                 = SetupHist("h_llllpt_"           + name,"Invariant pt of the two leading electrons",500,0,1000,"P_T (llll) GeV");
+    map_sig["h_z1_z2_dphi"]                 = SetupHist("h_z1_z2_dphi_"   + name,"Delta Phi Z1,Z2", 28, 0., 3.5,"#Delta(#phi) (Z_{1},Z_{2})");
+  }
+  
+  if(doubleel){
+    map_sig["h_llmass"]                 = SetupHist("h_llmass_"           + name,"Invariant mass of the two leading electrons",1000,0,1000,"M_{ll} GeV");
+    map_sig["h_llpt"]                 = SetupHist("h_llpt_"           + name,"Invariant pt of the two leading electrons",500,0,1000,"P_T (ll) GeV");
+    map_sig["h_lljjmass"]               = SetupHist("h_lljjmass_"         + name,"Invariant mass of the four particles",200,0,2000,"M_{lljj} GeV");
+    map_sig["h_lljjjj_ss_mass"]          = SetupHist("h_lljjjj_ss_mass_"       + name,"Invariant mass of the four particles",200,0,2000,"M_{lljjjj} (ss) GeV");
+    map_sig["h_lljjjj_mass"]             = SetupHist("h_lljjjj_mass_"       + name,"Invariant mass of the four particles",200,0,2000,"M_{lljjjj} GeV");
+    map_sig["h_lljmass"]                = SetupHist("h_lljmass_"         + name,"Invariant mass of the four particles",200,0,2000,"M_{llj} GeV");
+    map_sig["h_l1jj_central_mass"]               = SetupHist("h_l1jj_centralmass_"          + name,"Invariant mass of the two leading jets and leading electron",100,0,1000);
+    map_sig["h_l2jj_central_mass"]               = SetupHist("h_l2jj_centralmass_"          + name,"Invariant mass of the two leading jets and leading electron",100,0,1000);
+    map_sig["h_lljj_central_mass"]               = SetupHist("h_lljj_centralmass_"          + name,"Invariant mass of the two leading jets and leading electron",100,0,1000);
+
+    map_sig["h_forward_jet_pt"]             = SetupHist("h_forward_jet_pt_"                + name,"h_forward_jet_pt",60,0,300);
+    map_sig["h_central_jet_pt"]             = SetupHist("h_central_jet_pt_"                + name,"h_central_jet_pt",60,0,300);
+    map_sig["h_forward_jet_eta"]             = SetupHist("h_forward_jet_eta_"                + name,"h_forward_jet_eta",50,-2.5,2.5);
+    map_sig["h_central_jet_eta"]             = SetupHist("h_central_jet_eta_"                + name,"h_central_jet_eta",50,-2.5,2.5);
+    
+  }
+  
   map_sig["h_jjmass"]                 = SetupHist("h_dijetsmass_"        + name,"Invariant mass of the two leading jets",500,0.,500.,"M_{jj} GeV");
   map_sig["h_leadjetmass"]            = SetupHist("h_leadjetsmass_"      + name,"Invariant mass of the two leading jets",150,0.,750.,"M_{j1j2} GeV");
   map_sig["h_osllmass"]               = SetupHist("h_osllmass_"          + name,"Invariant mass of the two leading os electrons",100,0,500,"M_{ll} GeV");
+  map_sig["h_osll_closestZ_mass"]       =SetupHist("h_osll_closestZ_mass_"          + name,"Invariant mass of the two leading os electrons",100,0,500,"M_{ll} GeV");
+
   map_sig["h_l1jjmass"]               = SetupHist("h_l1jjmass_"          + name,"Invariant mass of the two leading jets and leading electron",100,0,1000,"M_{l1jj} GeV");
-  map_sig["h_l2jjmass"]               = SetupHist("h_l2jjmass_"          + name,"Invariant mass of the two leading jets and second electron",100,0,1000,"M_{l2jj} GeV");
-  map_sig["h_llmass"]                 = SetupHist("h_llmass_"           + name,"Invariant mass of the two leading electrons",1000,0,1000,"M_{ll} GeV");
-  map_sig["h_llpt"]                 = SetupHist("h_llpt_"           + name,"Invariant pt of the two leading electrons",500,0,1000,"P_T (ll) GeV");
-  map_sig["h_lljjmass"]               = SetupHist("h_lljjmass_"         + name,"Invariant mass of the four particles",200,0,2000,"M_{lljj} GeV");
-  map_sig["h_lljjjj_mass"]             = SetupHist("h_lljjjj_mass_"       + name,"Invariant mass of the four particles",200,0,2000,"M_{lljjjj} GeV");
+  if(nel > 1) map_sig["h_l2jjmass"]               = SetupHist("h_l2jjmass_"          + name,"Invariant mass of the two leading jets and second electron",100,0,1000,"M_{l2jj} GeV");
+
+  if(triel){
+    map_sig["h_lllmass"]                 = SetupHist("h_lllmass_"           + name,"Invariant mass of the two leading electrons",1000,0,1000,"M_{lll} GeV");
+    map_sig["h_lllpt"]                 = SetupHist("h_lllpt_"           + name,"Invariant pt of the two leading electrons",500,0,1000,"P_T (lll) GeV");
+  }
+
+  
   map_sig["h_l1jjjj_mass"]             = SetupHist("h_l1jjjj_mass_"       + name,"Invariant mass of the four particles",200,0,2000,"M_{l1jjjj} GeV");
-  map_sig["h_l2jjjj_mass"]             = SetupHist("h_l2jjjj_mass_"       + name,"Invariant mass of the four particles",200,0,2000,"M_{l2jjjj} GeV");
   map_sig["h_lljjjj_os_mass"]          = SetupHist("h_lljjjj_os_mass_"       + name,"Invariant mass of the four particles",200,0,2000,"M_{lljjjj} (os) GeV");
   map_sig["h_l1jjjj_os_mass"]          = SetupHist("h_l1jjjj_os_mass_"       + name,"Invariant mass of the four particles",200,0,2000,"M_{l1jjjj} (os) GeV");
-  map_sig["h_l2jjjj_os_mass"]          = SetupHist("h_l2jjjj_os_mass_"       + name,"Invariant mass of the four particles",200,0,2000,"M_{l2jjjj} (os) GeV");
-  map_sig["h_lljjjj_ss_mass"]          = SetupHist("h_lljjjj_ss_mass_"       + name,"Invariant mass of the four particles",200,0,2000,"M_{lljjjj} (ss) GeV");
   map_sig["h_l1jjjj_ss_mass"]          = SetupHist("h_l1jjjj_ss_mass_"       + name,"Invariant mass of the four particles",200,0,2000,"M_{l1jjjj} (ss) GeV");
-  map_sig["h_l2jjjj_ss_mass"]          = SetupHist("h_l2jjjj_ss_mass_"       + name,"Invariant mass of the four particles",200,0,2000, "M_{l2jjjj} (s) GeV");
+  if(nel!= 1){
+    map_sig["h_l2jjjj_mass"]             = SetupHist("h_l2jjjj_mass_"       + name,"Invariant mass of the four particles",200,0,2000,"M_{l2jjjj} GeV");
+    map_sig["h_l2jjjj_os_mass"]          = SetupHist("h_l2jjjj_os_mass_"       + name,"Invariant mass of the four particles",200,0,2000,"M_{l2jjjj} (os) GeV");
+    map_sig["h_l2jjjj_ss_mass"]          = SetupHist("h_l2jjjj_ss_mass_"       + name,"Invariant mass of the four particles",200,0,2000, "M_{l2jjjj} (s) GeV");
+  }
   
-  
-  map_sig["h_lljmass"]                = SetupHist("h_lljmass_"         + name,"Invariant mass of the four particles",200,0,2000,"M_{llj} GeV");
-  
-  /// 4J plots
-  map_sig["h_l1jj_central_mass"]               = SetupHist("h_l1jj_centralmass_"          + name,"Invariant mass of the two leading jets and leading electron",100,0,1000);
-  map_sig["h_l2jj_central_mass"]               = SetupHist("h_l2jj_centralmass_"          + name,"Invariant mass of the two leading jets and leading electron",100,0,1000);
-  map_sig["h_lljj_central_mass"]               = SetupHist("h_lljj_centralmass_"          + name,"Invariant mass of the two leading jets and leading electron",100,0,1000);
-
-  map_sig["h_forward_jet_pt"]             = SetupHist("h_forward_jet_pt_"                + name,"h_forward_jet_pt",60,0,300);
-  map_sig["h_central_jet_pt"]             = SetupHist("h_central_jet_pt_"                + name,"h_central_jet_pt",60,0,300);
-  map_sig["h_forward_jet_eta"]             = SetupHist("h_forward_jet_eta_"                + name,"h_forward_jet_eta",50,-2.5,2.5);
-  map_sig["h_central_jet_eta"]             = SetupHist("h_central_jet_eta_"                + name,"h_central_jet_eta",50,-2.5,2.5);
-
-
-  /// Lepton plots  
+  /// ALL Lepton plots  
   map_sig["h_LeptonEta"]              = SetupHist("h_LeptonEta_"         + name,"leading lepton eta",60,-3.,3., "#eta_{l}");
   map_sig["h_LeptonPhi"]              = SetupHist("h_LeptonPhi_"         + name,"leading lepton phi",64,-3.2,3.2);
   map_sig["h_LeptonPt"]               = SetupHist("h_LeptonPt_"          + name,"lepton pt",100,0,500);
   map_sig["h_leadingLeptonPt"]        = SetupHist("h_leadingLeptonPt_"   + name,"leading lepton pt",100,0,500);
-  map_sig["h_secondLeptonPt"]         = SetupHist("h_secondLeptonPt_"    + name,"secondary lepton pt",60,0,300);
+  if(nel > 1 ) {
+    map_sig["h_secondLeptonPt"]         = SetupHist("h_secondLeptonPt_"    + name,"secondary lepton pt",60,0,300);
+    map_sig["h_secondLeptonEta"]        = SetupHist("h_secondLeptonEta_"   + name,"second lepton eta",60,-3.,3.);    
+    map_sig["h_secondLeptonRelIso"]     = SetupHist("h_secondLeptonRelIso_"      + name,"leading lepton relIso",100,0,1.);
+    map_sig["h_secondLeptonMiniRelIso"]     = SetupHist("h_secondLeptonMiniRelIso_"      + name,"leading lepton mini relIso",100,0,1.);  
+    if(nel > 2 ) {
+      map_sig["h_thirdLeptonPt"]         = SetupHist("h_thirdLeptonPt_"    + name,"thirdary lepton pt",60,0,300);
+      map_sig["h_thirdLeptonEta"]        = SetupHist("h_thirdLeptonEta_"   + name,"third lepton eta",60,-3.,3.);
+      map_sig["h_thirdLeptonRelIso"]     = SetupHist("h_thirdLeptonRelIso_"      + name,"leading lepton relIso",100,0,1.);
+      map_sig["h_thirdLeptonMiniRelIso"]     = SetupHist("h_thirdLeptonMiniRelIso_"      + name,"leading lepton mini relIso",100,0,1.);
+      if(nel > 3 ) {
+	map_sig["h_fourthLeptonPt"]         = SetupHist("h_fourthLeptonPt_"    + name,"fourthary lepton pt",60,0,300);
+	map_sig["h_fourthLeptonEta"]        = SetupHist("h_fourthLeptonEta_"   + name,"fourth lepton eta",60,-3.,3.);
+	map_sig["h_fourthLeptonRelIso"]     = SetupHist("h_fourthLeptonRelIso_"      + name,"leading lepton relIso",100,0,1.);
+	map_sig["h_fourthLeptonMiniRelIso"]     = SetupHist("h_fourthLeptonMiniRelIso_"      + name,"leading lepton mini relIso",100,0,1.);
+      }
+    }
+ 
+  }
   map_sig["h_leadingLeptonEta"]       = SetupHist("h_leadingLeptonEta_"  + name,"leading lepton eta",60,-3.,3.);
-  map_sig["h_secondLeptonEta"]        = SetupHist("h_secondLeptonEta_"   + name,"second lepton eta",60,-3.,3.);
+
   map_sig["h_LeptonIso"]              = SetupHist("h_LeptonIso_"         + name,"leading lepton relIso",50,0,10.);
   map_sig["h_LeptonRelIso"]           = SetupHist("h_LeptonRelIso_"      + name,"leading lepton relIso",100,0,1.);
   map_sig["h_leadingLeptonRelIso"]    = SetupHist("h_leadingLeptonRelIso_"      + name,"leading lepton relIso",100,0,1.);
-  map_sig["h_secondLeptonRelIso"]     = SetupHist("h_secondLeptonRelIso_"      + name,"leading lepton relIso",100,0,1.);
   map_sig["h_leadingLeptonMiniRelIso"]    = SetupHist("h_leadingLeptonMiniRelIso_"      + name,"leading lepton mini relIso",100,0,1.);
-  map_sig["h_secondLeptonMiniRelIso"]     = SetupHist("h_secondLeptonMiniRelIso_"      + name,"leading lepton mini relIso",100,0,1.);
-  
-
   map_sig["h_LeptonDZ"]               = SetupHist("h_LeptonDZ_"          + name," leading lepton DZ", 400, -0.5 , 0.5);
+  map_sig["h_LeptonDXY_EC"]              = SetupHist("h_LeptonDXY_EC_"         + name," lepton DXY_{ec}", 1000, -0.25 , 0.25);
+  map_sig["h_LeptonDXY_B"]              = SetupHist("h_LeptonDXY_B_"         + name," lepton DXY_{b}", 1000, -0.25 , 0.25);
   map_sig["h_LeptonDXY"]              = SetupHist("h_LeptonDXY_"         + name," leading lepton DXY", 1000, -0.25 , 0.25);
   map_sig["h_LeptonDXYSig"]              = SetupHist("h_LeptonDXYSig_"         + name," leading lepton DXYSig", 1000, -10. , 10.);
   
@@ -107,7 +147,7 @@ SignalPlotsEE::SignalPlotsEE(TString name): StdPlots(name){
   /// MET plots
   map_sig["h_PFMET"]                  = SetupHist("h_PFMET_"               + name,"Missing Et",100,0.0,500.0);
   map_sig["h_PFMET_t1"]                  = SetupHist("h_PFMET_t1_"               + name,"Missing Et",100,0.0,500.0);
-  map_sig["h_PFMET_ST2"]                  = SetupHist("h_PFMET_ST2_"               + name,"Missing Et",100,0.0,200.0, "E_{T}/S^{2}_{T}");
+  map_sig["h_PFMET2_ST"]                  = SetupHist("h_PFMET2_ST_"               + name,"Missing Et",200,0.0,100.0, "E_{T}/S^{2}_{T}");
   map_sig["h_PFMET_phi"]              = SetupHist("h_PFMET_phi_"           + name,"Missing Et",100,-3.2,3.2);
   map_sig["h_PFMET_phi_t1"]              = SetupHist("h_PFMET_phi_t1_"           + name,"Missing Et",100,-3.2,3.2);
 
@@ -333,6 +373,8 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
       Fill("h_lljjmass", (electrons[0] +electrons[1] + jets[m] + jets[n]).M(),weight);
     }
   }
+  
+
 
   
   if(leadjetmass != 0.)Fill("h_leadjetmass", leadjetmass,weight);
@@ -342,11 +384,108 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
    int sum_charge(0);
    
 
+   float osmass_closeZ(100000.);
+   int nos(0.);
+   if(electrons.size()>=2){
+     for(unsigned int iel1 = 0 ; iel1< electrons.size()-1; iel1++){
+       for(unsigned int iel2 = iel1+1 ; iel2< electrons.size(); iel2++){
+	 if(electrons[iel1].Charge() != electrons[iel2].Charge())  {
+	   nos++;
+	   if( fabs( (electrons[iel1]+electrons[iel2]).M() - 91.1) < fabs(osmass_closeZ - 91.1) ){
+	     osmass_closeZ = (electrons[iel1]+electrons[iel2]).M();
+	   }
+	   Fill("h_osllmass", (electrons[iel1]+electrons[iel2]).M(),weight);
+	 }
+       }
+     }
+     
+     Fill("h_osll_closestZ_mass",osmass_closeZ ,weight);
+     
+     if(electrons.size()==3){
+       snu::KParticle eee= electrons[0] + electrons[1]+ electrons[2];
+       
+       Fill("h_lllmass",  eee.M(), weight);
+       Fill("h_lllpt",  eee.Pt(), weight);
+     }
+     
+     if(electrons.size() >= 4){
+       
+       snu::KParticle eeee= electrons[0] + electrons[1]+ electrons[2]+electrons[3];
+       
+       Fill("h_llllmass",  eeee.M(), weight);
+       Fill("h_llllpt",  eeee.Pt(), weight);
 
-  if(electrons.size()>=2){
-      if(electrons[0].Charge() != electrons[1].Charge())   Fill("h_osllmass", (electrons[0]+electrons[1]).M(),weight);
-      Fill("h_sumcharge", (electrons[0] +electrons[1]).Charge(), weight);
-  }
+       std::vector<int> vplus;
+       std::vector<int> vminus;
+       for(unsigned int iel1 = 0 ; iel1< electrons.size(); iel1++){
+	 if(electrons[iel1].Charge() < 0 ) vplus.push_back(iel1);
+	 else vminus.push_back(iel1);
+       }
+       if ( (vplus.size() == 2) || (vminus.size() == 2) ) {
+	 
+	 snu::KParticle Z1cand;
+	 snu::KParticle Z2cand;
+	 if(1){
+	   snu::KParticle Z1= electrons[vplus[0]] + electrons[vminus[0]];
+	   snu::KParticle Z2= electrons[vplus[1]] + electrons[vminus[1]];
+	   if(Z1.M() > 4. && Z1.M() < 120) {
+	     if(Z1.M() > 40. && Z1.M() < 120) {
+	       if(fabs(Z1.M() -90.1) < fabs(Z2.M() -90.1)){
+		 Z1cand=Z1;
+		 Z2cand=Z2;
+	       }
+	       else{
+		 Z1cand=Z2;
+                 Z2cand=Z1;
+	       }
+	     }
+	   }
+	   if(fabs(Z1.M() - 91.19) <10.) {
+	     if(fabs(Z2.M() - 91.19) <10.) {
+	       Fill("h_zzmass", Z1.M(),weight);
+	       Fill("h_zzmass", Z2.M(),weight);
+	     }
+	   }
+	 }
+	 if(1){
+	   snu::KParticle Z1= electrons[vplus[0]] + electrons[vminus[1]];
+	   snu::KParticle Z2= electrons[vplus[1]] + electrons[vminus[0]];
+	   
+	   if(Z1.M() > 4. && Z1.M() < 120) {
+             if(Z1.M() > 40. && Z1.M() < 120) {
+	       if(fabs(Z1.M() -90.1) < fabs(Z2.M() -90.1)){
+		 if(fabs(Z1.M() -90.1) < fabs(Z1cand.M() -90.1)){ 
+		   Z1cand=Z1;
+		   Z2cand=Z2;
+		 }
+	       }
+	       else{
+		 if(fabs(Z2.M() -90.1) < fabs(Z1cand.M() -90.1)){
+                   Z1cand=Z2;
+                   Z2cand=Z1;
+                 }
+	       }
+             }
+           }
+
+	   if(fabs(Z1.M() - 91.19) <10.) {
+	     if(fabs(Z2.M() - 91.19) <10.) {
+	       Fill("h_zzmass", Z1.M(),weight);
+	       Fill("h_zzmass", Z2.M(),weight);
+	     }
+	   }
+	 }
+
+	 Fill("h_z1mass", Z1cand.M(),weight);
+	 Fill("h_z2mass", Z2cand.M(),weight);
+	 float ZZdphi =fabs(TVector2::Phi_mpi_pi( Z1cand.Phi() - Z2cand.Phi()));
+	 Fill("h_z1_z2_dphi", ZZdphi,weight);
+
+       }
+       
+     }
+     Fill("h_sumcharge", (electrons[0] +electrons[1]).Charge(), weight);
+   }
   
   int iel(0);
  
@@ -355,6 +494,13 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
     Fill("h_LeptonPt", elit->Pt(),weight);
     Fill("h_LeptonPhi",elit->Phi(),weight);
     Fill("h_LeptonEta",elit->Eta(),weight);
+
+    if(fabs(elit->Eta()) > 1.5) {
+      Fill("h_LeptonDXY_EC", elit->dxy(),weight);
+    }    
+    else{
+      Fill("h_LeptonDXY_B", elit->dxy(),weight);
+    }
     Fill("h_LeptonDXY", elit->dxy(),weight);
     Fill("h_LeptonDXYSig", elit->dxySig() ,weight);
     Fill("h_LeptonDZ", elit->dz(),weight);
@@ -365,6 +511,19 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
     
     Fill("h_LeptonIso", el_iso_03,weight);
     Fill("h_LeptonRelIso", el_reliso_03,weight);
+    if(iel==2){
+      Fill("h_thirdLeptonPt", elit->Pt(),weight);
+      Fill("h_thirdLeptonRelIso", el_reliso_03,weight);
+      Fill("h_thirdLeptonMiniRelIso", el_minireliso,weight);
+      Fill("h_thirdLeptonEta",elit->Eta(),weight);
+    }
+    if(iel==3){
+      Fill("h_fourthLeptonPt", elit->Pt(),weight);
+      Fill("h_fourthLeptonRelIso", el_reliso_03,weight);
+      Fill("h_fourthLeptonMiniRelIso", el_minireliso,weight);
+      Fill("h_fourthLeptonEta",elit->Eta(),weight);
+    }
+
     if(iel==1){
       Fill("h_secondLeptonPt", elit->Pt(),weight);
       Fill("h_secondLeptonRelIso", el_reliso_03,weight);
@@ -436,7 +595,7 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
   
   Fill("h_HT", ht,weight);
   Fill("h_ST", st,weight);
-  Fill("h_PFMET_ST2",ev.PFMET()/pow(2., st), weight);
+  Fill("h_PFMET2_ST",pow(ev.PFMET(),2.)/ st, weight);
   Fill("h_Nbjets",nbjet, weight);
   Fill("h_Njets",jets.size(), weight);
   
@@ -535,8 +694,7 @@ void SignalPlotsEE::Fill(TString name, double value, double w, TString xlabel){
     it->second->Fill(value, w);
     it->second->GetXaxis()->SetTitle(xlabel);
   }
-
-  else cout << name << " not found in map_sig" << endl;
+  
   return;
 }
  
@@ -548,7 +706,6 @@ void SignalPlotsEE::Fill(TString name, double value1, double value2, double w,  
      it->second->GetYaxis()->SetTitle(ylabel);
      
    }
-   else cout << name << " not found in map_sig" << endl;
    return;
  }
 
@@ -557,7 +714,6 @@ void SignalPlotsEE::Fill(TString name, double value1, double value2, double w,  
 void SignalPlotsEE::Fill(TString name, double value1, double value2, double value3, double w){
   std::map<TString, TH3*>::iterator it = map_sig3.find(name);
   if(it!= map_sig3.end()) it->second->Fill(value1, value2, value3, w);
-  else cout << name << " not found in map_sig" << endl;
   return;
 }
 

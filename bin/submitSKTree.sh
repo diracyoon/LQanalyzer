@@ -76,6 +76,7 @@ submit_cat_tag2=""
 ######## NEW FOR TAG v7-6-3.2
 job_nevents=-1
 job_nskip=-1
+job_run_taus=False
 job_run_fake=False
 job_run_flip=False
 check_all_catversions=false
@@ -103,6 +104,7 @@ source ${LQANALYZER_DIR}/LQRun/txt/list_all_mc_${submit_version_tag}.sh
 ### setup list of samples and other useful functions
 source submit_setup.sh
 
+
 linkdef_filepath=/LQAnalysis/Analyzers/include/LQAnalysis_LinkDef.h
 
 if [[ $make_sktrees == "True" ]];
@@ -124,6 +126,15 @@ if [[ $job_run_fake != "False" ]];
         exit 1
   fi
 fi
+if [[ $job_run_taus != "False" ]];
+    then
+    if [[ $job_run_taus != "True" ]];
+        then
+        echo "LQanalyzer::sktree :: ERROR :: Wrong setting for -fake. use -fake 'True'. It is false by default".
+        exit 1
+  fi
+fi
+
 if [[ $job_run_flip != "False" ]];
     then
     if [[ $job_run_flip != "True" ]];
@@ -745,7 +756,7 @@ fi
 if [[ $submit_analyzer_name == "SKTreeMakerTriLep" ]];
     then
     submit_skinput=true
-    job_skim="SKTree_DiLepSkim"
+    job_skim="SKTree_LeptonSkim"
     if [[ $set_sktreemaker_debug == "false" ]];
         then
         job_njobs=1000
@@ -1507,6 +1518,7 @@ if [[ $runDATA  == "true" ]];
       nevents=${job_nevents}
       skipevent=${job_nskip}
       runnp=${job_run_fake}
+      runtau=${job_run_taus}
       runcf=${job_run_flip}
       cycle=${job_cycle}
       skinput=${submit_skinput}
@@ -1630,6 +1642,7 @@ if [[ $runMC  == "true" ]];
     nevents=${job_nevents}
     skipevent=${job_nskip}
     runnp=${job_run_fake}
+    runtau=${job_run_taus}
     runcf=${job_run_flip}
     drawhists=${submit_draw}
     submitallfiles=${job_submitallfiles}

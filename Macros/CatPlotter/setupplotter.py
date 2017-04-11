@@ -14,7 +14,7 @@ def  MakeCutFile(cutlist, jobname):
 
 
 
-def  MakeConfFile(inputdir,jobname,datastream,analyzer,tag,tag2,catversion,periodtag,cut,leglist):
+def  MakeConfFile(inputdir,jobname,datastream,analyzer,tag,tag2,catversion,periodtag,cut,leglist, plottag):
 
     if not os.path.exists(str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/"+jobname +"/Config/"):
         os.system("mkdir " +  str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/"+jobname +"/Config/")
@@ -31,7 +31,7 @@ def  MakeConfFile(inputdir,jobname,datastream,analyzer,tag,tag2,catversion,perio
     file_conf.write("postfix           " + tag2+"_cat_"+catversion+".root\n")
     file_conf.write("# NAME_THE_OUTPUT_DIR\n")
     file_conf.write("outputdir  HN13TeV_"+analyzer+"_"+catversion+"_"+periodtag+"_"+cut+"\n")
-    file_conf.write("histdir    CAT2016_"+catversion+"\n")
+    file_conf.write("histdir    CAT2016_"+catversion+plottag+"\n")
     file_conf.write("# CONFIGURE_HISTOGRAMS\n")
     # CONFIGURE_HISTOGRAMS                                                                                                                                                  
     file_conf.write("showdata   true \n")
@@ -68,7 +68,14 @@ skim = options.S
 catversion=str(os.getenv("CATVERSION"))
 period=options.p
 cutlist=options.C
+plottag=options.c
 configinputfile=options.M
+
+cap_file = open("caption.txt","r")
+text_caption=""
+for ca in cap_file:
+    text_caption=ca
+    break
 
 histlist=[]
 xtitlelist=[] 
@@ -95,6 +102,8 @@ list_of_colors=[]
 input_config = open(inputfile,"r")
 for line in input_config:
     sline = line.split()
+    if "#" in sline[0]:
+        continue
     if "alias" in line:
         continue
     if "END" in line:
@@ -133,6 +142,9 @@ for i in list_of_legends:
     for line in input_config:
         if (" " + i) in line:
             sline = line.split()
+            if "#" in sline[0]:
+                continue
+
             color=""
             uncer=""
             ni=0
@@ -160,7 +172,9 @@ for i in list_of_legends:
                 if os.path.exists(inputdir+"/"+prefix+sline[0]+postfix):
                     sample_exists=True
                     list_of_samples.append(sline[0])
-                    
+                else:
+                    print "Missing " + inputdir+"/"+prefix+sline[0]+postfix
+
             if(len(sline) ) > 8:
                 if sample_exists:
                     list_of_uncert.append(uncer)
@@ -202,7 +216,6 @@ path_skeleton_macroC =  str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/C
 skeleton_macroC = open(path_skeleton_macroC,"r")
 new_macroC = open(path_macroC_file,"w")
 for line in skeleton_macroC:
-    
     if "scp -r " in line:
         if os.getenv("USER") == "jalmond":
             new_macroC.write(line+"")
@@ -219,6 +232,10 @@ for line in skeleton_macroC:
         for x in range(0,len(xtitlelist)):
             new_macroC.write('if(name.find("' + histlist[x] + '")!=string::npos) xtitle='+xtitlelist[x] +';\n')
 
+
+    elif "caption=" in line:
+        new_macroC.write('caption="' + text_caption + '\n')
+
     elif "vector<pair<TString,float> > list;" in line:
         new_macroC.write("")
         new_macroC.write(line+"\n")
@@ -230,12 +247,31 @@ for line in skeleton_macroC:
     elif "for( unsigned int i = 0; i < listofsamples.size(); i++){"       in line :
         new_macroC.write(line+"")
         for x in range(0,len(list_of_legends_alias)):
-            new_macroC.write('   if(listofsamples.at(i) =="'+list_of_legends_alias[x]+'")samples.push_back(make_pair(make_pair('+list_of_legends_alias[x]+','+list_of_colors[x]+'),"'+list_of_legends[x]+'"));\n')
+            if not "nonprompt" in list_of_legends_alias[x]:
+                if not "chargeflip" in list_of_legends_alias[x]:
+                    new_macroC.write('   if(listofsamples.at(i) =="'+list_of_legends_alias[x]+'")samples.push_back(make_pair(make_pair('+list_of_legends_alias[x]+','+list_of_colors[x]+'),"'+list_of_legends[x]+'"));\n')
+                else:
+                    new_macroC.write('   if(listofsamples.at(i) =="'+list_of_legends_alias[x]+'")samples.push_back(make_pair(make_pair(cf,'+list_of_colors[x]+'),"'+list_of_legends[x]+'"));\n')
+            else:
+                new_macroC.write('   if(listofsamples.at(i) =="'+list_of_legends_alias[x]+'")samples.push_back(make_pair(make_pair(np,'+list_of_colors[x]+'),"'+list_of_legends[x]+'"));\n')
+                
     elif " /// Setup list of samples: grouped into different processes" in line:
         new_macroC.write(line+"")
-       
+        
         for x in range(0,len(list_of_legends_alias)):
-            new_macroC.write('vector<pair<TString,float> >  '+list_of_legends_alias[x]+' = InitSample(" '+list_of_legends_alias[x]+'"); \n')    
+            if not "nonprompt" in list_of_legends_alias[x]:
+                if not "chargeflip" in list_of_legends_alias[x]:
+                    new_macroC.write('vector<pair<TString,float> >  '+list_of_legends_alias[x]+' = InitSample(" '+list_of_legends_alias[x]+'"); \n')    
+                else:
+                    new_macroC.write('vector<pair<TString,float> > cf; \n')      
+                    new_macroC.write('cf.push_back(make_pair("chargeflip",0.12)); \n')      
+
+            else:
+                new_macroC.write('/// NP is nonprompt \n')
+                new_macroC.write('vector<pair<TString,float> > np;\n')
+                new_macroC.write('np.push_back(make_pair("'+list_of_legends_alias[x]+'",0.34));\n')
+
+
 
     else:
         new_macroC.write(line+"")
@@ -256,7 +292,7 @@ elif skim == "SKTree_DiLepSkim":
     tag="_SK"
     tag2="_dilep"
 
-MakeConfFile(inputdir,jobdir,stream,analyzer,tag,tag2,catversion,period,cutlist,list_of_legends_alias)
+MakeConfFile(inputdir,jobdir,stream,analyzer,tag,tag2,catversion,period,cutlist,list_of_legends_alias, plottag)
 
 os.system("source  " + str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/Code/runjob.sh " + jobdir)
 

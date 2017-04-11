@@ -23,50 +23,44 @@ Reweight::Reweight(TString filename){
   TDirectory* origDir = gDirectory;
   
   fileData_ = TFile::Open(filename, "READ");
-  if (!fileData_){
-    cout << "\n\nAt least one of the Nvtx reweighting files could not be opened!\n\n";
-    fileData_ = TFile::Open( "/data1/LQAnalyzer_rootfiles_for_analysis/CATAnalysis2016/Pileup/DataPileUp_BtoG_2016.root", "READ");
-
-  }
-  if(filename.Contains("BtoE")){
-    fileMC_   = new TFile("/data1/LQAnalyzer_rootfiles_for_analysis/CATAnalysis2016/Pileup/MCPileUp2016.root", "READ");
-  }
-  if(filename.Contains("BtoG")){
-    fileMC_   = new TFile("/data1/LQAnalyzer_rootfiles_for_analysis/CATAnalysis2016/Pileup/MCPileUp2016_802.root", "READ");
-  }
-  if(filename.Contains("Moriond")){
-    fileMC_   = new TFile("/data1/LQAnalyzer_rootfiles_for_analysis/CATAnalysis2016/Pileup/MCPileUp2016Moriond.root", "READ");
-  }
-
-
+  
+  fileMC_   = new TFile("/data1/LQAnalyzer_rootfiles_for_analysis/CATAnalysis2016/Pileup/MCPileUp2016Moriond.root", "READ");
+  
+  
   TDirectory* tempDir = getTemporaryDirectory();
   tempDir->cd();
-  //cout << " filename = " << filename << endl;
+  
   h_Data_ = 0;
-  if(filename.Contains("BtoE")){
-    h_DataF_ = dynamic_cast<TH1F*>((fileData_->Get("Nvtx_nocut_data"))->Clone());;  
-  }
-  if(filename.Contains("BtoG")){
-    h_Data_ = dynamic_cast<TH1D*>((fileData_->Get("Nvtx_nocut_data"))->Clone());;
-  }
-
-  if(filename.Contains("Moriond")){
-    h_Data_ = dynamic_cast<TH1D*>((fileData_->Get("Nvtx_nocut_data"))->Clone());;
-  }
+  h_Data_0j = 0;
+  h_Data_1j = 0;
+  
+  h_Data_ = dynamic_cast<TH1D*>((fileData_->Get("Nvtx_nocut_data"))->Clone());;
+  h_Data_0j = dynamic_cast<TH1D*>((fileData_->Get("Nvtx_0j_nocut_data"))->Clone());;
+  h_Data_1j = dynamic_cast<TH1D*>((fileData_->Get("Nvtx_1j_nocut_data"))->Clone());;
+  
 
 
-  //
-  if(filename.Contains("BtoE")){
-    h_MCmodF_ = (TH1F*)fileMC_->Get("h_VertexNoReweight");
-  }
-  else{
-    h_MCmod_ = (TH1D*)fileMC_->Get("Nvtx_nocut_mc");
-  }
+  h_MCmod_ = (TH1D*)fileMC_->Get("Nvtx_nocut_mc");
+  h_MCmod_0j = (TH1D*)fileMC_->Get("Nvtx_0j_nocut_mc");
+  h_MCmod_1j = (TH1D*)fileMC_->Get("Nvtx_1j_nocut_mc");
+
   double int_MC_ = h_MCmod_->Integral();
   double int_Data_ = h_Data_->Integral();
 
   h_Data_->Divide(h_MCmod_);
   h_Data_->Scale(int_MC_ / int_Data_);
+
+  double int_MC_0j = h_MCmod_0j->Integral();
+  double int_Data_0j = h_Data_0j->Integral();
+
+  h_Data_0j->Divide(h_MCmod_0j);
+  h_Data_0j->Scale(int_MC_0j / int_Data_0j);
+
+  double int_MC_1j = h_MCmod_1j->Integral();
+  double int_Data_1j = h_Data_1j->Integral();
+
+  h_Data_1j->Divide(h_MCmod_1j);
+  h_Data_1j->Scale(int_MC_1j / int_Data_1j);
 
   
   fileData_->Close();
@@ -88,16 +82,16 @@ Reweight::~Reweight(){
 }
 
 
-double Reweight::GetWeight(Int_t nvtx, TString version){
+double Reweight::GetWeight(Int_t nvtx, TString version, int njet){
 
-  if(version.Contains("v8-0-1")){
-    return h_DataF_->GetBinContent( h_DataF_->FindBin(nvtx)  );
-  }
-  if(version.Contains("v8-0-2")){
-    return h_Data_->GetBinContent( h_Data_->FindBin(nvtx)  );
-  }  
-  return 1.;
+  if (njet < 0)   return h_Data_->GetBinContent( h_Data_->FindBin(nvtx)  );
+  else if(njet ==0)   return h_Data_0j->GetBinContent( h_Data_0j->FindBin(nvtx)  );
+  else return h_Data_1j->GetBinContent( h_Data_1j->FindBin(nvtx)  );
+
+  return h_Data_->GetBinContent( h_Data_->FindBin(nvtx)  );
+  
 }
+
 
 TDirectory* Reweight::getTemporaryDirectory(void) const
 {

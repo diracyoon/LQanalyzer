@@ -32,7 +32,7 @@ class SignalPlotsEE : public StdPlots{
   SignalPlotsEE();
   
   // Main constructor
-  SignalPlotsEE(TString name);
+  SignalPlotsEE(TString name, int iel);
   
   // Destructor
   ~SignalPlotsEE();

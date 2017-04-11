@@ -16,7 +16,7 @@
 
 ClassImp( LQCycleBaseNTuple);
 
-LQCycleBaseNTuple::LQCycleBaseNTuple() : LQCycleBaseBase(), m_outputFile(0),m_outputTrees(),m_outputVarPointers(), k_isdata(false) ,k_running_nonprompt(false), k_running_chargeflip(false), k_sample_name(""), k_classname(""), sample_entries(-999), output_interval(10000), events_to_process(-1), k_mcperiod(0) {
+LQCycleBaseNTuple::LQCycleBaseNTuple() : LQCycleBaseBase(), m_outputFile(0),m_outputTrees(),m_outputVarPointers(), k_isdata(false) ,k_running_nonprompt(false), k_running_chargeflip(false),k_running_taudecays(false), k_sample_name(""), k_classname(""), sample_entries(-999), output_interval(10000), events_to_process(-1), k_mcperiod(0) {
 
 
  
@@ -93,6 +93,11 @@ void LQCycleBaseNTuple::SetMCPeriod( int period){
   m_logger << INFO << "SetMCPeriod : " << k_mcperiod << LQLogger::endmsg;
   k_mcperiod= period;
 }
+
+void LQCycleBaseNTuple::SetTauStatus( bool type){
+  k_running_taudecays = type;
+}
+
 
 void LQCycleBaseNTuple::SetNPStatus( bool type){
   k_running_nonprompt = type;

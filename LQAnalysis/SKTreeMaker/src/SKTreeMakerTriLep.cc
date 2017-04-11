@@ -118,7 +118,7 @@ void SKTreeMakerTriLep::ExecuteEvents()throw( LQError ){
 
   out_event   = eventbase->GetEvent();
   out_trigger = eventbase->GetTrigger();
-  //out_truth   = eventbase->GetTruth();
+  out_truth   = eventbase->GetTruth();
   
   return;
 }// End of execute event loop

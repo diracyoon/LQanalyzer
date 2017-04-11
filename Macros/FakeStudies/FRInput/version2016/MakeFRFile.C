@@ -23,9 +23,9 @@ void MakeFRRootFile(){
   
   TString path= "/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/FakeRateCalculator_El/periodBtoH/";
 
-  TFile * fdata = new TFile(path + "FakeRateCalculator_El_data_DoubleEG_cat_v8-0-4.root");
-  TFile * fmc = new TFile(path + "FakeRateCalculator_El_mc_v8-0-4.root");
-  cout << path + "FakeRateCalculator_El_data_DoubleEG_cat_v8-0-4.root" << endl;
+  TFile * fdata = new TFile(path + "FakeRateCalculator_El_data_DoubleEG_cat_v8-0-6.root");
+  TFile * fmc = new TFile(path + "FakeRateCalculator_El_mc_v8-0-6.root");
+  cout << path + "FakeRateCalculator_El_data_DoubleEG_cat_v8-0-6.root" << endl;
   if(!fdata)cout << "No Data" << endl;
   if (!fmc) cout << "No MC" << endl;
   /// Set Plotting style
@@ -48,37 +48,87 @@ void MakeFRRootFile(){
   isocut.push_back("dxy_b050_e040");
   isocut.push_back("dxy_b050_e025");
   isocut.push_back("dxy_b050_e020");
+  isocut.push_back("dxy_b050_e010");
 
   isocut.push_back("dxy_b025_e100");
   isocut.push_back("dxy_b025_e050");
   isocut.push_back("dxy_b025_e040");
   isocut.push_back("dxy_b025_e025");
   isocut.push_back("dxy_b025_e020");
+  isocut.push_back("dxy_b025_e010");
 
   isocut.push_back("dxy_b015_e100");
   isocut.push_back("dxy_b015_e050");
   isocut.push_back("dxy_b015_e040");
   isocut.push_back("dxy_b015_e025");
   isocut.push_back("dxy_b015_e020");
+  isocut.push_back("dxy_b015_e010");
 
   isocut.push_back("dxy_b010_e100");
   isocut.push_back("dxy_b010_e050");
   isocut.push_back("dxy_b010_e040");
   isocut.push_back("dxy_b010_e025");
   isocut.push_back("dxy_b010_e020");
+  isocut.push_back("dxy_b010_e010");
+  
+  isocut.push_back("dxy_b017_e017");
+  isocut.push_back("dxy_b017_e015");
+  isocut.push_back("dxy_b017_e014");
+  isocut.push_back("dxy_b017_e013");
+  isocut.push_back("dxy_b017_e012");
+  isocut.push_back("dxy_b017_e011");
+  isocut.push_back("dxy_b017_e010");
+
+  isocut.push_back("dxy_b015_e017");
+  isocut.push_back("dxy_b015_e015");
+  isocut.push_back("dxy_b015_e014");
+  isocut.push_back("dxy_b015_e013");
+  isocut.push_back("dxy_b015_e012");
+  isocut.push_back("dxy_b015_e011");
+  isocut.push_back("dxy_b015_e010");
+
+  isocut.push_back("dxy_b014_e017");
+  isocut.push_back("dxy_b014_e015");
+  isocut.push_back("dxy_b014_e014");
+  isocut.push_back("dxy_b014_e013");
+  isocut.push_back("dxy_b014_e012");
+  isocut.push_back("dxy_b014_e011");
+  isocut.push_back("dxy_b014_e010");
+
+  isocut.push_back("dxy_b013_e017");
+  isocut.push_back("dxy_b013_e015");
+  isocut.push_back("dxy_b013_e014");
+  isocut.push_back("dxy_b013_e013");
+  isocut.push_back("dxy_b013_e012");
+  isocut.push_back("dxy_b013_e011");
+  isocut.push_back("dxy_b013_e010");
+
+  isocut.push_back("dxy_b012_e017");
+  isocut.push_back("dxy_b012_e015");
+  isocut.push_back("dxy_b012_e014");
+  isocut.push_back("dxy_b012_e013");
+  isocut.push_back("dxy_b012_e012");
+  isocut.push_back("dxy_b012_e011");
+  isocut.push_back("dxy_b012_e010");
+
+  isocut.push_back("dxy_b011_e017");
+  isocut.push_back("dxy_b011_e015");
+  isocut.push_back("dxy_b011_e014");
+  isocut.push_back("dxy_b011_e013");
+  isocut.push_back("dxy_b011_e012");
+  isocut.push_back("dxy_b011_e011");
+  isocut.push_back("dxy_b011_e010");
+
+  isocut.push_back("dxy_b010_e017");
+  isocut.push_back("dxy_b010_e015");
+  isocut.push_back("dxy_b010_e014");
+  isocut.push_back("dxy_b010_e013");
+  isocut.push_back("dxy_b010_e012");
+  isocut.push_back("dxy_b010_e011");
 
 
-  isocut.push_back("b045_e045");
-  isocut.push_back("b045_e050");
-  isocut.push_back("b045_e055");
-  isocut.push_back("b045_e060");
-  isocut.push_back("b045_e065");
-  isocut.push_back("b045_e075");
-  isocut.push_back("b045_e100");
-  isocut.push_back("b045_e125");
-
-  isocut.push_back("b050_e045");
   isocut.push_back("b050_e050");
+  isocut.push_back("b050_e0525");
   isocut.push_back("b050_e055");
   isocut.push_back("b050_e060");
   isocut.push_back("b050_e065");
@@ -86,8 +136,17 @@ void MakeFRRootFile(){
   isocut.push_back("b050_e100");
   isocut.push_back("b050_e125");
 
-  isocut.push_back("b055_e045");
+  isocut.push_back("b0525_e050");
+  isocut.push_back("b0525_e0525");
+  isocut.push_back("b0525_e055");
+  isocut.push_back("b0525_e060");
+  isocut.push_back("b0525_e065");
+  isocut.push_back("b0525_e075");
+  isocut.push_back("b0525_e100");
+  isocut.push_back("b0525_e125");
+
   isocut.push_back("b055_e050");
+  isocut.push_back("b055_e0525");
   isocut.push_back("b055_e055");
   isocut.push_back("b055_e060");
   isocut.push_back("b055_e065");
@@ -95,8 +154,8 @@ void MakeFRRootFile(){
   isocut.push_back("b055_e100");
   isocut.push_back("b055_e125");
 
-  isocut.push_back("b065_e045");
   isocut.push_back("b065_e050");
+  isocut.push_back("b065_e0525");
   isocut.push_back("b065_e055");
   isocut.push_back("b065_e060");
   isocut.push_back("b065_e065");
@@ -104,8 +163,8 @@ void MakeFRRootFile(){
   isocut.push_back("b065_e100");
   isocut.push_back("b065_e125");
 
-  isocut.push_back("b060_e045");
   isocut.push_back("b060_e050");
+  isocut.push_back("b060_e0525");
   isocut.push_back("b060_e055");
   isocut.push_back("b060_e060");
   isocut.push_back("b060_e065");
@@ -113,8 +172,8 @@ void MakeFRRootFile(){
   isocut.push_back("b060_e100");
   isocut.push_back("b060_e125");
 
-  isocut.push_back("b075_e045");
   isocut.push_back("b075_e050");
+  isocut.push_back("b075_e0525");
   isocut.push_back("b075_e055");
   isocut.push_back("b075_e060");
   isocut.push_back("b075_e065");
@@ -122,8 +181,8 @@ void MakeFRRootFile(){
   isocut.push_back("b075_e100");
   isocut.push_back("b075_e125");
 
-  isocut.push_back("b100_e045");
   isocut.push_back("b100_e050");
+  isocut.push_back("b100_e0525");
   isocut.push_back("b100_e055");
   isocut.push_back("b100_e060");
   isocut.push_back("b100_e065");
@@ -131,8 +190,8 @@ void MakeFRRootFile(){
   isocut.push_back("b100_e100");
   isocut.push_back("b100_e125");
 
-  isocut.push_back("b125_e045");
   isocut.push_back("b125_e050");
+  isocut.push_back("b125_e0525");
   isocut.push_back("b125_e055");
   isocut.push_back("b125_e060");
   isocut.push_back("b125_e065");
@@ -160,9 +219,21 @@ void MakeFRRootFile(){
   fakes.push_back("ELECTRON16_FR_POG_TIGHT_CC_dijet_pog");
   fakes.push_back("ELECTRON16_FR_POG_MEDIUM_CC_dijet_pog");
   fakes.push_back("ELECTRON16_FR_MVA_TIGHT_CC_dijet_mva");
+  fakes.push_back("ELECTRON16_FR_POG_TIGHT_DXYCC_dijet_pog");
+  fakes.push_back("ELECTRON16_FR_POG_MEDIUM_DXYCC_dijet_pog");
+  fakes.push_back("ELECTRON16_FR_MVA_TIGHT_DXYCC_dijet_mva");
+
+  fakes.push_back("ELECTRON16_FR_POG_TIGHT_CC_dijet_pog_d0");
+  fakes.push_back("ELECTRON16_FR_POG_MEDIUM_CC_dijet_pog_d0");
+  fakes.push_back("ELECTRON16_FR_MVA_TIGHT_CC_dijet_mva_d0");
+  fakes.push_back("ELECTRON16_FR_POG_TIGHT_DXYCC_dijet_pog_d0");
+  fakes.push_back("ELECTRON16_FR_POG_MEDIUM_DXYCC_dijet_pog_d0");
+  fakes.push_back("ELECTRON16_FR_MVA_TIGHT_DXYCC_dijet_mva_d0");
+
 
   std::vector<TString> fakes_opt;
   fakes_opt.push_back("HNTight_");
+  //fakes_opt.push_back("HNTight_miniiso_");
   fakes_opt.push_back("HNTight_dxysig_");
   fakes_opt.push_back("HNTight_miniiso_dxysig_");
   
@@ -170,7 +241,7 @@ void MakeFRRootFile(){
     for(vector<TString>::iterator it = fakes.begin(); it!=fakes.end(); ++it){
       cout << *it2 << endl;
       if(!CheckFile(fdata))return;
-      if(!CheckFile(fmc))return;
+     if(!CheckFile(fmc))return;
 
       TString denom ="LooseEl" + *it + "_"+ *it2;
       TString num ="TightEl" + *it +  "_"+ *it2;
@@ -266,6 +337,49 @@ void MakeFRRootFile(){
           num ="TightEl" + *it + *it3+  "_dijet_nod0_dxysig_miniiso_"+ *it2;
         }
 
+        TH2D* h_pt_num= (TH2D*)fdata->Get(num.Data());
+        TH2D* h_pt_denom= (TH2D*)fdata->Get(denom.Data());
+
+        cout << h_pt_num << " " << h_pt_denom << endl;
+        cout << num << " " << denom << endl;
+        CheckHist(h_pt_denom);
+        CheckHist(h_pt_num);
+        TH2D* h_mcpt_num= (TH2D*)fmc->Get(num.Data());
+        TH2D* h_mcpt_denom= (TH2D*)fmc->Get(denom.Data());
+        CheckHist(h_mcpt_denom);
+        CheckHist(h_mcpt_num);
+
+        TString name = *it +*it2 + *it3;
+
+        TH2D* eff_rate = (TH2D*)h_pt_num->Clone(("FakeRate_" + name).Data());
+        TH2D* hratedenom = (TH2D*)h_pt_denom->Clone((name +"_denom").Data());
+        eff_rate->Add(h_mcpt_num,-1.);
+        hratedenom->Add(h_mcpt_denom, -1.);
+        eff_rate->Divide(eff_rate,hratedenom,1.,1.,"cl=0.683 b(1,1) mode");
+        eff_rate->Write();
+      }
+    }
+  }
+
+
+  for(vector<TString>::iterator it2 = fakes40.begin(); it2!=fakes40.end(); ++it2){
+    for(vector<TString>::iterator it3 = isocut.begin(); it3!=isocut.end(); ++it3){
+      for(vector<TString>::iterator it = fakes_opt.begin(); it!=fakes_opt.end(); ++it){
+
+        if(it3->Contains("dxy") && it->Contains("mini")) continue;
+
+        if(!CheckFile(fdata))return;
+        if(!CheckFile(fmc))return;
+        TString denom ="LooseEl" + *it + *it3 +"_dijet_d0_"+ *it2;
+        TString num ="TightEl" + *it +  *it3 +"_dijet_d0_"+ *it2;
+        if(it->Contains("dxy")){
+          denom ="LooseEl" + *it + *it3 +"_dijet_d0_dxysig_"+ *it2;
+          num ="TightEl" + *it +  *it3 +"_dijet_d0_dxysig_"+ *it2;
+        }
+        if(it->Contains("miniiso")){
+          denom ="LooseEl" + *it + *it3+ "_dijet_d0_dxysig_miniiso_"+ *it2;
+          num ="TightEl" + *it + *it3+  "_dijet_d0_dxysig_miniiso_"+ *it2;
+        }
 
         TH2D* h_pt_num= (TH2D*)fdata->Get(num.Data());
         TH2D* h_pt_denom= (TH2D*)fdata->Get(denom.Data());
@@ -278,24 +392,19 @@ void MakeFRRootFile(){
         TH2D* h_mcpt_denom= (TH2D*)fmc->Get(denom.Data());
         CheckHist(h_mcpt_denom);
         CheckHist(h_mcpt_num);
-        cout << "tets" << endl;
 
-        TString name = *it +*it2 + *it3;
+        TString name = *it +*it2 + *it3+"_d0";
 
         TH2D* eff_rate = (TH2D*)h_pt_num->Clone(("FakeRate_" + name).Data());
-        cout << "tets" << endl;
         TH2D* hratedenom = (TH2D*)h_pt_denom->Clone((name +"_denom").Data());
         eff_rate->Add(h_mcpt_num,-1.);
         hratedenom->Add(h_mcpt_denom, -1.);
         eff_rate->Divide(eff_rate,hratedenom,1.,1.,"cl=0.683 b(1,1) mode");
         eff_rate->Write();
-
-        //TCanvas* c1 = new TCanvas(("Plot"), "Plot", 1600, 1200);                                                                                                                                                                                                       
-        //eff_rate->Draw("colz textE");                                                                                                                                                                                                                                  
-	//c1->SaveAs(("/home/jalmond/WebPlots/13TeV/Fakes/2D_ps_hntight_aj40.pdf"));                                                                                                                                                                                         
       }
     }
   }
+
 
 
   return;

@@ -1290,6 +1290,7 @@ parser.add_option("-L", "--LibList", dest="LibList", default="NULL", help="Add e
 parser.add_option("-D", "--debug", dest="debug", default=False, help="Run submit script in debug mode?")
 parser.add_option("-m", "--useskim", dest="useskim", default="Lepton", help="Run submit script in debug mode?")
 parser.add_option("-P", "--runnp", dest="runnp", default="runnp", help="Run fake mode for np bkg?")
+parser.add_option("-G", "--runtau", dest="runtau", default="runtau", help="Run only tausmode for bkg?")
 parser.add_option("-Q", "--runcf", dest="runcf", default="runcf", help="Run fake mode for np bkg?")
 parser.add_option("-q", "--queue", dest="queue", default="", help="Which queue to use?")
 parser.add_option("-J", "--setnjobs", dest="setnjobs", default="False", help="user sets njobs?")
@@ -1331,6 +1332,7 @@ cycle = options.cycle
 logstep = int(options.logstep)
 loglevel = options.loglevel
 runnp = options.runnp
+runtau = options.runtau
 runcf = options.runcf
 queue = options.queue
 tagger= options.tagger
@@ -1532,6 +1534,7 @@ useskimtmp=""
 ismctmp=  True
 sampletmp=""
 runnptmp=""
+runtautmp=""
 runcftmp=""
 channeltmp=""
 
@@ -1571,7 +1574,7 @@ sample_times=[]
 tmpnjobs_for_submittion=0
 
 ### rundebug=True will not submit any jobs and debug.txt file will be produced in ./
-rundebug=False
+rundebug=True
 if rundebug:
     file_debug = open("debug.txt","w")
     file_debug.write("DEBUG \n")
@@ -1850,6 +1853,7 @@ for nsample in range(0, len(sample)):
 
         sampletmp=sample[x]
         runnptmp=runnp
+        runtautmp=runtau
         runcftmp=runcf
         channeltmp=channel
 
@@ -2170,7 +2174,7 @@ for nsample in range(0, len(sample)):
     blankbuffer = "         "
     if not queue:
         queue="None"
-    command1= "python  " +  os.getenv("LQANALYZER_DIR")+  "/python/CATConfig.py -p " + s + "  -s " + str(channel) + "  -j " + str(njobs_for_submittion) + " -c  " + str(cycle)+ " -o " + str(logstep)+ "  -d " + str(data_lumi) + " -O " + str(Finaloutputdir) + "  -w " + str(remove_workspace)+ " -l  " + str(loglevel) + "  -k " + str(skipev) + "  -n " + str(number_of_events_per_job) + "  -e " + str(totalev) + "  -x " + str(xsec) + "  -T " + str(tar_lumi) + " -E " + str(eff_lumi) + "  -S " + str(useskinput) + " -R " + str(runevent)+ "  -N " + str(useCATv742ntuples) + " -L " + str(tmplist_of_extra_lib) + " -D " + str(DEBUG) + " -m " + str(useskim) + " -P  " + str(runnp) + " -Q " + str(runcf) + " -v " + str(catversion) + " -f " + str(skflag) + " -b " + str(usebatch) + "  -X " + str(tagger) +" -q " + str(queue) + " -J " + str(setjobs) 
+    command1= "python  " +  os.getenv("LQANALYZER_DIR")+  "/python/CATConfig.py -p " + s + "  -s " + str(channel) + "  -j " + str(njobs_for_submittion) + " -c  " + str(cycle)+ " -o " + str(logstep)+ "  -d " + str(data_lumi) + " -O " + str(Finaloutputdir) + "  -w " + str(remove_workspace)+ " -l  " + str(loglevel) + "  -k " + str(skipev) + "  -n " + str(number_of_events_per_job) + "  -e " + str(totalev) + "  -x " + str(xsec) + "  -T " + str(tar_lumi) + " -E " + str(eff_lumi) + "  -S " + str(useskinput) + " -R " + str(runevent)+ "  -N " + str(useCATv742ntuples) + " -L " + str(tmplist_of_extra_lib) + " -D " + str(DEBUG) + " -m " + str(useskim) + " -P  " + str(runnp) + " -Q " + str(runcf) + " -v " + str(catversion) + " -f " + str(skflag) + " -b " + str(usebatch) + "  -X " + str(tagger) +" -q " + str(queue) + " -J " + str(setjobs) + " -G " + str(runtau) + " -F " + str(tmpsubmit_allfiles)
     command2=command1
     command2 = command2.replace("CATConfig.py", "localsubmit.py")
     command2_background=command2 + "&>  "+an_jonpre+"/CAT_SKTreeOutput/"+os.getenv("USER")+"/CLUSTERLOG" + str(tagger) +"/" + tagger + "/" + s+".txt&"

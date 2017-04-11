@@ -39,12 +39,14 @@ parser.add_option("-L", "--LibList", dest="LibList", default="NULL", help="Add e
 parser.add_option("-D", "--debug", dest="debug", default=False, help="Run submit script in debug mode?")
 parser.add_option("-m", "--useskim", dest="useskim", default="Lepton", help="Run submit script in debug mode?")
 parser.add_option("-P", "--runnp", dest="runnp", default="runnp", help="Run fake mode for np bkg?")
+parser.add_option("-G", "--runtau", dest="runtau", default="runtau", help="Run fake mode for np bkg?")
 parser.add_option("-Q", "--runcf", dest="runcf", default="runcf", help="Run fake mode for np bkg?")
 parser.add_option("-q", "--queue", dest="queue", default="", help="Which queue to use?")
 parser.add_option("-v", "--catversion", dest="catversion", default="NULL", help="What cat version?")
 parser.add_option("-f", "--skflag", dest="skflag", default="NULL", help="add input flag?")
 parser.add_option("-b", "--usebatch", dest="usebatch", default="usebatch", help="Run in batch queue?")
 parser.add_option("-J", "--setnjobs", dest="setnjobs", default="False", help="user sets njobs?")
+parser.add_option("-F","--submitallfiles",dest="submitallfiles",default="False", help="force n=1000")
 
 
 ###################################################
@@ -63,6 +65,7 @@ cycle = options.cycle
 logstep = int(options.logstep)
 loglevel = options.loglevel
 runnp = options.runnp
+runtau = options.runtau
 runcf = options.runcf
 queue = options.queue
 tagger= options.tagger
@@ -87,6 +90,13 @@ DEBUG = options.debug
 useskim = options.useskim
 skflag = options.skflag
 usebatch =options.usebatch
+
+tmpsubmit_allfiles=options.submitallfiles
+submit_allfiles=False
+if tmpsubmit_allfiles == "true":
+    submit_allfiles=True
+
+
 
 
 ###### New for 801.7 tag  
@@ -591,6 +601,11 @@ number_of_files = sum(1 for item in os.listdir(InputDir) if isfile(join(InputDir
 if number_of_files == 1 and not setnumber_of_cores:
     singlejob=False
     running_batch=True
+if number_of_files == 1 and submit_allfiles:
+    singlejob=False
+    running_batch=True
+
+
 
 if DEBUG == "True":
     print "Job has " + str(number_of_files) + " files to process:"
@@ -732,7 +747,7 @@ for line in fr:
             filelist = output+ "Job_" + str(count) + "/" + sample + "_%s" % (count) + ".txt"
             fwrite = open(filelist, 'w')
             configfile=open(runscript,'w')
-            configfile.write(makeConfigFile(loglevel, outsamplename, filelist, tree, cycle, count, outputdir_tmp, outputdir, number_of_events_per_job, logstep, skipev, datatype, original_channel, data_lumi, totalev, xsec, tar_lumi, eff_lumi, useskinput, runevent, list_of_extra_lib, runnp,runcf, skflag)) #job, input, sample, ver, output
+            configfile.write(makeConfigFile(loglevel, outsamplename, filelist, tree, cycle, count, outputdir_tmp, outputdir, number_of_events_per_job, logstep, skipev, datatype, original_channel, data_lumi, totalev, xsec, tar_lumi, eff_lumi, useskinput, runevent, list_of_extra_lib, runnp,runcf,runtau, skflag)) #job, input, sample, ver, output
             configfile.close()
             if DEBUG == "True":
                 print "Making file : " + printedrunscript
@@ -757,7 +772,7 @@ for line in fr:
                 filelist = output+ "Job_" + str(count) + "/" + sample + "_%s" % (count) + ".txt"
                 fwrite = open(filelist, 'w')
                 configfile=open(runscript,'w')
-                configfile.write(makeConfigFile(loglevel,outsamplename, filelist, tree, cycle, count, outputdir_tmp,outputdir, number_of_events_per_job, logstep, skipev, datatype , original_channel, data_lumi, totalev, xsec, tar_lumi, eff_lumi, useskinput, runevent,list_of_extra_lib, runnp, runcf, skflag))
+                configfile.write(makeConfigFile(loglevel,outsamplename, filelist, tree, cycle, count, outputdir_tmp,outputdir, number_of_events_per_job, logstep, skipev, datatype , original_channel, data_lumi, totalev, xsec, tar_lumi, eff_lumi, useskinput, runevent,list_of_extra_lib, runnp, runcf,runtau, skflag))
                 configfile.close()
                 fwrite.write(line)
                 filesprocessed+=1

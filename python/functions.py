@@ -114,7 +114,7 @@ def make_batch_script(workdir, jname, lqdir, macroname, cluster):
     return config
 
 
-def makeConfigFile(log,sample, input, tree, cycle, ver, output_tmp, output, nevents, outstep, skipev, datatype, channel, period, totalmcevents, xsec, tar_lumi, eff_lumi, useSKinput, runevent, libraries, runnp, runcf, skflag):
+def makeConfigFile(log,sample, input, tree, cycle, ver, output_tmp, output, nevents, outstep, skipev, datatype, channel, period, totalmcevents, xsec, tar_lumi, eff_lumi, useSKinput, runevent, libraries, runnp, runcf, runtau, skflag):
 
     config='{\n'
     config+='    gEnv->SetValue("TFile.AsyncPrefetching", 1);\n'
@@ -177,6 +177,7 @@ def makeConfigFile(log,sample, input, tree, cycle, ver, output_tmp, output, neve
         config+='   analysis.SetMCCrossSection(' + str(xsec) +');\n'
     config+='   analysis.SetUserFlag("'+skflag+'");\n'    
     config+='   analysis.RunNonPrompt("' +runnp+'");\n'
+    config+='   analysis.RunTauMode("' +runtau+'");\n'
     config+='   analysis.RunChargeFlip("' +runcf+'");\n'
     config+='   analysis.SetName("' + sample + '",'+ str(ver) +',"'+ output_tmp +'");\n'                        
     config+='   analysis.Initialize();\n'

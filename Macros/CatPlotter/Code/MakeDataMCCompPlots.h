@@ -42,7 +42,9 @@ void MakeCutFlow(std::string hist);
 int MakeCutFlow_Plots(string configfile);
 void PrintCanvas(TCanvas* c1, std::string folder, std::string plotdesciption,  std::string title);
 bool repeat(string hname);
-TLegend* MakeLegend(map<TString, TH1*> legmap,TH1* h_legdata, bool rundata, bool log, float ymax, float xmax);
+TLegend* MakeLegend( map<TString, TH1*> legmap,TH1* h_legdata, bool rundata, bool log, float ymax, float xmax);
+TLegend* MakeRatioLegend( TH1* h, TH1*h2);
+
 TH1* MakeDataHist(string name, double xmin, double xmax, TH1* h_up,bool ylog , int rebin);
 void CheckHist(TH1* h);
 void CheckSamples(int nsamples);
@@ -52,7 +54,7 @@ void SetErrors(TH1* hist, float normerr, bool usestat);
 TH1* MakeStackUp(map<TString, TH1*> map_of_stacks, TString clonename);
 TH1* MakeStackDown(map<TString, TH1*> map_of_stacks, TString clonename);
 TH1* MakeSumHist(THStack* thestack);
-float  GetMaximum(TH1* h_data, TH1* h_up, bool ylog, string name, float xmax);
+float  GetMaximum(TH1* h_data, TH1* h_up, bool ylog, string name, float xmax, float xmin);
 void SetTitles(TH1* hist, string name);
 bool HistInGev(string name);
 void fixOverlay();
@@ -187,8 +189,8 @@ void setTDRStyle() {
   // Margins:
   tdrStyle->SetPadTopMargin(0.05);
   tdrStyle->SetPadBottomMargin(0.1);
-  tdrStyle->SetPadLeftMargin(0.16);
-  tdrStyle->SetPadRightMargin(0.02);
+  tdrStyle->SetPadLeftMargin(0.14);
+  tdrStyle->SetPadRightMargin(0.04);
 
   // For the Global title:
 
@@ -202,8 +204,8 @@ void setTDRStyle() {
   // For the axis titles:
   tdrStyle->SetTitleColor(1, "XYZ");
   tdrStyle->SetTitleFont(42, "XYZ");
-  tdrStyle->SetTitleSize(0.07, "XYZ");
-  tdrStyle->SetTitleXOffset(0.9);
+  tdrStyle->SetTitleSize(0.05, "XYZ");
+  tdrStyle->SetTitleXOffset(0.8);
   tdrStyle->SetTitleYOffset(1.25);
 
   // For the axis labels:

@@ -341,7 +341,7 @@ float DataDrivenBackgrounds::Get_DataDrivenWeight_MMM(bool geterr, vector<snu::K
   return mmm_weight;
 }
 
-float DataDrivenBackgrounds::Get_DataDrivenWeight(bool geterr, std::vector<snu::KMuon> k_muons, TString muid, int n_muons, std::vector<snu::KElectron> k_electrons, TString elid, int n_electrons){
+float DataDrivenBackgrounds::Get_DataDrivenWeight(bool geterr, std::vector<snu::KMuon> k_muons, TString muid, int n_muons, std::vector<snu::KElectron> k_electrons, TString elid, int n_electrons, TString elidloose, TString elmethod){
 
   float this_weight = 0.;
 
@@ -379,8 +379,8 @@ float DataDrivenBackgrounds::Get_DataDrivenWeight(bool geterr, std::vector<snu::
 
   std::vector<TLorentzVector> muons=MakeTLorentz(k_muons);
   std::vector<TLorentzVector> electrons=MakeTLorentz(k_electrons);
-
-  this_weight =m_fakeobj->get_eventweight(geterr, muons, muid, electrons, elid, isT);
+  TString elkey = GetElFRKey(elidloose, elid, elmethod);
+  this_weight =m_fakeobj->get_eventweight(geterr, muons, muid, electrons, elkey , isT);
 
   return this_weight;
 }
@@ -444,46 +444,69 @@ float DataDrivenBackgrounds::Get_DataDrivenWeight_EE(bool geterr,vector<snu::KEl
 
   if(k_electrons.size()==0) return 0.;
 
-  float ee_weight = 0.;
   if(k_electrons.size()==2){
 
     bool is_el1_tight    =  dd_eventbase->GetElectronSel()->ElectronPass(k_electrons.at(0),IDtight);
-    bool is_el2_tight    = dd_eventbase->GetElectronSel()->ElectronPass(k_electrons.at(1),IDloose);
+    bool is_el2_tight    = dd_eventbase->GetElectronSel()->ElectronPass(k_electrons.at(1),IDtight);
     vector<TLorentzVector> electrons=MakeTLorentz(k_electrons);
 
-    //float HNCommonLeptonFakes::get_dilepton_ee_eventweight(bool geterr, std::vector<TLorentzVector> electrons, bool isel1tight, bool isel2tight, TString eltightid, TString elloosid, float awayjetpt ){
-
-    /// "" loose ID needs filling here
+    TString elkey = GetElFRKey(IDloose, IDtight,  method);
     
-    TString cut = "pt_eta_";
-
-    if(method.Contains("opt_dijet")){
+    return  m_fakeobj->get_dilepton_ee_eventweight(geterr,electrons, is_el1_tight, is_el2_tight, elkey );
+    
       
-      TString sjpt="";
-      if(method.Contains("ajet20"))sjpt="20";
-      if(method.Contains("ajet30"))sjpt="30";
-      if(method.Contains("ajet40"))sjpt="40";
-      if(method.Contains("ajet60"))sjpt="60";
-      else sjpt="40";
+    /// "" loose ID needs filling here
+  }
+  return 1.;
+}
 
-      if(IDtight.Contains("HNTight_b") || IDtight.Contains("HNTight_e")){
-	if(method.Contains("dxysig")) {
-	  if(method.Contains("miniiso"))  cut+="miniiso_dxysig_";
-	  else cut+="dxysig_";
-	}
-	cut+=IDtight+"_"+sjpt;
-      }
-      else{
-	if(method.Contains("dxysig")) cut+="dxysig_";
-	cut+=IDtight+"_"+sjpt;
-      }
-      
-      return m_fakeobj->get_dilepton_ee_eventweight(geterr,electrons, is_el1_tight,is_el2_tight, cut);
+TString DataDrivenBackgrounds::GetElFRKey( TString IDloose,TString IDtight, TString method){
 
+  TString cut = "pt_eta_";
+
+  if(method.Contains("opt_dijet")){
+    string IDtightmod = string(IDtight);
+    if(IDtight.Contains("miniiso")){
+      std::string sr = "miniiso_";
+      std::string::size_type i = IDtightmod.find(sr);
+      if (i != std::string::npos)
+	IDtightmod.erase(i, sr.length());
+    }
+    if(IDtight.Contains("dxysig_")){
+      std::string sr = "dxysig_";
+      std::string::size_type i = IDtightmod.find(sr);
+      if (i != std::string::npos)
+        IDtightmod.erase(i, sr.length());
     }
     
-    else if(method.Contains("dijet")){
-      TString sjpt="";
+    
+    TString sjpt="";
+    if(method.Contains("ajet20"))sjpt="20";
+    if(method.Contains("ajet30"))sjpt="30";
+    if(method.Contains("ajet40"))sjpt="40";
+    if(method.Contains("ajet60"))sjpt="60";
+    else sjpt="40";
+    
+    if(IDtight.Contains("HNTight_") && (IDtight.Contains("_b") || IDtight.Contains("_e")) ){
+      if(IDtight.Contains("dxysig")) {
+	if(IDtight.Contains("miniiso"))  cut="miniiso_dxysig_"+cut;
+	else cut="dxysig_"+cut;
+      }
+      else if(IDtight.Contains("miniiso"))  cut ="miniiso_"+cut;
+      cut+=IDtightmod+"_"+sjpt;
+    }
+    else{
+      if(method.Contains("dxysig")) cut="dxysig_"+cut;
+      cut+=IDtightmod+"_"+sjpt;
+    }
+
+    if(method.Contains("_d0")) cut+="_d0";
+    return cut;
+    
+  }
+
+  else if(method.Contains("dijet")){
+    TString sjpt="";
       if(method.Contains("ajet20"))sjpt="20_";
       if(method.Contains("ajet30"))sjpt="30_";
       if(method.Contains("ajet40"))sjpt="40_";
@@ -497,23 +520,34 @@ float DataDrivenBackgrounds::Get_DataDrivenWeight_EE(bool geterr,vector<snu::KEl
       else if(IDtight == "ELECTRON16_HN_TIGHT_DXYSIG" && IDloose=="ELECTRON16_HN_FAKELOOSE_NOD0")  cut+=sjpt+IDtight + "_dijet_nod0_dxysig";
       
       if(IDtight == "ELECTRON16_HN_TIGHT" && IDloose=="ELECTRON16_HN_FAKELOOSE")  cut+=sjpt+IDtight + "_dijet_d0";
-      if(IDtight == "ELECTRON16_HN_TIGHT_DXYSIG" && IDloose=="ELECTRON16_HN_FAKELOOSE")  cut+=sjpt+IDtight + "_dijet_d0_dxysig";
+      if(IDtight == "ELECTRON16_HN_TIGHT_DXYSIG" && IDloose=="ELECTRON16_HN_FAKELOOSE"&& (method.Contains("miniiso")))  cut+=sjpt+IDtight + "_dijet_d0_dxysig_miniiso";
+      else if(IDtight == "ELECTRON16_HN_TIGHT_DXYSIG" && IDloose=="ELECTRON16_HN_FAKELOOSE")  cut+=sjpt+IDtight + "_dijet_d0_dxysig";
+
+
       if(IDtight == "ELECTRON16_HN_TIGHT" && IDloose=="ELECTRON16_HN_FAKELOOSE_ISO04")  cut+=sjpt+IDtight + "_dijet_iso04";
       if(IDtight == "ELECTRON16_HN_TIGHT" && IDloose=="ELECTRON16_HN_FAKELOOSE_ISO06")  cut+=sjpt+IDtight + "_dijet_iso06";
       if(IDtight == "ELECTRON16_FR_POG_TIGHT" && IDloose=="ELECTRON16_POG_FAKELOOSE")  cut+=sjpt+IDtight + "_dijet_pog";
-      if(IDtight == "ELECTRON16_FR_POG_MEDIUM" && IDloose=="ELECTRON16_POG_FAKELOOSE")  cut+=sjpt+IDtight + "_dijet_pog";
+      if(IDtight == "ELECTRON16_FR_POG_MEDIUM" && IDloose=="ELECTRON16_POG_MEDIUM_FAKELOOSE")  cut+=sjpt+IDtight + "_dijet_pog";
       if(IDtight == "ELECTRON16_FR_POG_TIGHT_CC" && IDloose=="ELECTRON16_POG_FAKELOOSE_CC")  cut+=sjpt+IDtight + "_dijet_pog";
-      if(IDtight == "ELECTRON16_FR_POG_MEDIUM_CC" && IDloose=="ELECTRON16_POG_FAKELOOSE_CC")  cut+=sjpt+IDtight + "_dijet_pog";
+      if(IDtight == "ELECTRON16_FR_POG_MEDIUM_CC" && IDloose=="ELECTRON16_POG_MEDIUM_FAKELOOSE_CC")  cut+=sjpt+IDtight + "_dijet_pog";
       if(IDtight == "ELECTRON16_FR_MVA_TIGHT_CC" && IDloose=="ELECTRON16_MVA_FAKELOOSE_CC")  cut+=sjpt+IDtight + "_dijet_mva";
+      if(IDtight == "ELECTRON16_FR_POG_TIGHT_DXYCC" && IDloose=="ELECTRON16_POG_FAKELOOSE_CC")  cut+=sjpt+IDtight + "_dijet_pog";
+      if(IDtight == "ELECTRON16_FR_POG_MEDIUM_DXYCC" && IDloose=="ELECTRON16_POG_MEDIUM_FAKELOOSE_CC")  cut+=sjpt+IDtight + "_dijet_pog";
+      if(IDtight == "ELECTRON16_FR_MVA_TIGHT_DXYCC" && IDloose=="ELECTRON16_MVA_FAKELOOSE_CC")  cut+=sjpt+IDtight + "_dijet_mva";
 
-      return m_fakeobj->get_dilepton_ee_eventweight(geterr,electrons, is_el1_tight,is_el2_tight, cut);
+      if(IDtight == "ELECTRON16_FR_POG_TIGHT_CC" && IDloose=="ELECTRON16_POG_FAKELOOSE_CC_d0")  cut+=sjpt+IDtight + "_dijet_pog_d0";
+      if(IDtight == "ELECTRON16_FR_POG_MEDIUM_CC" && IDloose=="ELECTRON16_POG_MEDIUM_FAKELOOSE_CC_d0")  cut+=sjpt+IDtight + "_dijet_pog_d0";
+      if(IDtight == "ELECTRON16_FR_MVA_TIGHT_CC" && IDloose=="ELECTRON16_MVA_FAKELOOSE_CC_d0")  cut+=sjpt+IDtight + "_dijet_mva_d0";
+      if(IDtight == "ELECTRON16_FR_POG_TIGHT_DXYCC" && IDloose=="ELECTRON16_POG_FAKELOOSE_CC_d0")  cut+=sjpt+IDtight + "_dijet_pog_d0";
+      if(IDtight == "ELECTRON16_FR_POG_MEDIUM_DXYCC" && IDloose=="ELECTRON16_POG_MEDIUM_FAKELOOSE_CC_d0")  cut+=sjpt+IDtight + "_dijet_pog_d0";
+      if(IDtight == "ELECTRON16_FR_MVA_TIGHT_DXYCC" && IDloose=="ELECTRON16_MVA_FAKELOOSE_CC_d0")  cut+=sjpt+IDtight + "_dijet_mva_d0";
+
+
+      return cut;
       
-    }
-
-    ee_weight =m_fakeobj->get_dilepton_ee_eventweight(geterr,electrons, is_el1_tight,is_el2_tight, "");
-
   }
-  return ee_weight;
+
+  return "";
 
 }
 

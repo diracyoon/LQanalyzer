@@ -20,6 +20,10 @@
 ### MUON_MU24_TRIGGER_GH  TRIGGERFILEDIR EfficienciesAndSF_Period4.root IsoMu24_OR_IsoTkMu24_PtEtaBins/abseta_pt_ratio TH2F
 ### MUON_MU50_TRIGGER_BCDEF  TRIGGERFILEDIR EfficienciesAndSF_RunBtoF.root	Mu50_OR_TkMu50_PtEtaBins/abseta_pt_ratio TH2F
 ### MUON_MU50_TRIGGER_GH  TRIGGERFILEDIR EfficienciesAndSF_Period4.root	Mu50_OR_TkMu50_PtEtaBins/abseta_pt_ratio TH2F
+### MUON_MU17_TRIGGER_BCDEF TRIGGERFILEDIR  MuonTriggerEfficiency_TRILEP_DoubleIsoMu17Mu8_IsoMu17leg_RunBCDEF.root  TriggerEff_Trilepton_BCDEF  TH2F
+### MUON_MU8_OR_TKMU8_TRIGGER_BCDEF TRIGGERFILEDIR  MuonTriggerEfficiency_TRILEP_Mu8_OR_TkMu8_RunBCDEF.root TriggerEff_Trilepton_BCDEF  TH2F
+### MUON_MU17_TRIGGER_GH TRIGGERFILEDIR  MuonTriggerEfficiency_TRILEP_DoubleIsoMu17Mu8_IsoMu17leg_RunGH.root  TriggerEff_Trilepton_GH  TH2F
+### MUON_MU8_OR_TKMU8_TRIGGER_GH TRIGGERFILEDIR  MuonTriggerEfficiency_TRILEP_Mu8_OR_TkMu8_RunGH.root TriggerEff_Trilepton_GH  TH2F
 ### ID_BCDEF_MUON_HN_TRI_TIGHT IDFILEDIR MuonIDSF_TRILEP_RunBCDEF.root abseta_pt_PLOT TH2F
 ### ID_GH_MUON_HN_TRI_TIGHT IDFILEDIR MuonIDSF_TRILEP_RunGH.root abseta_pt_PLOT TH2F
 ### TRACKING_EFF IDFILEDIR Tracking_EfficienciesAndSF_BCDEFGH.root ratio_eff_eta3_dr030e030_corr TGraphAsymmErrors

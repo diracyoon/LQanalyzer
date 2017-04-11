@@ -27,6 +27,8 @@ class HNDiElectron : public AnalyzerCore {
   void MakeHistograms();
   void FillEventCutFlow(TString cut, TString label , float weight);
 
+  void MakeControlPlots(int method, TString methodtag, float w)throw( LQError );
+  void MakeValidationPlots(float w);
 
   void RunAnalysis(TString plottag, TString tightelid, TString vetoelid, TString looseelid);
 

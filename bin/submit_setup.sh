@@ -1321,6 +1321,9 @@ while [ "$1" != "" ]; do
 				exit 1
                                 ;;
 
+        -tau | --run_tau_analyzer)    shift
+                                job_run_taus=$1
+                                 ;;
         -fake | --run_fake_analyzer)    shift
                                 job_run_fake=$1
                                  ;;

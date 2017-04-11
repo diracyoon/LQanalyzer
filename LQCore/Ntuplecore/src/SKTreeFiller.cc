@@ -537,6 +537,8 @@ std::vector<KElectron> SKTreeFiller::GetAllElectrons(){
     int mc_pdgid=-1;
     bool matched_in_Dr=false;
 
+    int           eltype=0;
+    
     if(k_cat_version  > 3){
       
       if(gen_pt){
@@ -563,15 +565,15 @@ std::vector<KElectron> SKTreeFiller::GetAllElectrons(){
 	/// Match required to status 1 electron
 	if(gen_status->at(it) != 1) continue;
 	if(fabs(gen_pdgid->at(it)) != 11) continue;
-	
+	if(gen_pt->at(it) < 5.) continue;
+
 	/// Check status 1 electron is not matched already to areco electron
 	bool already_matched=false;
-	for(unsigned int im=0; im > matched_truth.size();im++){
+	for(unsigned int im=0; im < matched_truth.size();im++){
           if(it == unsigned(matched_truth.at(im))) already_matched=true;
         }
         if(already_matched) continue;
-	
-
+	  
 	if(matched_in_Dr){
 	  /// This is for multiple matched status 1 el.
 	  /// In case multiple status 1 electrons are matched with same mother check pt
@@ -631,16 +633,24 @@ std::vector<KElectron> SKTreeFiller::GetAllElectrons(){
 	if( (fabs(gen_pdgid->at(mindex)) == 23) || (fabs(gen_pdgid->at(mindex)) == 24)) {
 	  /// Check if el from Z/W is CF and if it is from a photon conversion
 	  
+	  eltype=1;
 	  int n_el_from_el=0;
 	  float charge_sum=0.;
 	  /// Loop over electrons: Find mother of matched status 1 and see what other daughters there are:
 	  /// In case of a conversion i.e  Z->ee->eephoton->eeee the status 23 electorn decays to 3 electrons e+e+e- or e-e-e+
+	  bool isthirdel_fromconv(false);
 	  for (UInt_t itx=0; itx< gen_pt->size(); itx++ ){
 	    if(gen_motherindex->at(itx) <= 0)continue;
 	    if(gen_motherindex->at(itx) >= int(gen_pt->size()))continue;
 	    if(gen_pt->at(itx) < 0.1) continue;
 	    if(fabs(gen_pdgid->at(itx)) ==11) {
-	      if(gen_motherindex->at(itx) == gen_motherindex->at(matched_index)) { charge_sum+= gen_pdgid->at(itx); n_el_from_el++;}
+	      if(gen_motherindex->at(itx) == gen_motherindex->at(matched_index)) { 
+		charge_sum+= gen_pdgid->at(itx); n_el_from_el++;
+		if(n_el_from_el==3){
+		  if(itx == matched_index) isthirdel_fromconv=true;
+		}
+	      }
+
 	    }
 	  }
 
@@ -648,13 +658,29 @@ std::vector<KElectron> SKTreeFiller::GetAllElectrons(){
 	  /// Two methods: 
 	  /// 1) check pdgid of status 1 el vs mother. if < 0 it is a converison
 	  /// 2) In case closest status 1 el is not opposite charge truth check number of electrons from mother if 3 it is a conversion
-	  if((gen_pdgid->at(matched_index)  * pdgid) < 0 )  el.SetIsPhotonConversion(true);
+	  if((gen_pdgid->at(matched_index)  * pdgid) < 0 )  {el.SetIsPhotonConversion(true);           eltype=2;} 
 	  else  el.SetIsPhotonConversion(false);
-	  if(n_el_from_el ==3&& (fabs(charge_sum) == 11))  el.SetIsPhotonConversion(true); 
 	  
+	  if(!isthirdel_fromconv){
+	    if(n_el_from_el ==3&& (fabs(charge_sum) == 11)) { eltype=3; el.SetIsPhotonConversion(true); }
+	  }
+	  else{
+	    if(pdgid * electrons_q->at(iel) > 0 )  {
+	      if(n_el_from_el ==3&& (fabs(charge_sum) == 11)) { eltype=3; el.SetIsPhotonConversion(true);}
+	    }
+	  }
+
 	  /// Check if it is a chargeflip.
 	  /// Either from a conversion or just reconstructed charge is wrong
-	  if(pdgid * electrons_q->at(iel) > 0 )     el.SetIsChargeFlip(true);
+	  if(pdgid * electrons_q->at(iel) > 0 )    
+	    { el.SetIsChargeFlip(true); 
+	      if(eltype == 2 || eltype == 3){
+		if(eltype == 2) eltype=4;
+		if(eltype == 3) eltype=5;
+	      }
+	      else eltype=6;
+	    }
+
 	  else     el.SetIsChargeFlip(false);
 	  
 	  mother_index=mindex;
@@ -665,7 +691,8 @@ std::vector<KElectron> SKTreeFiller::GetAllElectrons(){
 	else {
 	  if(gen_status->at(mindex) == 2){
 	    if(fabs(gen_pdgid->at(mindex)) > 50) {isprompt=false; mother_pdgid=gen_pdgid->at(mindex); mother_index=mindex; from_tau=false;
-
+	      eltype=7;
+	      
 	      if(gen_isprompt->at(matched_index)){
 		cout << "matched FAKE, but isPrompt flag??" << endl;
 		cout << "------------------CF "<< endl;
@@ -678,13 +705,32 @@ std::vector<KElectron> SKTreeFiller::GetAllElectrons(){
 	      }
 	      
 	    }
+	    else {
+	      isprompt=true;
+	      mother_pdgid=gen_pdgid->at(mindex); mother_index=mindex; from_tau=false;
+	      eltype=8;
+	      
+	      
+	      if(fabs(gen_pdgid->at(mindex)) == 22){
+		if(fabs(gen_pdgid->at(gen_motherindex->at(mindex))) > 50){
+		  eltype=9;
+		}
+		else {
+		  eltype=10;
+		}
+	      }
+	    }
+	    
 	    if(fabs(gen_pdgid->at(mindex)) == 15){
+	      eltype=11;
+
 	      isprompt=true; mother_pdgid=gen_pdgid->at(mindex);  mother_index=mindex; from_tau=true;
 	      // Check if el from tau  is CF
-	 
+	      
 	      int n_el_from_el=0;
 	      float charge_sum=0.;
 	      for (UInt_t itx=0; itx< gen_pt->size(); itx++ ){
+		if(itx == matched_index) continue;
 		if(gen_motherindex->at(itx) <= 0)continue;
 		if(gen_motherindex->at(itx) >= int(gen_pt->size()))continue;
 		if(gen_pt->at(itx) < 0.1) continue;
@@ -696,34 +742,81 @@ std::vector<KElectron> SKTreeFiller::GetAllElectrons(){
 	      if((gen_pdgid->at(matched_index)  * pdgid) < 0 )  el.SetIsPhotonConversion(true);
 	      else  el.SetIsPhotonConversion(false);
 	      if(n_el_from_el ==3&& (fabs(charge_sum) == 11))  el.SetIsPhotonConversion(true);
+
+	      if(fabs(gen_pdgid->at(gen_motherindex->at(mother_index))) > 50) {isprompt=false; eltype=12;}
 	      
-	      if(pdgid * electrons_q->at(iel) > 0 )     el.SetIsChargeFlip(true);
+	      if(pdgid * electrons_q->at(iel) > 0 )     {el.SetIsChargeFlip(true); eltype=13; }
 	      else     el.SetIsChargeFlip(false);
 	    }
+	    
+	   
+	    
 	  }/// end of status 2 check
 	  else {
 	    /// using new method for matching: These events are set as prompt 
 	    isprompt=true;mother_pdgid=-99999; mother_index=mindex; from_tau=false; 
-	    
+	    eltype=14;
 	    int n_el_from_eg=0;  
+	    vector<KTruth> vel_tmp;
+	    bool isthirdel_fromconv(false);
+	    bool neutrino_invertex(false);
 	    for (UInt_t itx=0; itx< gen_pt->size(); itx++ ){
 	      if(gen_motherindex->at(itx) <= 0)continue;
 	      if(gen_motherindex->at(itx) >= int(gen_pt->size()))continue;
 	      if(gen_pt->at(itx) < 0.1) continue;
 	      if(fabs(gen_pdgid->at(itx)) ==11) {
 		if(gen_motherindex->at(itx) == gen_motherindex->at(matched_index)) {  n_el_from_eg++;
+		  if(n_el_from_eg==3){isthirdel_fromconv=true; }
+		  if(gen_status->at(itx) ==1){
+		    KTruth truthe;
+		    truthe.SetPtEtaPhiE(gen_pt->at(itx), gen_eta->at(itx), gen_phi->at(itx), gen_energy->at(itx));
+		    vel_tmp.push_back(truthe);
+		  }
+		}
+	      }
+	      
+	      if(fabs(gen_pdgid->at(itx)) ==12) {
+
+		int index_mother_nu=gen_motherindex->at(itx);
+		while (fabs(index_mother_nu) ==12){
+		  index_mother_nu=gen_motherindex->at(index_mother_nu);
+		}
+		
+		if(index_mother_nu == mindex) {
+		  neutrino_invertex=true;
 		}
 	      }
 	    } // end of truth loop to check Conv
 	    
-	    if((gen_pdgid->at(matched_index)  * pdgid) < 0 )  el.SetIsPhotonConversion(true);
-	    else  el.SetIsPhotonConversion(false);
-	    if(n_el_from_eg ==3)  el.SetIsPhotonConversion(true);
+	    if(neutrino_invertex) eltype=15;
 
-	    if(pdgid * electrons_q->at(iel) > 0 )     el.SetIsChargeFlip(true);
+	    if(vel_tmp.size() ==2) {
+	      KParticle ll = vel_tmp[0] + vel_tmp[1];
+	      if(fabs(ll.M()) < 5.) eltype=16;
+	    }
+
+
+	    if((gen_pdgid->at(matched_index)  * pdgid) < 0 )  {el.SetIsPhotonConversion(true);  eltype=17;}
+	    else el.SetIsPhotonConversion(false);
+	    
+	    if(n_el_from_eg ==3&&!isthirdel_fromconv)  {el.SetIsPhotonConversion(true); eltype=18;}
+	    if(isthirdel_fromconv&&n_el_from_eg ==3){
+	      if(pdgid * electrons_q->at(iel) > 0 )   {
+		el.SetIsPhotonConversion(true);
+		eltype=18;
+	      }
+	    }
+	    if(pdgid * electrons_q->at(iel) > 0 )  {
+	      el.SetIsChargeFlip(true);
+	      if(eltype==17  || eltype == 18){
+		if(eltype==17 ) eltype=19;
+		if(eltype==18 ) eltype=20;
+	      }
+	      else eltype=21;
+	    }
 	    else     el.SetIsChargeFlip(false);
 	    
-
+	    
 	  }  
 	}
       }      /// In case no status 1 electron is found : classify electron fake
@@ -739,7 +832,7 @@ std::vector<KElectron> SKTreeFiller::GetAllElectrons(){
 	    double dr = sqrt( pow(fabs( match_eta - gen_eta->at(it)),2.0) +  pow( fabs(TVector2::Phi_mpi_pi( match_phi - gen_phi->at(it))),2.0));
 	  
 	    bool already_matched=false;
-	    for(unsigned int im=0; im > matched_truth.size();im++){
+	    for(unsigned int im=0; im < matched_truth.size();im++){
 	      if(it == unsigned(matched_truth.at(im))) already_matched=true;
 	    }
 	    
@@ -764,27 +857,58 @@ std::vector<KElectron> SKTreeFiller::GetAllElectrons(){
 	      matched_index = it;
 	      mc_pdgid= int(gen_pdgid->at(it));
 	      if(fabs(pdgid) == 22) {
+
+		if(fabs(mother_pdgid) > 50) eltype=22;
+		else eltype=23;		
 		
-		el.SetIsPhotonConversion(true);
+		//// This case is not a conversion
+		//el.SetIsPhotonConversion(true);
 		
-		if(gen_pdgid->at(gen_motherindex->at(it)) * electrons_q->at(iel) > 0 )     el.SetIsChargeFlip(true);
-		else     el.SetIsChargeFlip(false);
+		//if(gen_pdgid->at(gen_motherindex->at(it)) * electrons_q->at(iel) > 0 )     el.SetIsChargeFlip(true);
+		//else     el.SetIsChargeFlip(false);
 		
 		from_tau=false;
 		break;
-	    }
-	      if(fabs(pdgid) == 15)from_tau=true;
+	      }
+	      
+	      else if(fabs(pdgid) == 15){
+		from_tau=true;
+		if(fabs(mother_pdgid) > 50) eltype=24;
+		else eltype=25;
+	      }
+	      else if(fabs(pdgid) == 1){
+		eltype=26;
+	      }
+	      else if(fabs(pdgid) == 2){
+                eltype=27;
+              }
+	      else if(fabs(pdgid) == 3){
+                eltype=28;
+              }
+	      else if(fabs(pdgid) == 4){
+                eltype=29;
+              }
+	      else if(fabs(pdgid) == 5){
+                eltype=30;
+              }
+	      else if(fabs(pdgid) == 21){
+                eltype=31;
+              }
+	      else eltype=32;
+	      
 	    }// dr req
 	  }// loop over gen vector
 	}// require gen info
       }// no status 1 match
-    }/// END OF TRUTH MATCHING
-    
-    matched_truth.push_back(matched_index);
-    ///matched_index is index which matches reco muon with smallest dR
+      }/// END OF TRUTH MATCHING
+      
+      matched_truth.push_back(matched_index);
+      ///matched_index is index which matches reco muon with smallest dR
     ///- If multiple status 1 muons are matched look at closest in pt
     ///- In no status 1 is matched set as not prompt butlook for closest particle in dR
     /// - In noparticles within dR < 0.1 matched_in_Dr= false
+      
+      el.SetType(eltype);
     if(!matched_in_Dr){
       el.SetIsMCMatched(false);
       el.SetIsFromTau(false);
@@ -1178,6 +1302,8 @@ std::vector<KMuon> SKTreeFiller::GetAllMuons(){
         if(gen_motherindex->at(it) >= int(gen_pt->size()))continue;
         if(gen_pt->at(it) < 0.1) continue;
 	
+	if(gen_pt->at(it) < 5.) continue;
+
 	double match_eta =muon_eta->at(ilep);
 	double match_phi =muon_phi->at(ilep);
 	double dr = sqrt( pow(fabs( match_eta - gen_eta->at(it)),2.0) +  pow( fabs(TVector2::Phi_mpi_pi( match_phi - gen_phi->at(it))),2.0));
@@ -1186,7 +1312,7 @@ std::vector<KMuon> SKTreeFiller::GetAllMuons(){
         ///
 
 	bool already_matched=false;
-	for(unsigned int im=0; im > matched_truth.size();im++){
+	for(unsigned int im=0; im < matched_truth.size();im++){
 	  if(it == unsigned(matched_truth.at(im))) already_matched=true;
 	}
 	if(already_matched) continue;
@@ -1263,6 +1389,7 @@ std::vector<KMuon> SKTreeFiller::GetAllMuons(){
         else {
           if(gen_status->at(mindex) == 2){
             if(fabs(gen_pdgid->at(mindex)) > 50) {isprompt=false; mother_pdgid=gen_pdgid->at(mindex); mother_index=mindex; from_tau=false;}
+	    else isprompt=true;
             if(fabs(gen_pdgid->at(mindex)) == 15){
               isprompt=true; mother_pdgid=gen_pdgid->at(mindex);  mother_index=mindex; from_tau=true;
               // Check if el from tau  is CF
@@ -1319,7 +1446,7 @@ std::vector<KMuon> SKTreeFiller::GetAllMuons(){
             if(gen_pt->at(it) < 0.1) continue;
 
 	    bool already_matched=false;
-	    for(unsigned int im=0; im > matched_truth.size();im++){
+	    for(unsigned int im=0; im < matched_truth.size();im++){
 	      if(it == unsigned(matched_truth.at(im))) already_matched=true;
 	    }
 	    if(already_matched) continue;

@@ -65,7 +65,7 @@ class MCDataCorrections{
 
   /// Lepton Scale Factors
   double ElectronScaleFactor( TString  elid, std::vector<snu::KElectron> el, int sys=0);
-  double ElectronRecoScaleFactor(std::vector<snu::KElectron> el);
+  double ElectronRecoScaleFactor(std::vector<snu::KElectron> el, int sys=0);
   double MuonScaleFactor(TString  muid, std::vector<snu::KMuon> mu, int sys=0);
   double MuonISOScaleFactor(TString muid, std::vector<snu::KMuon> mu,int sys=0);
   double MuonTrackingEffScaleFactor(std::vector<snu::KMuon> mu);  
@@ -76,12 +76,16 @@ class MCDataCorrections{
   /// Trigger 
   double TriggerScaleFactor( std::vector<snu::KElectron> el, std::vector<snu::KMuon> mu, TString trigname, int direction=0);
   double TriggerScaleFactorPeriodDependant( std::vector<snu::KElectron> el, std::vector<snu::KMuon> mu, TString trigname, int catperiod, int direction=0);
+
+  double TriggerEfficiencyLegByLeg(std::vector<snu::KElectron> el, std::vector<snu::KMuon> mu, int TriggerCategory, int DataOrMC, int direction=0);
+  double TriggerEfficiencyLegByLegPeriodDependant(std::vector<snu::KElectron> el, std::vector<snu::KMuon> mu, int TriggerCategory, int catperiod, int DataOrMC, int direction=0);
+  double TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger(snu::KMuon mu1, snu::KMuon mu2, TString leg1, TString leg2, int DataOrMC, int catperiod);
   
   
 
   /// Other corrections
   float PileupWeightByPeriod(snu::KEvent ev);
-  float UserPileupWeight(snu::KEvent ev);
+  float UserPileupWeight(snu::KEvent ev, int nj = -999);
   float CatPileupWeight(snu::KEvent ev, int syst=0);
   void CorrectMuonMomentum(std::vector<snu::KMuon>& k_muons, std::vector<snu::KTruth> truth);
   float GetCorrectedMuonMomentum(snu::KMuon muon, std::vector<snu::KTruth> truth);

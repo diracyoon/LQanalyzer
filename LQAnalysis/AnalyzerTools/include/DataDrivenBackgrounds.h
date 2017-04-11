@@ -71,8 +71,9 @@ class DataDrivenBackgrounds{
   /// ===  trilepton
   float Get_DataDrivenWeight_MMM(bool geterr, std::vector<snu::KMuon> k_muons);
 
+  TString GetElFRKey(TString elidloose, TString elidtight, TString method);
   //==== General lepton fakes
-  float Get_DataDrivenWeight(bool geterr, std::vector<snu::KMuon> k_muons, TString muid, int n_muons, std::vector<snu::KElectron> k_electrons, TString elid, int n_electrons);
+  float Get_DataDrivenWeight(bool geterr, std::vector<snu::KMuon> k_muons, TString muid, int n_muons, std::vector<snu::KElectron> k_electrons, TString elid, int n_electrons, TString elidloose="ELECTRON16_POG_FAKELOOSE", TString method="dijet_ajet40");
 
   /// = single lepton
   float Get_DataDrivenWeight_E(bool geterr, std::vector<snu::KElectron> k_electrons ,TString ID, TString method);

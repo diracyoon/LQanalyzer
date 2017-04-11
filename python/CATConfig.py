@@ -43,12 +43,14 @@ parser.add_option("-N", "--useCATv742ntuples", dest="useCATv742ntuples", default
 parser.add_option("-L", "--LibList", dest="LibList", default="NULL", help="Add extra lib files to load")
 parser.add_option("-D", "--debug", dest="debug", default=False, help="Run submit script in debug mode?")
 parser.add_option("-m", "--useskim", dest="useskim", default="Lepton", help="Run submit script in debug mode?")
+parser.add_option("-G", "--runtau", dest="runtau", default="runtau", help="Run fake mode for np bkg?")
 parser.add_option("-P", "--runnp", dest="runnp", default="runnp", help="Run fake mode for np bkg?")
 parser.add_option("-Q", "--runcf", dest="runcf", default="runcf", help="Run fake mode for np bkg?")
 parser.add_option("-q", "--queue", dest="queue", default="queue", help="what queue")
 parser.add_option("-v", "--catversion", dest="catversion", default="NULL", help="What cat version?")
 parser.add_option("-f", "--skflag", dest="skflag", default="NULL", help="add input flag?")
 parser.add_option("-b", "--usebatch", dest="usebatch", default="usebatch", help="Run in batch queue?")
+parser.add_option("-F","--submitallfiles",dest="submitallfiles",default="False", help="force n=1000")
 
 
 ###################################################                                                                                                                            

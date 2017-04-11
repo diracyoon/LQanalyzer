@@ -100,7 +100,7 @@ void ExampleAnalyzer::ExecuteEvents()throw( LQError ){
    trignames.push_back(dimuon_trigmuon_trig4);
 
 
-   std::vector<snu::KElectron> electrons =  GetElectrons(false,false,"ELECTRON_NOCUT");
+   std::vector<snu::KElectron> electrons =  GetElectrons(false,false, "ELECTRON_NOCUT");
    /*
      
    std::vector<snu::KElectron> electrons =  GetElectrons(BaseSelection::ELECTRON_NOCUT);  ... WONT WORK

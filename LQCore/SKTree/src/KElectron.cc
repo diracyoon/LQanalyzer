@@ -58,7 +58,7 @@ KParticle()
   k_trkvz=-999;
   k_gsf_ctscpix_charge=false;
   k_trig_match="";
-
+  k_eltype=-999;
 }
 
 /**
@@ -112,6 +112,7 @@ KElectron::KElectron(const KElectron& el) :
   k_trkvz= el.TrkVz();
   k_gsf_ctscpix_charge= el.GsfCtfScPixChargeConsistency();
   k_trig_match= el.TrigMatch();
+  k_eltype=el.GetType();
 
 }
 
@@ -166,8 +167,8 @@ void KElectron::Reset()
   k_abs_iso04=-999;
   k_gsf_ctscpix_charge=false;
   k_trig_match="";
-
-  
+  k_eltype=-999;
+ 
 }
 
 
@@ -219,6 +220,7 @@ KElectron& KElectron::operator= (const KElectron& p)
     k_abs_iso03=p.PFAbsIso(0.3);
     k_abs_iso04=p.PFAbsIso(0.4);
     k_trig_match= p.TrigMatch();
+    k_eltype=p.GetType();
 
   }
   
@@ -226,6 +228,10 @@ KElectron& KElectron::operator= (const KElectron& p)
 }
 
 
+
+void  KElectron::SetType(int type){
+  k_eltype= type;
+}
 
 bool KElectron::TriggerMatched(TString path){
   TString trig = k_trig_match;

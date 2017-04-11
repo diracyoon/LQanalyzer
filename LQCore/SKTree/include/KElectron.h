@@ -51,6 +51,7 @@ namespace snu {
     
     
     //// set   vertex variables
+    void SetType(int eltype);
     void Setdxy(Double_t d_xy);
     void Setdxy_sig(Double_t d_xysig);
     void Setdz(Double_t d_z);
@@ -112,6 +113,17 @@ namespace snu {
 
     ///// Functions to call class variables
     
+    inline Int_t GetType()  const {
+      if(k_eltype < 32) return k_eltype;
+      else {
+	if(fabs(k_mc_pdgid) == 211) return 32;
+	if(fabs(k_mc_pdgid) == 310) return 33;
+	if(fabs(k_mc_pdgid) == 431) return 34;
+	if(fabs(k_mc_pdgid) == 13) return 35;
+	return 36;
+      }
+    }
+
     inline Bool_t  IsEBFiducial() {return bool (fabs(SCEta()) < 1.442);}
     inline Bool_t  IsEEFiducial() {return bool (fabs(SCEta()) > 1.560 && fabs(SCEta()) < 2.50);}
       
@@ -214,7 +226,7 @@ namespace snu {
       else  if(cone == 0.4)   return k_abs_iso04;
       else return -999.;
     }
-    
+
     /// VtxDist with vertex chosen to be primary   
     inline Double_t  dxy() const {return  k_dxy;}
     inline Double_t  dxySig() const {return  k_dxy_sig;}
@@ -244,9 +256,9 @@ namespace snu {
     Double_t k_pt_shifted_up, k_pt_shifted_down;
     Int_t snu_id,k_mother_pdgid, k_mc_pdgid,k_mother_index, k_mc_index;
     TString k_trig_match;
-    
+    Int_t k_eltype;
 
-    ClassDef(KElectron,24);
+    ClassDef(KElectron,25);
   }; 
   
 }//namespace snu

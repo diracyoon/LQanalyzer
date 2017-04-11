@@ -204,7 +204,6 @@ void ElectronSelection::Selection(std::vector<KElectron>& leptonColl , bool m_de
     }
 
 
-
     if(apply_BESepCut){
       if(fabs(el->SCEta())<1.479){
         if(apply_relisocut && !(reliso < relIsoBarrel_max && reliso >= relIsoBarrel_min)) pass_selection=false;

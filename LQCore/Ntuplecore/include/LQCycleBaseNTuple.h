@@ -43,6 +43,7 @@ public:
   void SetMCPeriod(int period);
   void SetNPStatus( bool type);
   void SetCFStatus( bool type);
+  void SetTauStatus( bool type);
   void SetSampleName( TString sample);
   void SetAnalyzerClassName( TString name); 
   void SetDataChannel(TString channel);
@@ -57,6 +58,7 @@ public:
 
   bool k_running_nonprompt;
   bool k_running_chargeflip;
+  bool k_running_taudecays;
   TString k_sample_name;
   TString k_channel;
   TString k_classname;

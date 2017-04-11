@@ -61,86 +61,130 @@ void PileupValidation::InitialiseAnalysis() throw( LQError ) {
 
 void PileupValidation::ExecuteEvents()throw( LQError ){
   
+  bool makepufile=false;
   m_logger << DEBUG << "RunNumber/Event Number = "  << eventbase->GetEvent().RunNumber() << " : " << eventbase->GetEvent().EventNumber() << LQLogger::endmsg;
   m_logger << DEBUG << "isData = " << isData << LQLogger::endmsg;
   
   if(!isData) weight*= MCweight;
-  
-  if (!eventbase->GetEvent().HasGoodPrimaryVertex()) return;
-  
-  FillHist("MET/PFMet_uncleaned" , eventbase->GetEvent().PFMET(), MCweight,  0. , 300., 300);
-  if(!PassMETFilter()) return;     /// Initial event cuts :                                                                                                                                                                                                                 
+  counter("Z_0weight", 1.);
 
-  FillHist("MET/PFMet_t1xy" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
-  FillHist("MET/PFMetPhi_t1xy" , eventbase->GetEvent().METPhi(snu::KEvent::pfmet), weight,  -3. , 3., 100);
-  FillHist("MET/PFMet_t1" , eventbase->GetEvent().PFMETType1(), weight,  0. , 300., 300);
-  FillHist("MET/PFMetPhi_t1" , eventbase->GetEvent().PFMETType1Phi(), weight,  -3. , 3., 100);
-  FillHist("MET/PFMet_unsmeared" , eventbase->GetEvent().PFMETUnSmearedType1Pt(), weight,  0. , 300., 300);
-  FillHist("MET/PFMetPhi_unsmeared" , eventbase->GetEvent().PFMETUnSmearedType1Phi(), weight,  -3. , 3., 100);
+  if (!eventbase->GetEvent().HasGoodPrimaryVertex()) return;
+  counter("Z_1weight", 1.);
+  
+  FillHist("MET_PFMet_uncleaned" , eventbase->GetEvent().PFMET(), MCweight,  0. , 10000., 1000);
+  if(!PassMETFilter()) return;     /// Initial event cuts :                                                                                                                                              
+  counter("Z_2weight", 1.);                                                                               
+  
+  if(makepufile){
+    FillHist("MET_PFMet_t1xy" , eventbase->GetEvent().PFMET(), weight,  0. , 10000., 1000);
+    FillHist("MET_PFMetPhi_t1xy" , eventbase->GetEvent().METPhi(snu::KEvent::pfmet), weight,  -3. , 3., 100);
+    FillHist("MET_PFMet_t1" , eventbase->GetEvent().PFMETType1(), weight,  0. , 10000., 1000);
+    FillHist("MET_PFMetPhi_t1" , eventbase->GetEvent().PFMETType1Phi(), weight,  -3. , 3., 100);
+    FillHist("MET_PFMet_unsmeared" , eventbase->GetEvent().PFMETUnSmearedType1Pt(), weight,  0. , 10000., 1000);
+    FillHist("MET_PFMetPhi_unsmeared" , eventbase->GetEvent().PFMETUnSmearedType1Phi(), weight,  -3. , 3., 100);
+  }
   std::vector<snu::KJet> jets =  GetJets("JET_HN", 30., 2.5);
   std::vector<snu::KJet> jets_pu =  GetJets("JET_HN_PU", 30., 2.5);
-  if(isData){
+  if(isData&&!makepufile){
     // met
-    if(GetDataPeriod() == 1)   FillHist("METPerPeriod/PFMet_t1xy_B" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
-    if(GetDataPeriod() == 2)   FillHist("METPerPeriod/PFMet_t1xy_C" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
-    if(GetDataPeriod() == 3)   FillHist("METPerPeriod/PFMet_t1xy_D" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
-    if(GetDataPeriod() == 4)   FillHist("METPerPeriod/PFMet_t1xy_E" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
-    if(GetDataPeriod() == 5)   FillHist("METPerPeriod/PFMet_t1xy_F" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
-    if(GetDataPeriod() == 6)   FillHist("METPerPeriod/PFMet_t1xy_G" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
-    if(GetDataPeriod() == 7)   FillHist("METPerPeriod/PFMet_t1xy_H" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
+    if(GetDataPeriod() == 1)   FillHist("METPerPeriod_PFMet_t1xy_B" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
+    if(GetDataPeriod() == 2)   FillHist("METPerPeriod_PFMet_t1xy_C" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
+    if(GetDataPeriod() == 3)   FillHist("METPerPeriod_PFMet_t1xy_D" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
+    if(GetDataPeriod() == 4)   FillHist("METPerPeriod_PFMet_t1xy_E" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
+    if(GetDataPeriod() == 5)   FillHist("METPerPeriod_PFMet_t1xy_F" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
+    if(GetDataPeriod() == 6)   FillHist("METPerPeriod_PFMet_t1xy_G" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
+    if(GetDataPeriod() == 7)   FillHist("METPerPeriod_PFMet_t1xy_H" , eventbase->GetEvent().PFMET(), weight,  0. , 300., 300);
     /// nvtx
-    if(GetDataPeriod() == 1)   FillHist("NvtxPerPeriod/PFMet_t1xy_B" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
-    if(GetDataPeriod() == 2)   FillHist("NvtxPerPeriod/PFMet_t1xy_C" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
-    if(GetDataPeriod() == 3)   FillHist("NvtxPerPeriod/PFMet_t1xy_D" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
-    if(GetDataPeriod() == 4)   FillHist("NvtxPerPeriod/PFMet_t1xy_E" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
-    if(GetDataPeriod() == 5)   FillHist("NvtxPerPeriod/PFMet_t1xy_F" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
-    if(GetDataPeriod() == 6)   FillHist("NvtxPerPeriod/PFMet_t1xy_G" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
-    if(GetDataPeriod() == 7)   FillHist("NvtxPerPeriod/PFMet_t1xy_H" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
+    if(GetDataPeriod() == 1)   FillHist("NvtxPerPeriod_PFMet_t1xy_B" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
+    if(GetDataPeriod() == 2)   FillHist("NvtxPerPeriod_PFMet_t1xy_C" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
+    if(GetDataPeriod() == 3)   FillHist("NvtxPerPeriod_PFMet_t1xy_D" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
+    if(GetDataPeriod() == 4)   FillHist("NvtxPerPeriod_PFMet_t1xy_E" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
+    if(GetDataPeriod() == 5)   FillHist("NvtxPerPeriod_PFMet_t1xy_F" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
+    if(GetDataPeriod() == 6)   FillHist("NvtxPerPeriod_PFMet_t1xy_G" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
+    if(GetDataPeriod() == 7)   FillHist("NvtxPerPeriod_PFMet_t1xy_H" , eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
     // njets
-    if(GetDataPeriod() == 1)   FillHist("NJetPerPeriod/PFMet_t1xy_B" , jets.size(), weight, 0., 10., 10);
-    if(GetDataPeriod() == 2)   FillHist("NJetPerPeriod/PFMet_t1xy_C" , jets.size(), weight, 0., 10., 10);
-    if(GetDataPeriod() == 3)   FillHist("NJetPerPeriod/PFMet_t1xy_D" , jets.size(), weight, 0., 10., 10);
-    if(GetDataPeriod() == 4)   FillHist("NJetPerPeriod/PFMet_t1xy_E" , jets.size(), weight, 0., 10., 10);
-    if(GetDataPeriod() == 5)   FillHist("NJetPerPeriod/PFMet_t1xy_F" , jets.size(), weight, 0., 10., 10);
-    if(GetDataPeriod() == 6)   FillHist("NJetPerPeriod/PFMet_t1xy_G" , jets.size(), weight, 0., 10., 10);
-    if(GetDataPeriod() == 7)   FillHist("NJetPerPeriod/PFMet_t1xy_H" , jets.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 1)   FillHist("NJetPerPeriod_PFMet_t1xy_B" , jets.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 2)   FillHist("NJetPerPeriod_PFMet_t1xy_C" , jets.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 3)   FillHist("NJetPerPeriod_PFMet_t1xy_D" , jets.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 4)   FillHist("NJetPerPeriod_PFMet_t1xy_E" , jets.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 5)   FillHist("NJetPerPeriod_PFMet_t1xy_F" , jets.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 6)   FillHist("NJetPerPeriod_PFMet_t1xy_G" , jets.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 7)   FillHist("NJetPerPeriod_PFMet_t1xy_H" , jets.size(), weight, 0., 10., 10);
     // pu cut jets
-    if(GetDataPeriod() == 1)   FillHist("NJetPUPerPeriod/PFMet_t1xy_B" , jets_pu.size(), weight, 0., 10., 10);
-    if(GetDataPeriod() == 2)   FillHist("NJetPUPerPeriod/PFMet_t1xy_C" , jets_pu.size(), weight, 0., 10., 10);
-    if(GetDataPeriod() == 3)   FillHist("NJetPUPerPeriod/PFMet_t1xy_D" , jets_pu.size(), weight, 0., 10., 10);
-    if(GetDataPeriod() == 4)   FillHist("NJetPUPerPeriod/PFMet_t1xy_E" , jets_pu.size(), weight, 0., 10., 10);
-    if(GetDataPeriod() == 5)   FillHist("NJetPUPerPeriod/PFMet_t1xy_F" , jets_pu.size(), weight, 0., 10., 10);
-    if(GetDataPeriod() == 6)   FillHist("NJetPUPerPeriod/PFMet_t1xy_G" , jets_pu.size(), weight, 0., 10., 10);
-    if(GetDataPeriod() == 7)   FillHist("NJetPUPerPeriod/PFMet_t1xy_H" , jets_pu.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 1)   FillHist("NJetPUPerPeriod_PFMet_t1xy_B" , jets_pu.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 2)   FillHist("NJetPUPerPeriod_PFMet_t1xy_C" , jets_pu.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 3)   FillHist("NJetPUPerPeriod_PFMet_t1xy_D" , jets_pu.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 4)   FillHist("NJetPUPerPeriod_PFMet_t1xy_E" , jets_pu.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 5)   FillHist("NJetPUPerPeriod_PFMet_t1xy_F" , jets_pu.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 6)   FillHist("NJetPUPerPeriod_PFMet_t1xy_G" , jets_pu.size(), weight, 0., 10., 10);
+    if(GetDataPeriod() == 7)   FillHist("NJetPUPerPeriod_PFMet_t1xy_H" , jets_pu.size(), weight, 0., 10., 10);
 
 
   }
 
 
-  if(false){
+  if(makepufile){
     TString analysis_trigger="HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v";
     std::vector<TString> triggerslist;
     triggerslist.push_back(analysis_trigger);
 
-
     if(!isData ||  (isData&&PassTrigger(analysis_trigger))  ){
+
+      counter("Z_3weight", 1.);
 
       std::vector<snu::KElectron> electronTightColl=GetElectrons(TString("ELECTRON_POG_TIGHT"),15., 2.5);
       
       if(!isData) weight*=  mcdata_correction->GetDoubleEGTriggerEff(electronTightColl);
+
+      float mc_corr(1.);
+      float id_iso_sf(1.);
+      float trigger_ps(1.);
+      float reco_weight=1.;
+
+      if(!isData){
+	id_iso_sf=   mcdata_correction->ElectronScaleFactor("ELECTRON_POG_TIGHT", electronTightColl,0);
+	trigger_ps= WeightByTrigger(analysis_trigger, TargetLumi) ;
+	reco_weight = mcdata_correction->ElectronRecoScaleFactor(electronTightColl);
+	/// standard CMS pu weight                                                                                                                                             
+	weight*= trigger_ps* id_iso_sf * reco_weight;	
+	/// need to ad dZ on POG https://indico.cern.ch/event/604947/contributions/2467335/attachments/1409577/2158348/EleIDSFs_IPCuts_Update.pdf                                                                                                       
+      }
+
       if(OppositeCharge(electronTightColl)){
+	counter("Z_4weight", 1.);
 	if(electronTightColl.at(0).Pt() > 26. && electronTightColl.at(1).Pt() > 22.){
-	  if(GetDiLepMass(electronTightColl) < 120. && GetDiLepMass(electronTightColl)  > 60. ){
+	  counter("Z_5weight", 1.);
+	  if(GetDiLepMass(electronTightColl) < 101. && GetDiLepMass(electronTightColl)  > 81. ){
+
+	    counter("Z_6weight", 1.);
+	    counter("Z_7weight", weight);
+	    counter("Z_8weight", weight*trigger_ps);
+	    counter("Z_9weight", weight*trigger_ps*id_iso_sf);
+	    counter("Z_10weight", weight*trigger_ps*id_iso_sf*reco_weight);
+
 	    if(isData) FillHist("Nvtx_nocut_data",  eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
 	    else  FillHist("Nvtx_nocut_mc",  eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
 	    if(isData) FillHist("Nint_nocut_data", eventbase->GetEvent().PileUpInteractionsTrue(),weight, 0. , 75., 75);
-	    if(isData) FillHist("Nint_nocut_mc", eventbase->GetEvent().PileUpInteractionsTrue(),weight, 0. , 75., 75);
+	    else FillHist("Nint_nocut_mc", eventbase->GetEvent().PileUpInteractionsTrue(),weight, 0. , 75., 75);
+	    if(jets.size() == 0){
+	      if(isData) FillHist("Nvtx_0j_nocut_data",  eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
+	      else  FillHist("Nvtx_0j_nocut_mc",  eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
+	    }
+	    else{
+	      if(isData) FillHist("Nvtx_1j_nocut_data",  eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
+	      else  FillHist("Nvtx_1j_nocut_mc",  eventbase->GetEvent().nVertices() ,weight, 0. , 75., 75);
+	    }
 	  }
 	}
       }
     }
+    return;
   }
   else{
+    
+    float scale_weight=1.;
+    if(k_sample_name.Contains("DYJets")) scale_weight *= 0.94;
+
     TString analysis_trigger="HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v";
     std::vector<TString> triggerslist;
     triggerslist.push_back(analysis_trigger);
@@ -148,12 +192,12 @@ void PileupValidation::ExecuteEvents()throw( LQError ){
     if(!isData ||  (isData&&PassTrigger(analysis_trigger))  ){
       std::vector<snu::KElectron> electronTightColl=GetElectrons(TString("ELECTRON_POG_TIGHT"),15., 2.5);
       
-      if(!isData) weight*=  mcdata_correction->GetDoubleEGTriggerEff(electronTightColl);
+      float trig_eff(1.);
+      if(!isData) trig_eff=  mcdata_correction->GetDoubleEGTriggerEff(electronTightColl);
       
       if(OppositeCharge(electronTightColl)){
         if(electronTightColl.at(0).Pt() > 26. && electronTightColl.at(1).Pt() > 22.){
 	  
-	  float mc_corr(1.);
 	  float weight2(1.);
 	  float weight2d(1.);
 	  float weight3(1.);
@@ -163,39 +207,43 @@ void PileupValidation::ExecuteEvents()throw( LQError ){
 	  float id_iso_sf(1.);
 	  float trigger_ps(1.);
 	  float reco_weight=1.;
-	  float puweight(1.);
-
-	  
+	  float defweight = weight;
 	  if(!isData){
 	    id_iso_sf=   mcdata_correction->ElectronScaleFactor("ELECTRON_POG_TIGHT", electronTightColl,0);
 	    trigger_ps= WeightByTrigger(analysis_trigger, TargetLumi)  ;
-	    weight*= trigger_ps;
 	    reco_weight = mcdata_correction->ElectronRecoScaleFactor(electronTightColl);
+
+	    weight*= trigger_ps * id_iso_sf * reco_weight* trig_eff;
+
 	    /// standard CMS pu weight
-	    weight2 = weight * eventbase->GetEvent().PileUpWeight();
-	    weight2d = weight * eventbase->GetEvent().PileUpWeight(snu::KEvent::down);
+	    weight2 = weight * eventbase->GetEvent().PileUpWeight()* scale_weight;
+	    weight2d = weight * eventbase->GetEvent().PileUpWeight(snu::KEvent::down)* scale_weight;
 	    /// reweight nvtx to DY
-	    weight3 = weight * mcdata_correction->UserPileupWeight(eventbase->GetEvent());
+	    weight3 = weight * mcdata_correction->UserPileupWeight(eventbase->GetEvent())* scale_weight;
+	    weight5 =  weight * mcdata_correction->UserPileupWeight(eventbase->GetEvent());
 	    /// standard CMS pu weight but different if -p X is set in submittion                                                                                                                                                                                                                                       
-	    weight4 = weight * mcdata_correction->PileupWeightByPeriod(eventbase->GetEvent());
-	    mc_corr =  id_iso_sf * reco_weight * puweight;
+	    weight4 = weight * mcdata_correction->PileupWeightByPeriod(eventbase->GetEvent())* scale_weight;
 
 	    /// need to ad dZ on POG https://indico.cern.ch/event/604947/contributions/2467335/attachments/1409577/2158348/EleIDSFs_IPCuts_Update.pdf
 	  }
-	  
-	  weight5 = weight3 * mc_corr;
-	  weight2 = weight2 *  mc_corr;
-	  weight2d = weight2d *  mc_corr;
-	  
+
+
 	  /// Z peak
-	  if(GetDiLepMass(electronTightColl) < 120. && GetDiLepMass(electronTightColl)  > 60. ){
+	  if(GetDiLepMass(electronTightColl) < 101. && GetDiLepMass(electronTightColl)  > 81. ){
+	    counter("Z_0weight", 1.);
+            counter("Z_1weight", defweight);
+            counter("Z_2weight", defweight* scale_weight);
+            counter("Z_3weight", defweight*id_iso_sf* scale_weight);
+            counter("Z_4weight", defweight*id_iso_sf*reco_weight* scale_weight);
+	    counter("Z_5weight", defweight*id_iso_sf*reco_weight*mcdata_correction->UserPileupWeight(eventbase->GetEvent())* scale_weight);
+
 	    /// out of box MET
-	    FillHist("ZMET_PFMet_t1xy" , eventbase->GetEvent().PFMET(), weight,  0. , 200., 200);
-	    FillHist("ZMET_PFMet_t1" , eventbase->GetEvent().PFMETType1(), weight,  0. , 200., 200);
-	    FillHist("ZMET_PFMet_t1_unsmeared" , eventbase->GetEvent().PFMETUnSmearedType1Pt(), weight,  0. , 200., 200);
-	    FillHist("ZMET_NJet", jets.size(), weight, 0., 10., 10);
-	    FillHist("ZMET_Nvtx",  eventbase->GetEvent().nVertices(), weight, 0., 75., 75);
-	    FillHist("ZMET_Nint",  eventbase->GetEvent().PileUpInteractionsTrue(), weight, 0., 75., 75);
+	    FillHist("ZMET_PFMet_t1xy" , eventbase->GetEvent().PFMET(), weight* scale_weight,  0. , 200., 200);
+	    FillHist("ZMET_PFMet_t1" , eventbase->GetEvent().PFMETType1(), weight* scale_weight,  0. , 200., 200);
+	    FillHist("ZMET_PFMet_t1_unsmeared" , eventbase->GetEvent().PFMETUnSmearedType1Pt(), weight* scale_weight,  0. , 200., 200);
+	    FillHist("ZMET_NJet", jets.size(), weight* scale_weight, 0., 10., 10);
+	    FillHist("ZMET_Nvtx",  eventbase->GetEvent().nVertices(), weight* scale_weight, 0., 75., 75);
+	    FillHist("ZMET_Nint",  eventbase->GetEvent().PileUpInteractionsTrue(), weight* scale_weight, 0., 75., 75);
 
 	    //_ weighted for 69.2 mb
 	    FillHist("ZMETNintPU69p2_PFMet_t1xy" , eventbase->GetEvent().PFMET(), weight2,  0. , 200., 200);
@@ -236,25 +284,23 @@ void PileupValidation::ExecuteEvents()throw( LQError ){
             FillHist("ZMETNvtxCorr_NJet", jets.size(), weight5, 0., 10., 10);
 	    FillHist("ZMETNvtxCorr_Nvtx",  eventbase->GetEvent().nVertices(), weight5, 0., 75., 75);
             FillHist("ZMETNvtxCorr_Nint",  eventbase->GetEvent().PileUpInteractionsTrue(), weight5, 0., 75., 75);
-
-
 	    
 	    if(jets.size() == 0) {
-	      FillHist("ZMETNvtxCorr_nj0_PFMet_t1xy" , eventbase->GetEvent().PFMET(), weight5,  0. , 200., 200);
-	      FillHist("ZMETNvtxCorr_nj0_PFMet_t1" , eventbase->GetEvent().PFMETType1(), weight5,  0. , 200., 200);
-	      FillHist("ZMETNvtxCorr_nj0_PFMet_t1_unsmeared" , eventbase->GetEvent().PFMETUnSmearedType1Pt(), weight5,  0. , 200., 200);
-	      FillHist("ZMETNvtxCorr_nj0_NJet", jets.size(), weight5, 0., 10., 10);
-	      FillHist("ZMETNvtxCorr_nj0_Nvtx",  eventbase->GetEvent().nVertices(), weight5, 0., 75., 75);
-	      FillHist("ZMETNvtxCorr_nj0_Nint",  eventbase->GetEvent().PileUpInteractionsTrue(), weight5, 0., 75., 75);
+	      FillHist("ZMETNvtxCorr_nj0_PFMet_t1xy" , eventbase->GetEvent().PFMET(), weight3,  0. , 200., 200);
+	      FillHist("ZMETNvtxCorr_nj0_PFMet_t1" , eventbase->GetEvent().PFMETType1(), weight3,  0. , 200., 200);
+	      FillHist("ZMETNvtxCorr_nj0_PFMet_t1_unsmeared" , eventbase->GetEvent().PFMETUnSmearedType1Pt(), weight3,  0. , 200., 200);
+	      FillHist("ZMETNvtxCorr_nj0_NJet", jets.size(), weight3, 0., 10., 10);
+	      FillHist("ZMETNvtxCorr_nj0_Nvtx",  eventbase->GetEvent().nVertices(), weight3, 0., 75., 75);
+	      FillHist("ZMETNvtxCorr_nj0_Nint",  eventbase->GetEvent().PileUpInteractionsTrue(), weight3, 0., 75., 75);
 
 	    }
 	    else{
-	      FillHist("ZMETNvtxCorr_nj1_PFMet_t1xy" , eventbase->GetEvent().PFMET(), weight5,  0. , 200., 200);
-              FillHist("ZMETNvtxCorr_nj1_PFMet_t1" , eventbase->GetEvent().PFMETType1(), weight5,  0. , 200., 200);
-              FillHist("ZMETNvtxCorr_nj1_PFMet_t1_unsmeared" , eventbase->GetEvent().PFMETUnSmearedType1Pt(), weight5,  0. , 200., 200);
-              FillHist("ZMETNvtxCorr_nj1_NJet", jets.size(), weight5, 0., 10., 10);
-	      FillHist("ZMETNvtxCorr_nj1_Nvtx",  eventbase->GetEvent().nVertices(), weight5, 0., 75., 75);
-	      FillHist("ZMETNvtxCorr_nj1_Nint",  eventbase->GetEvent().PileUpInteractionsTrue(), weight5, 0., 75., 75);
+	      FillHist("ZMETNvtxCorr_nj1_PFMet_t1xy" , eventbase->GetEvent().PFMET(), weight3,  0. , 200., 200);
+              FillHist("ZMETNvtxCorr_nj1_PFMet_t1" , eventbase->GetEvent().PFMETType1(), weight3,  0. , 200., 200);
+              FillHist("ZMETNvtxCorr_nj1_PFMet_t1_unsmeared" , eventbase->GetEvent().PFMETUnSmearedType1Pt(), weight3,  0. , 200., 200);
+              FillHist("ZMETNvtxCorr_nj1_NJet", jets.size(), weight3, 0., 10., 10);
+	      FillHist("ZMETNvtxCorr_nj1_Nvtx",  eventbase->GetEvent().nVertices(), weight3, 0., 75., 75);
+	      FillHist("ZMETNvtxCorr_nj1_Nint",  eventbase->GetEvent().PileUpInteractionsTrue(), weight3, 0., 75., 75);
 
 	    }
 	  }// Zpeak
@@ -288,7 +334,7 @@ void PileupValidation::ExecuteEvents()throw( LQError ){
 
 
 void PileupValidation::counter(TString cut, float w){
-  w=1.;
+
   map<TString,float>::iterator itmapcounter = mapcounter.find(cut) ;
   if (itmapcounter == mapcounter.end()){
     mapcounter[cut] = w;

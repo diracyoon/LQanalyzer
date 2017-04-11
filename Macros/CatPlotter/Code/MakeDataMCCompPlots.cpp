@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     int a =MakeCutFlow_Plots(configfile);
   }
   
-  system(("scp -r " + output_path + " jalmond@lxplus.cern.ch:~/www/SNU/CATAnalyzerPlots/").c_str());
+  system(("scp -r " + output_path + " jalmond@lxplus018.cern.ch:~/www/SNU/CATAnalyzerPlots/").c_str());
 
   cout << "Open plots in " << output_index_path << endl;
   cout << "Local directory = ~/CATAnalyzerPlots/" + path +  "/histograms/" + histdir  << endl;
@@ -62,7 +62,7 @@ int MakeCutFlow_Plots(string configfile){
   page << "<br> <font size=\"4\"><b> " << message <<  " </b></font> <br><br>" << endl;
   page << "<a href=\"histograms/" +histdir + "/indexCMS.html\">"+ histdir + "</a><br>"; 
   
-  //MakeCutFlow(histdir);  
+  MakeCutFlow(histdir);  
   int M=MakePlots(histdir);  
 
   return 1;
@@ -161,6 +161,8 @@ int MakePlots(string hist) {
 	/// Make data histogram
 	ylog=false;
 	if(TString(name).Contains("llmass")){ylog=true;}
+	if(TString(name).Contains("lllmass")){ylog=false;}
+	
 	if(TString(name).Contains("LeptonPt")){ylog=true;}
 	
 	if(TString(name).Contains("Tri")) {ylog=false;}
@@ -168,16 +170,20 @@ int MakePlots(string hist) {
 
 	TH1* hdata = MakeDataHist(name, xmin, xmax, hup, ylog, rebin);
 	CheckHist(hdata);	
-	float ymin (0.001), ymax( 0.);
+	float ymin (2.), ymax( 0.);
 	
-	ymax = GetMaximum(hdata, hup, ylog, name, xmax);
+	ymax = GetMaximum(hdata, hup, ylog, name, xmax, xmin);
 	
 	if(showdata)cout << "Total data = " <<  hdata->Integral() << endl;
 	scale = 1.;
 
+
+	unsigned int outputWidth = 1200;
+	unsigned int outputHeight = 1200;
+
 	/// Make legend
 	TLegend* legend = MakeLegend(legmap, hdata, showdata, ylog, ymax, xmax);       		
-
+	
         vector<THStack*> vstack;		
 	vstack.push_back(mstack);   	
 	vstack.push_back(mstack_nostat);   	
@@ -301,9 +307,11 @@ void MakeCutFlow(string type){
       else if(sample.Contains("t#bar{t}V")) sample = "t$\bar{t}$+V";
       else if(sample.Contains("t/#bar{t}")) sample = "t/$\bar{t}$";
       
-      if(sample.Contains("DY#rightarrow ll; 10 < m(ll) < 50")) sample = "DY$\\rightarrow$ ll; 10 < m(ll) < 50";
-      if(sample.Contains("DY#rightarrow ll; m(ll) > 50")) sample = "DY$\\rightarrow$ ll; m(ll) > 50";
-      if(sample.Contains("DY#rightarrow ll")) sample = "DY$\\rightarrow$ ll";
+      if(sample.Contains("Z#gamma")) sample = "Z$\\gamma$";
+      if(sample.Contains("W#gamma")) sample = "W$\\gamma$";
+      if(sample.Contains("DY #rightarrow ee (m < 50)    ")) sample = "DY $\\rightarrow$ ll (m < 50)    ";
+      if(sample.Contains("DY #rightarrow ee")) sample = "DY$\\rightarrow$ ee";
+      if(sample.Contains("DY #rightarrow #tau#tau")) sample = "DY$\\rightarrow$ $\\tau\\tau$";
       cout << sample << " background = " << mapit->second<< " +- " << mapit_stat->second << " + " << mapit_up->second << " - " << mapit_down->second <<  endl;      
    
       
@@ -328,19 +336,21 @@ void MakeCutFlow(string type){
 
     //// Make TEX file
     ofstream ofile_tex;
-    string latex_file =  "Tables/" + cut_label.at(i_cut) + ".tex";
+    string lqdir =  string(getenv("LQANALYZER_DIR")) +"/Macros/CatPlotter/";
+
+    string latex_file =  lqdir+"/Tables/" + cut_label.at(i_cut) + ".tex";
     ofile_tex.open(latex_file.c_str());
     ofile_tex.setf(ios::fixed,ios::floatfield);
     ofile_tex << "\\documentclass[10pt]{article}" << endl;
     ofile_tex << "\\usepackage{epsfig,subfigure,setspace,xtab,xcolor,array,colortbl}" << endl;
 
     ofile_tex << "\\begin{document}" << endl;
-    ofile_tex << "\\input{Tables/" + cut_label.at(i_cut)  + "Table.txt}" << endl;
+    ofile_tex << "\\input{" + lqdir + "/Tables/" + cut_label.at(i_cut)  + "Table.txt}" << endl;
     ofile_tex << "\\end{document}" << endl;
     
     /// Make text file
     ofstream ofile;
-    string latex =  "Tables/" + cut_label.at(i_cut) + "Table.txt";
+    string latex =  lqdir + "/Tables/" + cut_label.at(i_cut) + "Table.txt";
     
     ofile.open(latex.c_str());
     ofile.setf(ios::fixed,ios::floatfield); 
@@ -372,9 +382,11 @@ void MakeCutFlow(string type){
       else if(sample.Contains("t#bar{t}V")) sample = "t$\\bar{t}$+V";
       else if(sample.Contains("t#bar{t}")) sample = "t$\\bar{t}$";
 
-      if(sample.Contains("DY#rightarrow ll; 10 < m(ll) < 50")) sample = "DY$\\rightarrow$ ll; 10 < m(ll) < 50";
-      if(sample.Contains("DY#rightarrow ll; m(ll) > 50")) sample = "DY$\\rightarrow$ ll; m(ll) > 50";
-      if(sample.Contains("DY#rightarrow ll")) sample = "DY$\\rightarrow$ ll";
+      if(sample.Contains("Z#gamma")) sample = "Z$\\gamma$";
+      if(sample.Contains("W#gamma")) sample = "W$\\gamma$";
+      if(sample.Contains("DY #rightarrow ll (m < 50)    ")) sample = "DY $\\rightarrow$ ll (m < 50)    ";
+      if(sample.Contains("DY #rightarrow ee")) sample = "DY$\\rightarrow$ ee";
+      if(sample.Contains("DY #rightarrow #tau#tau")) sample = "DY$\\rightarrow$ $\\tau\\tau$";
 
       if(mapit->second!=0.0){
 	ofile << sample + "&" <<  mapit->second << "& $\\pm$& "  << mapit_stat->second <<  "&$^{+" <<  mapit_up->second << "}_{-" <<  mapit_down->second  << "}$" ; 
@@ -398,7 +410,7 @@ void MakeCutFlow(string type){
     ofile << "\\end{table}" << endl;    
      
   
-    string latex_command = "latex Tables/" + cut_label.at(i_cut) +".tex";
+    string latex_command = "latex " + lqdir + "/Tables/" + cut_label.at(i_cut) +".tex";
     string dvi_command = "dvipdf " + cut_label.at(i_cut) +".dvi";
     string mv_command = "mv " + cut_label.at(i_cut) +".pdf /home/" + string(getenv("USER") )+"/CATAnalyzerPlots/" + path +"/histograms/"+ histdir ;
     
@@ -447,6 +459,10 @@ void PrintCanvas(TCanvas* c1, string folder, string plot_description, string tit
   histpage << "<a href=\"" << title.c_str() << "_log.png\">";
   histpage << "<img src=\"" << title.c_str() << "_log.png\" width=\"100%\"/>";
   histpage << "</td>" << endl;
+  histpage <<"<td>"<<endl;
+  histpage << "<a href=\"" << title.c_str() << "_log.pdf\">";
+  histpage << "<img src=\"" << title.c_str() << "_log.pdf\" width=\"100%\"/>";
+  histpage << "</td>" << endl;
 
   
   return;
@@ -454,8 +470,27 @@ void PrintCanvas(TCanvas* c1, string folder, string plot_description, string tit
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+TLegend* MakeRatioLegend( TH1* h1, TH1* h2){
+  
+  double x1 = 0.7;
+  double y1 = 0.21;
+  double x2 = 0.95;
+  double y2 = 0.24;
+  
+  TLegend* legendH = new TLegend(x1,y1,x2,y2);
+  legendH->SetFillColor(kWhite);
+  legendH->SetTextFont(42);
 
-TLegend* MakeLegend(map<TString, TH1*> map_legend,TH1* hlegdata,  bool rundata , bool logy, float ymax, float xmax){
+  legendH->SetBorderSize(0);
+  legendH->SetTextSize(0.02);
+  legendH->SetNColumns(2);
+
+  legendH->AddEntry(h1,"Stat.","f");
+  legendH->AddEntry(h2,"Syst.+Stat.","f");
+  
+  return legendH;
+}
+TLegend* MakeLegend( map<TString, TH1*> map_legend,TH1* hlegdata,  bool rundata , bool logy, float ymax, float xmax){
   
   double x1 = 0.5;
   double y1 = 0.5;
@@ -484,44 +519,30 @@ TLegend* MakeLegend(map<TString, TH1*> map_legend,TH1* hlegdata,  bool rundata ,
     y2 = 0.9;
   }
   else{
-    x1 = 0.6;
-    y1 = 0.7;
-    x2 = 0.95;
+
+    x1 = 0.55;
+    y1 = 0.65;
+    x2 = 0.9;
     y2 = 0.9;
   }
-  
-  cout << "Test" << endl;
+
   TLegend* legendH = new TLegend(x1,y1,x2,y2);
   legendH->SetFillColor(kWhite);
   legendH->SetTextFont(42);
   
   legendH->SetBorderSize(0);
   legendH->SetTextSize(0.02);
-  legendH->SetNColumns(2);
-
-  if(rundata) 	legendH->AddEntry(hlegdata,"Data","pE");
-  
-  //  for(map<TString, TH1*>::iterator it = map_legend.begin(); it!= map_legend.end(); it++){
-  
   vector<TString> legorder;
-
-  
   map<double, TString> order_hists;
   for(map<TString, TH1*>::iterator it = map_legend.begin(); it!= map_legend.end(); it++){
     order_hists[it->second->Integral()] = it->first;
   }
-  
   
   if(map_legend.size()  < 3){
     for(map<TString, TH1*>::iterator it = map_legend.begin(); it!= map_legend.end(); it++) {
       legendH->AddEntry(it->second, it->first,"f");
     }
   }else{
-    //for(unsigned int ileg = 0; ileg < legorder.size() ; ileg++){
-    //map<TString, TH1*>::iterator it = map_legend.find(legorder.at(ileg));
-    //if(it->second)legendH->AddEntry(it->second,it->first.Data(),"f");    
-      
-    // }
     for(map<double, TString>::iterator it =order_hists.begin(); it!= order_hists.end(); it++) {
       map<TString, TH1*>::iterator it2 = map_legend.find(it->second);
       if(it->first > 0)legendH->AddEntry(it2->second,it->second.Data(),"f");
@@ -531,6 +552,9 @@ TLegend* MakeLegend(map<TString, TH1*> map_legend,TH1* hlegdata,  bool rundata ,
   legendH->SetFillColor(kWhite);
   legendH->SetTextFont(42);
 
+
+  if(rundata) 	legendH->AddEntry(hlegdata,"Data","pE");
+  
   return legendH;
   
 }
@@ -546,8 +570,8 @@ TH1* MakeDataHist(string name, double xmin, double xmax, TH1* hup, bool ylog, in
   
   hdata->Rebin(rebin);
 
-  float ymin (0.01), ymax( 1000000.);
-  ymax = GetMaximum(hdata, hup, ylog, name, xmax);
+  float ymin (2.), ymax( 1000.);
+  ymax = GetMaximum(hdata, hup, ylog, name, xmax, xmin);
   
 
   /// Set Ranges / overflows
@@ -579,14 +603,6 @@ vector<pair<TString,float> >  InitSample (TString sample){
   vector<pair<TString,float> > list;  
   
 
-
-  if(sample.Contains("nonprompt_DoubleMuon")){
-    list.push_back(make_pair("nonprompt_DoubleMuon",0.34));
-  }
-
-  if(sample.Contains("chargeflip")){
-    list.push_back(make_pair("chargeflip",0.12));
-  }
 
   if(list.size()==0) cout << "Error in making lists" << endl;
   
@@ -625,11 +641,12 @@ THStack* MakeStack(vector<pair<pair<vector<pair<TString,float> >, int >, TString
     if(type.Contains("Nominal")) fileloc = mcloc;
         
     if(!type.Contains("Nominal")) {
-      if(it->first.first.at(0).first.Contains("nonprompt_DoubleMuon"))fileloc=mcloc;
+      if(it->first.first.at(0).first.Contains("DoubleEG_SKnonprompt"))fileloc=mcloc;
     }    
     
     CheckSamples( it->first.first.size() );
     
+
     int isample=0;
     TFile* file =  TFile::Open((fileloc+ fileprefix + it->first.first.at(isample).first + filepostfix).Data());
     cout << fileloc+ fileprefix + it->first.first.at(isample).first + filepostfix << endl;
@@ -811,7 +828,7 @@ void SetErrors(TH1* hist, float normerr, bool includestaterr ){
 void SetTitles(TH1* hist, string name){
   
   string xtitle ="";
-  string ytitle ="Entries";
+  string ytitle ="Counts";
 
   float binedge_up = hist->GetBinLowEdge(2);
   float binedge_down = hist->GetBinLowEdge(1);
@@ -821,7 +838,7 @@ void SetTitles(TH1* hist, string name){
   std::ostringstream str_width;
   str_width<< int(width);
   
-  if(HistInGev(name)) ytitle = "Entries / " +str_width.str() + " GeV";
+  if(HistInGev(name)) ytitle = "Counts / " +str_width.str() + " GeV";
   
   if(name.find("h_MET")!=string::npos){
     xtitle="E^{miss}_{T} (GeV)"; 
@@ -836,8 +853,8 @@ void SetTitles(TH1* hist, string name){
   hist->GetXaxis()->SetTitle(xtitle.c_str());
   hist->GetYaxis()->SetTitle(ytitle.c_str());
 
-  hist->GetXaxis()->SetTitleSize(0.05);
-  hist->GetYaxis()->SetTitleSize(0.05);
+  hist->GetXaxis()->SetTitleSize(0.04);
+  hist->GetYaxis()->SetTitleSize(0.04);
   return;
 }
 
@@ -860,7 +877,7 @@ bool HistInGev(string name){
 }
 
 
-float  GetMaximum(TH1* h_data, TH1* h_up, bool ylog, string name, float xmax){
+float  GetMaximum(TH1* h_data, TH1* h_up, bool ylog, string name, float xmax, float xmin){
   
   float yscale= 1.2;
   
@@ -878,8 +895,15 @@ float  GetMaximum(TH1* h_data, TH1* h_up, bool ylog, string name, float xmax){
   }
   if(max_bin == 0) max_bin = h_data->GetNbinsX()+1;
   
+
+  double x1 = 0.5;
+  double y1 = 0.5;
+  double x2 = 0.6;
+  double y2 = 0.9;
+
   bool scale_up=false;
   if(ymax_bin/max_bin > 0.5){
+
   }
   else{
     /*x1 = 0.6;
@@ -900,9 +924,10 @@ float  GetMaximum(TH1* h_data, TH1* h_up, bool ylog, string name, float xmax){
     else if(h_data->GetMaximum() > 10000) scale_for_log = 10;
     else if(h_data->GetMaximum() > 1000) scale_for_log = 10;
     yscale*=scale_for_log;
-    if(scale_up) yscale*= 10000;
+    if(scale_up) yscale*= 10;
   }
   else{
+
     yscale=1.2;
   }
 
@@ -921,6 +946,8 @@ float  GetMaximum(TH1* h_data, TH1* h_up, bool ylog, string name, float xmax){
   
   if(name.find("eemass")!=string::npos) yscale*=1.3;
   if(name.find("eta")!=string::npos) yscale*=2.5;
+  if(name.find("Eta")!=string::npos) yscale*=1.75;
+  if(name.find("nVert")!=string::npos) yscale*=1.75;
   if(name.find("MET")!=string::npos) yscale*=1.2;
   if(name.find("e1jj")!=string::npos) yscale*=1.2;
   if(name.find("Nje")!=string::npos) yscale*=1.2;
@@ -1134,7 +1161,7 @@ float GetSyst(TString cut, TString syst, pair<vector<pair<TString,float> >,TStri
 
 float Calculate(TString cut, TString variance, pair<vector<pair<TString,float> >,TString > samples ){
   
-  if(samples.second.Contains("Nonprompt_DoubleEG")){
+  if(samples.second.Contains("DoubleEG_SKnonprompt")){
     if(variance.Contains("Normal"))  return GetTotal(cut,samples.first) ;  
     if(variance.Contains("StatErr")) return GetStatError(cut,samples.first) ;  
   }
@@ -1187,6 +1214,8 @@ void SetUpMasterConfig(string name){
     if(tmp=="datapath") dataloc = tmppath;
     if(tmp=="nonpromptpath") nonpromptloc = tmppath;
     if(tmp=="prefix") fileprefix = tmppath;
+
+
     if(tmp=="postfix") filepostfix = tmppath;
     if(tmp=="plottingpath") plotloc = tmppath;
     if(tmp=="cutpath")  cutloc = tmppath;
@@ -1225,11 +1254,7 @@ void  SetUpConfig(vector<pair<pair<vector<pair<TString,float> >, int >, TString 
   
   /// Setup list of samples: grouped into different processes 
 
-  vector<pair<TString,float> > np;
-  np.push_back(make_pair("nonprompt_DoubleMuon",0.34));
-  
-  vector<pair<TString,float> > cf;
-  cf.push_back(make_pair("chargeflip",0.12));
+
   for( unsigned int i = 0; i < listofsamples.size(); i++){
 
   }
@@ -1246,7 +1271,7 @@ void  SetUpConfig(vector<pair<pair<vector<pair<TString,float> >, int >, TString 
 
 TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH1* hup_nostat,TLegend* legend, const string hname, const  int rebin, double xmin, double xmax,double ymin, double ymax,string path , string folder, bool logy, bool usedata, TString channel) {
   
-  ymax = GetMaximum(hdata, hup, ylog, hname, xmax);
+  ymax = GetMaximum(hdata, hup, ylog, hname, xmax, xmin);
   
   string cname;
   if(hdata) cname= string("c_") + hdata->GetName();
@@ -1255,7 +1280,7 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
   string label_plot_type = "";
   //Create Canvases
 
-  unsigned int outputWidth = 1600;
+  unsigned int outputWidth = 1200;
   unsigned int outputHeight = 1200;
 
   TCanvas* canvas = new TCanvas((cname+ label_plot_type).c_str(), (cname+label_plot_type).c_str(), outputWidth,outputHeight);
@@ -1281,15 +1306,16 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
 
   
   std::string title=canvas->GetName();
-  std::string tpdf = "/home/" + string(getenv("USER") )+"/CATAnalyzerPlots/"+ path + "/histograms/"+folder+"/"+title+".png";
-  std::string tlogpdf = "/home/" + string(getenv("USER") )+"/CATAnalyzerPlots/"+ path + "/histograms/"+folder+"/"+title+"_log.png";
+  std::string tpng = "/home/" + string(getenv("USER") )+"/CATAnalyzerPlots/"+ path + "/histograms/"+folder+"/"+title+".png";
+  std::string tlogpng = "/home/" + string(getenv("USER") )+"/CATAnalyzerPlots/"+ path + "/histograms/"+folder+"/"+title+"_log.png";
+  std::string tlogpdf = "/home/" + string(getenv("USER") )+"/CATAnalyzerPlots/"+ path + "/histograms/"+folder+"/"+title+"_log.pdf";
   
   ///####################   Standard plot
 
   if(!TString(hname).Contains("Tri")) {
     //if(!TString(hname).Contains("SSE")) {
       
-      if(TString(hname).Contains("llmass")){canvas_log->SetLogy();canvas->SetLogy();}
+    if(TString(hname).Contains("llmass") && ! TString(hname).Contains("lllmass") ){canvas_log->SetLogy();canvas->SetLogy();}
       if(TString(hname).Contains("LeptonPt")){canvas_log->SetLogy();canvas->SetLogy();}
       //}
   }
@@ -1299,13 +1325,15 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
   
   //// %%%%%%%%%% TOP HALF OF PLOT %%%%%%%%%%%%%%%%%%
   TH1* h_nominal = MakeSumHist2(mcstack.at(0));
-  SetNomBinError(h_nominal, hup, hdown);
 
+  TH1* errorband = MakeErrorBand(h_nominal,hup, hdown) ;
+  legend->AddEntry(errorband, "stat. + syst.","f");
+  SetNomBinError(h_nominal, hup, hdown);
   
   hdata->SetLineColor(kBlack);
   
   // draw data hist to get axis settings
-  hdata->GetYaxis()->SetTitleOffset(1.5);
+  hdata->GetYaxis()->SetTitleOffset(1.4);
   hdata->Draw("p9hist");
   TLatex label;
   label.SetTextSize(0.04);
@@ -1319,9 +1347,9 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
 
   //return canvas;  
   mcstack.at(0)->Draw("HIST9same");
-  
   // draw axis on same canvas
   hdata->Draw("axis same");
+  errorband->Draw("E2same");  
 
   vector<float> err_up_tmp;
   vector<float> err_down_tmp;
@@ -1375,7 +1403,7 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
   canvas->Update();
   canvas->RedrawAxis();
 
-  canvas->Print(tpdf.c_str(), ".png");
+  canvas->Print(tpng.c_str(), ".png");
 
 
   //// %%%%%%%%%% PRINT ON LOG
@@ -1387,16 +1415,18 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
   
   float scale_for_log = 1.;
   if(!ylog){
-    ymax = GetMaximum(hdata, hup, !ylog, hname, xmax);
-    hdata->GetYaxis()->SetRangeUser(0.01, ymax*scale_for_log);
+    ymax = GetMaximum(hdata, hup, !ylog, hname, xmax,xmin);
+    hdata->GetYaxis()->SetRangeUser(2., ymax*scale_for_log);
   }
-  hdata->GetYaxis()->SetTitleOffset(1.6);
+  hdata->GetYaxis()->SetTitleOffset(1.5);
   hdata->Draw("p9hist");
   
   mcstack.at(0)->Draw("9HIST same");
+
   hdata->Draw("9samep9hist");
   hdata->Draw("axis same");
-  
+  errorband->Draw("E2same");
+
   gPad->Update();
 
 
@@ -1427,15 +1457,16 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
   
   
   // How large fraction that will be taken up by the data/MC ratio part
-  double FIGURE2_RATIO = 0.35;
-  double SUBFIGURE_MARGIN = 0.15;
+  double FIGURE2_RATIO = 0.25;
+  double SUBFIGURE_MARGIN = 0.;
   canvas_log->SetBottomMargin(FIGURE2_RATIO);
   TPad *p = new TPad( "p_test", "", 0, 0, 1, 1.0 - SUBFIGURE_MARGIN, 0, 0, 0);  // create new pad, fullsize to have equal font-sizes in both plots
   p->SetTopMargin(1-FIGURE2_RATIO);   // top-boundary (should be 1 - thePad->GetBottomMargin() )
   p->SetFillStyle(0);     // needs to be transparent
   p->Draw();
   p->cd();
-
+  p->SetTicks(0,1);
+  
   
   
   Double_t *staterror;
@@ -1494,10 +1525,15 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
   
   //////////// Plot all
   
-  
-  hdev->GetYaxis()->SetTitle( "#frac{Data}{MC}" );
-  hdev->GetYaxis()->SetRangeUser(0.6,+1.4);
-  hdev->GetYaxis()->SetNdivisions(9);
+  hdev->GetYaxis()->SetLabelSize(0.035);
+  hdev->GetYaxis()->SetTitleSize(0.035);
+  hdev->GetYaxis()->SetTitleOffset(1.3);
+
+  hdev->GetYaxis()->SetTitle( "Data / #Sigma MC" );
+  hdev->GetYaxis()->SetRangeUser(0.25,+1.75);
+  hdev->GetYaxis()->SetNdivisions(3);
+  hdev->GetXaxis()->SetNdivisions(5);
+
   hdev->SetMarkerStyle(20);
   //hdev->SetMarkerSize(2.3);
   hdev_err_stat->SetMarkerSize(0.);
@@ -1524,13 +1560,15 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
   devz->Draw("SAME");
   
   
-  
-  
+  TLegend* legendr = MakeRatioLegend(hdev_err,hdev_err_stat);
+  legendr->Draw();
+    
 
-  CMS_lumi( canvas_log, 4, 11 );
+  CMS_lumi( canvas_log, 4, 2 );
   canvas_log->Update();
   canvas_log->RedrawAxis();
-  canvas_log->Print(tlogpdf.c_str(), ".png");
+  canvas_log->Print(tlogpng.c_str(), ".png");
+  canvas_log->Print(tlogpdf.c_str(), ".pdf");
   gPad->RedrawAxis();
   
   return canvas;
@@ -1585,8 +1623,8 @@ TH1* MakeErrorBand(TH1* hnom, TH1* hup, TH1* hdown){
     errorband->SetBinError(i,bin_error);
   }
 
-  errorband->SetFillStyle(3444);
-  errorband->SetFillColor(kBlue-8);
+  errorband->SetFillStyle(3004);
+  errorband->SetFillColor(kBlue-2);
   errorband->SetMarkerSize(0);
   errorband->SetMarkerStyle(0);
   errorband->SetLineColor(kWhite);
@@ -1641,6 +1679,8 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX )
   float r = pad->GetRightMargin();
   float b = pad->GetBottomMargin();
   float e = 0.025;
+
+  if(iPosX!=2) t*= 0.7;
 
   pad->cd();
 
@@ -1699,77 +1739,29 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX )
   latex.SetTextSize(lumiTextSize*t);
   latex.DrawLatex(1-r,1-t+lumiTextOffset*t,lumiText);
 
-  if( outOfFrame )
-    {
-      latex.SetTextFont(cmsTextFont);
-      latex.SetTextAlign(11);
-      latex.SetTextSize(cmsTextSize*t);
-      latex.DrawLatex(l,1-t+lumiTextOffset*t,cmsText);
-    }
+  if(iPosX==2)  latex.DrawLatex(1-r-0.22,1-t+lumiTextOffset*t, "ee ch.,");
+  else  latex.DrawLatex(1-r-0.4,1-t+lumiTextOffset*t, "ee ch.,");
 
-  pad->cd();
+  
 
-  //  writeExtraText=true;
-  float posX_;
-  if( iPosX%10<=1 )
-    {
-      posX_ =   l + relPosX*(1-l-r);
-    }
-  else if( iPosX%10==2 )
-    {
-      posX_ =  l + 0.5*(1-l-r);
-    }
-  else if( iPosX%10==3 )
-    {
-      posX_ =  1-r - relPosX*(1-l-r);
-    }
-  float posY_ = 1-t - relPosY*(1-t-b);
-  if( !outOfFrame )
-    {
-      if( drawLogo )
-        {
-          posX_ =   l + 0.045*(1-l-r)*W/H;
-          posY_ = 1-t - 0.045*(1-t-b);
-          float xl_0 = posX_;
-          float yl_0 = posY_ - 0.15;
-          float xl_1 = posX_ + 0.15*H/W;
-          float yl_1 = posY_;
-          TASImage* CMS_logo = new TASImage("CMS-BW-label.png");
-          TPad* pad_logo = new TPad("logo","logo", xl_0, yl_0, xl_1, yl_1 );
-          pad_logo->Draw();
-          pad_logo->cd();
-          CMS_logo->Draw("X");
-          pad_logo->Modified();
-          pad->cd();
-        }
-      else
-        {
-          latex.SetTextFont(cmsTextFont);
-          latex.SetTextSize(cmsTextSize*t);
-          latex.SetTextAlign(align_);
-          latex.DrawLatex(posX_, posY_, cmsText);
-          if( writeExtraText )
-            {
-              latex.SetTextFont(extraTextFont);
-              latex.SetTextAlign(align_);
-              latex.SetTextSize(extraTextSize*t);
-              latex.DrawLatex(posX_, posY_- relExtraDY*cmsTextSize*t, extraText);
-            }
-        }
-    }
-  else if( writeExtraText )
-    {
-      if( iPosX==0)
-        {
-          posX_ =   l +  relPosX*(1-l-r);
-          posY_ =   1-t+lumiTextOffset*t;
-        }
-      latex.SetTextFont(extraTextFont);
-      latex.SetTextSize(extraTextSize*t);
-      latex.SetTextAlign(align_);
-      latex.DrawLatex(posX_, posY_, extraText);
-    }
-  return;
+  latex.SetTextFont(cmsTextFont);
+  latex.SetTextAlign(11);
+  latex.SetTextSize(cmsTextSize*t);
+  latex.DrawLatex(l,1-t+lumiTextOffset*t,cmsText);
+  
+
+
+  float posY_ = 1-t+lumiTextOffset*t;
+  
+  
+  latex.SetTextAlign(11);
+  float posX_ = l +  relPosX*(1-l-r) + 0.06;
+  latex.SetTextFont(extraTextFont);
+  latex.SetTextSize(extraTextSize*t);
+  //latex.SetTextAlign(align_);
+  latex.DrawLatex(posX_, posY_, extraText);
+
+return;
 }
 
 

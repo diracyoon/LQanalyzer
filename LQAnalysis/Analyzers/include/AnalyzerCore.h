@@ -49,15 +49,28 @@ class AnalyzerCore : public LQCycleBase {
 
   void setTDRStyle();
   TString GetStringID(BaseSelection::ID id);
+  double GetIsoCut(snu::KElectron el, TString curlable);
+  double GetDXYCut(snu::KElectron el, TString curlable);
+
   std::vector<snu::KJet>  GetJets(BaseSelection::ID jetid, float ptcut=-999., float etacut = -999.);
   std::vector<snu::KFatJet>  GetFatJets(BaseSelection::ID jetid, float ptcut=-999., float etacut = -999.);
   std::vector<snu::KMuon> GetMuons(BaseSelection::ID muid, float ptcut=-999., float etacut = -999.);
   std::vector<snu::KElectron> GetElectrons( BaseSelection::ID elid , float ptcut=-999., float etacut = -999.);
 
+  float GetKFactor();
+
+  bool ISCF(snu::KElectron el);
+  bool TruthMatched(std::vector<snu::KElectron> el, bool tightdxy, bool allowCF);
+  bool TruthMatched(snu::KElectron el, bool keepcf);
+  
+  float GetVirtualMassConv(int cmindex,int nconvindx);
+  float GetVirtualMass(bool inph=false);
+
   void SetupLuminosityMap(bool initialsetup, TString forceperiod="");
   Int_t GetMCPeriod();
   Int_t GetDataPeriod();  
   int GetPeriod();
+  int GetMCPeriodRandom();
 
   void  SetupID();
   void  SetupDDBkg();
@@ -73,7 +86,7 @@ class AnalyzerCore : public LQCycleBase {
   std::vector<snu::KFatJet>  GetFatJets(TString jetid,  float ptcut=-999., float etacut = -999.);
   std::vector<snu::KMuon> GetMuons(TString muid, float ptcut=-999., float etacut = -999.);
   std::vector<snu::KMuon> GetMuons(TString muid, bool keepfakes, float ptcut=-999., float etacut = -999.);
-  std::vector<snu::KElectron> GetElectrons(bool keepcf, bool keepfake, TString elid, float ptcut=-999., float etacut = -999.);
+  std::vector<snu::KElectron> GetElectrons(bool keepcf, bool keepfake,   TString elid, float ptcut=-999., float etacut = -999.);
   std::vector<snu::KElectron> GetElectrons( TString elid , float ptcut=-999., float etacut = -999.);
 
   bool Is2015Analysis();
@@ -81,6 +94,8 @@ class AnalyzerCore : public LQCycleBase {
   void SetupSelectionJet(std::string path_sel);
   void SetupSelectionFatJet(std::string path_sel);
   void SetupSelectionElectron(std::string path_sel);
+
+  
 
   void MakeBTagEfficiencyPlots();
   void GetJetTaggerEfficiences(TString taggerWP, snu::KJet::Tagger tag,  snu::KJet::WORKING_POINT wp);
@@ -125,12 +140,14 @@ class AnalyzerCore : public LQCycleBase {
   std::vector<snu::KElectron> GetTruePrompt(vector<snu::KElectron> electrons,  bool keep_chargeflip, bool keepfake);
   std::vector<snu::KMuon> GetTruePrompt(vector<snu::KMuon> muons,   bool keepfake);
 
+  bool  MCIsCF(snu::KElectron el);
   bool Zcandidate(vector<snu::KMuon> muons, float interval, bool require_os=true);
   bool Zcandidate(vector<snu::KElectron> electrons, float interval, bool require_os=true);
   bool SameCharge(std::vector<snu::KMuon> muons);
   bool SameCharge(std::vector<snu::KElectron> electrons, bool runcf=false);
   bool OppositeCharge(std::vector<snu::KElectron> electrons, bool runcf=false);
-  
+
+  bool OppositeCharge(std::vector<snu::KElectron> electrons, std::vector<snu::KMuon> muons);  
   float CorrectedMETRochester(std::vector<snu::KMuon> muons , bool updatemet);
   float CorrectedMETElectron(std::vector<snu::KElectron> electrons,  int syst=0);
   float CorrectedMETMuon(std::vector<snu::KMuon> muons ,int syst=0);
@@ -149,7 +166,7 @@ class AnalyzerCore : public LQCycleBase {
   double MuonDYMassCorrection(std::vector<snu::KMuon> mu, double w);
 
   // enum for plotting functions/classes
-  enum histtype {muhist, elhist, jethist, sighist_ee, sighist_mm, sighist_em, trilephist, hnpairmm, hntrilephist};
+  enum histtype {muhist, elhist, jethist, sighist_e,sighist_ee,sighist_eee,sighist_eeee, sighist_mm, sighist_em, trilephist, hnpairmm, hntrilephist};
   
   
   //
@@ -237,6 +254,7 @@ class AnalyzerCore : public LQCycleBase {
 
   // used to get trigger prescale
   
+  bool k_onlyfromtaus;
   bool  k_reset_period;
   int a_mcperiod;
   bool IDSetup;
@@ -339,6 +357,7 @@ class AnalyzerCore : public LQCycleBase {
   bool GenMatching(snu::KParticle a, snu::KParticle b, double maxDeltaR, double maxPtDiff);
   std::vector<snu::KMuon> GetHNTriMuonsByLooseRelIso(double LooseRelIsoMax, bool keepfake);
   void PrintTruth();
+  std::vector<snu::KMuon> sort_muons_ptorder(std::vector<snu::KMuon> muons);
 
   //private methods
   static bool Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1);

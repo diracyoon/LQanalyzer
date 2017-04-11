@@ -64,10 +64,10 @@ void GetFakeSF::ExecuteEvents()throw( LQError ){
   FillHist("NoCut" , 1., MCweight,  0. , 2., 2);
   FillHist("NoCut_w" , 1., weight,  0. , 2., 2);
 
-  std::vector<snu::KElectron> electronLooose_highdxy = GetElectrons(false,true,"ELECTRON_HN_HIGHDXY_FAKELOOSE");
+  std::vector<snu::KElectron> electronLooose_highdxy = GetElectrons(false,true, "ELECTRON_HN_HIGHDXY_FAKELOOSE");
   std::vector<snu::KElectron> electronLooose_lowdxy = GetElectrons(false,true,"ELECTRON_HN_LOWDXY_FAKELOOSE");
-  std::vector<snu::KElectron> electronTight_highdxy = GetElectrons(false,true,"ELECTRON_HN_HIGHDXY_TIGHT");
-  std::vector<snu::KElectron> electronTight_lowdxy = GetElectrons(false,true,"ELECTRON_HN_LOWDXY_TIGHT");
+  std::vector<snu::KElectron> electronTight_highdxy = GetElectrons(false,true, "ELECTRON_HN_HIGHDXY_TIGHT");
+  std::vector<snu::KElectron> electronTight_lowdxy = GetElectrons(false,true, "ELECTRON_HN_LOWDXY_TIGHT");
 
   
 
