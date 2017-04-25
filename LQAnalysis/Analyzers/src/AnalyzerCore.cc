@@ -3085,11 +3085,6 @@ TNtupleD* AnalyzerCore::GetNtp(TString hname){
   return n;
 }
 
-bool AnalyzerCore::Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1)
-{
-  return jet0.Pt() > jet1.Pt();
-}
-
 std::vector<snu::KMuon> AnalyzerCore::sort_muons_ptorder(std::vector<snu::KMuon> muons){
 
   std::vector<snu::KMuon> outmuon;
@@ -3107,9 +3102,317 @@ std::vector<snu::KMuon> AnalyzerCore::sort_muons_ptorder(std::vector<snu::KMuon>
     outmuon.push_back( muons.at(index) );
   }
   return outmuon;
- 
+
 
 }
 
+///////////////////
+/*private methods*/
+///////////////////
 
+Bool_t AnalyzerCore::Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1)
+{
+  return jet0.Pt() > jet1.Pt();
+}//Bool_t AnalyzerCore::Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1)
 
+//////////
+
+Bool_t AnalyzerCore::Compare_Jet_CSV(const snu::KJet& jet0, const snu::KJet& jet1)
+{
+  Double_t csv0 = jet0.BJetTaggerValue(snu::KJet::CSVv2);
+  Double_t csv1 = jet1.BJetTaggerValue(snu::KJet::CSVv2);
+
+  return csv0 > csv1;
+}//Bool_t AnalyzerCore::Compare_Jet_CSV(const snu::KJet& jet0, const snu::KJet& jet1)
+
+//////////
+
+Double_t AnalyzerCore::Distance(const snu::KTruth& truth, const snu::KJet& jet)
+{
+  Double_t truth_phi = truth.Phi();
+  Double_t truth_eta = truth.Eta();
+
+  Double_t jet_phi = jet.Phi();
+  Double_t jet_eta = jet.Eta();
+
+  Double_t distance = TMath::Sqrt(TMath::Power(truth_phi-jet_phi, 2) + TMath::Power(truth_eta-jet_eta, 2));
+
+  //cout << truth_phi << "\t" << truth_eta << "\t" << jet_phi << "\t" << jet_eta << "\t" << distance << endl;
+
+  return distance;
+}//Double_t AnalyzerCore::Distance(const snu::KTruth& truth, const snu::KJet& jet)
+
+//////////
+
+Bool_t AnalyzerCore::Search_Truth_Value(std::vector<snu::KTruth>& gen_truth_coll, snu::KTruth gen_quark[4], snu::KTruth& gen_neutrino, snu::KTruth& gen_lepton)
+{
+  Int_t n_parton = gen_truth_coll.size();
+  
+  Int_t gen_truth_index[10];
+  for(Int_t i=0; i<10; i++){ gen_truth_index[i] = BLANK; }
+
+  snu::KTruth gen_truth[10];
+  
+  for(Int_t i=0; i<n_parton; i++)
+    {
+      snu::KTruth truth = gen_truth_coll.at(i);
+
+      Int_t gen_index = i;
+      Int_t pdg_id =  truth.PdgId();
+      Int_t index_mother = truth.IndexMother();
+
+      //cout << gen_index << "\t" << pdg_id << "\t" << index_mother << endl;
+
+      //top observed
+      if(pdg_id==6 && gen_truth_index[TOP]==BLANK)
+	{
+          gen_truth[TOP] = truth;
+          gen_truth_index[TOP]= gen_index;
+        }
+      
+      //anti_top observed
+      if(pdg_id==-6 && gen_truth_index[A_TOP]==BLANK)
+        {
+          gen_truth[A_TOP] = truth;
+          gen_truth_index[A_TOP]= gen_index;
+	}
+
+      //t -> b w+ or t -> b h+
+      if(index_mother==gen_truth_index[TOP] && pdg_id!=gen_truth[TOP].PdgId())
+        {
+	  //bottom from top decay observed 
+	  if(pdg_id==5)
+            {
+              gen_truth[BOTTOM] = truth;
+              gen_truth_index[BOTTOM]= gen_index;
+            }
+	  
+	  //w+ or h+ from top decay observed
+	  else
+            {
+	      gen_truth[D_0] = truth;
+              gen_truth_index[D_0]= gen_index;
+            }
+        }
+      
+      //D_0 -> D_0_0 D_0_1
+      if(index_mother==gen_truth_index[D_0] && pdg_id!=gen_truth[D_0].PdgId())
+        {
+          if(gen_truth_index[D_0_0]==BLANK)
+            {
+              gen_truth[D_0_0] = truth;
+              gen_truth_index[D_0_0]= gen_index;
+            }
+          else
+            {
+              gen_truth[D_0_1] = truth;
+              gen_truth_index[D_0_1]= gen_index;
+            }
+        }
+
+      //anti_t -> anti_b w- or anti_t -> anti_b h-
+      if(index_mother==gen_truth_index[A_TOP] && pdg_id!=gen_truth[A_TOP].PdgId())
+        {
+	  //anti_bottom from top decay observed
+	  if(pdg_id==-5)
+            {
+              gen_truth[A_BOTTOM]= truth;
+              gen_truth_index[A_BOTTOM]= gen_index;
+            }
+	  
+	  //w- or h- from top decay observed
+	  else
+            {
+              gen_truth[D_1] = truth;
+              gen_truth_index[D_1]= gen_index;
+            }
+        }
+      
+      //D_1 -> D_1_0 D_1_1
+      if(index_mother==gen_truth_index[D_1] && pdg_id!=gen_truth[D_1].PdgId())
+        {
+          if(gen_truth_index[D_1_0]==BLANK)
+            {
+              gen_truth[D_1_0] = truth;
+              gen_truth_index[D_1_0]= gen_index;
+            }
+          else
+            {
+              gen_truth[D_1_1] = truth;
+              gen_truth_index[D_1_1]= gen_index;
+            }
+        }
+
+      //tracing parton shower
+      for(Int_t j=0; j<10; j++)
+	{
+	  if(index_mother==gen_truth_index[j] && pdg_id==gen_truth[j].PdgId())
+	    {
+              gen_truth[j] = truth;
+              gen_truth_index[j] = gen_index;
+	    }
+	}
+    }//for loop over ntruth
+
+  //cout << endl;
+  //for(Int_t i=0; i<10; i++){ cout << gen_truth_index[i] << "\t" << gen_truth[i].PdgId() << endl; }
+  //cout << endl;
+
+  //Check one lepton decay and one hadronic decay
+  Bool_t chk_leptonic_decay_0 = kFALSE;
+  Bool_t chk_leptonic_decay_1 = kFALSE;
+
+  if(gen_truth[D_0_0].PdgId()==-11 || gen_truth[D_0_0].PdgId()==-13 || gen_truth[D_0_1].PdgId()==-11 || gen_truth[D_0_1].PdgId()==-13) chk_leptonic_decay_0 = kTRUE;
+  if(gen_truth[D_1_0].PdgId()==11 || gen_truth[D_1_0].PdgId()==13 || gen_truth[D_1_1].PdgId()==11 || gen_truth[D_1_1].PdgId()==13) chk_leptonic_decay_1 = kTRUE;
+
+  //check semi-leptonic decay
+  if((chk_leptonic_decay_0==kTRUE && chk_leptonic_decay_1==kTRUE) || (chk_leptonic_decay_0==kFALSE && chk_leptonic_decay_1==kFALSE)) return kFALSE;
+
+  //constuct gen parton array for easy handling
+  if(chk_leptonic_decay_0==kFALSE)
+    {
+      gen_quark[0] = gen_truth[A_BOTTOM];
+      gen_quark[1] = gen_truth[BOTTOM];
+      gen_quark[2] = gen_truth[D_0_0];
+      gen_quark[3] = gen_truth[D_0_1];
+
+      if(gen_truth[D_1_0].PdgId()==11 || gen_truth[D_1_0].PdgId()==13)
+        {
+          gen_neutrino = gen_truth[D_1_1];
+          gen_lepton = gen_truth[D_1_0];
+        }
+      else
+        {
+          gen_neutrino = gen_truth[D_1_0];
+          gen_lepton = gen_truth[D_1_1];
+        }
+    }
+  else
+    {
+      gen_quark[0] = gen_truth[BOTTOM];
+      gen_quark[1] = gen_truth[A_BOTTOM];
+      gen_quark[2] = gen_truth[D_1_0];
+      gen_quark[3] = gen_truth[D_1_1];
+
+      if(gen_truth[D_0_0].PdgId()==-11 || gen_truth[D_0_0].PdgId()==-13)
+        {
+          gen_neutrino = gen_truth[D_0_1];
+          gen_lepton = gen_truth[D_0_0];
+        }
+      else
+        {
+          gen_neutrino = gen_truth[D_0_0];
+          gen_lepton = gen_truth[D_0_1];
+        }
+    }
+
+  return kTRUE;
+}//Bool_t AnalyzerCore::Search_Truth_Value(std::vector<snu::KTruth>& gen_truth_coll, snu::KTruth gen_quark[4], snu::KTruth& gen_neutrino, snu::KTruth& gen_lepton)
+
+//////////
+
+Bool_t AnalyzerCore::Truth_Jet_Match(const snu::KTruth gen_quark[], const vector<snu::KJet>& jet_vector, Int_t permutation_truth[4])
+{
+  //Bool_t chk_print = kTRUE;
+  Bool_t chk_print = kFALSE;
+  
+  if(chk_print) cout << endl;
+  
+  Int_t njet = jet_vector.size();
+  
+  Bool_t* match = new Bool_t[njet];
+  Bool_t* chk_btag = new Bool_t[njet];
+  Int_t nbjet = 0;
+  for(Int_t i=0; i<njet; i++)
+    {
+      match[i] = kFALSE;
+
+      snu::KJet jet = jet_vector.at(i);
+      Double_t cvs = jet.BJetTaggerValue(snu::KJet::CSVv2);
+      if(cvs>CSV_THRESHOLD_MEDIUM)
+	{
+          chk_btag[i] = kTRUE;
+          nbjet++;
+        }
+      else chk_btag[i] = kFALSE;
+    }
+  
+  if(chk_print) cout << "njet = " << njet << ", nbjet = " << nbjet << endl;
+  
+  for(Int_t i=0; i<4; i++)
+    {
+      for(Int_t j=0; j<njet; j++)
+        {
+	  if(match[j]==kTRUE) continue;
+	  
+	  snu::KJet jet = jet_vector.at(j);
+          Double_t distance = Distance(gen_quark[i], jet);
+
+	  if(chk_print) cout << i << "\t" << gen_quark[i].PdgId() << "\t" << gen_quark[i].Pt() << "\t" << j << "\t" << jet.Pt() << "\t" << distance << "\t" << chk_btag[j] << endl;
+
+          if(distance<DISTANCE_MATCH)
+            {
+              if(chk_print) cout << "Distance Match" << endl;
+
+              if(chk_btag[j]==kTRUE && (gen_quark[i].PdgId()==5||gen_quark[i].PdgId()==-5) )
+                {
+                  match[j] = kTRUE;
+                  permutation_truth[i] = j;
+
+                  if(chk_print) cout << "Found b tag" << endl;
+
+                  break;
+                }//b tag jet
+	      else
+                {
+                  match[j] = kTRUE;
+                  permutation_truth[i] = j;
+
+                  if(chk_print) cout << "Found No b tag" << endl;
+
+                  break;
+                }//no b tag jet
+
+	      // if((i==0||i==1)&&chk_btag[j]==kTRUE)
+              //   {
+              //     match[j] = kTRUE;
+              //     permutation_truth[i] = j;
+
+              //     if(chk_print) cout << "Found" << endl;
+
+              //     break;
+              //   }
+              // else
+              //   {
+              //     match[j] = kTRUE;
+              //     permutation_truth[i] = j;
+
+              //     if(chk_print) cout << "Found" << endl;
+
+              //     break;
+	      // 	}
+	      
+	    }//if distance
+	}//for loop over leading four jet
+    }//for loop over four parton
+	  
+  Int_t count = 0;
+  for(Int_t i=0; i<njet; i++){ if(match[i]==kTRUE) count++; }
+  
+  Bool_t chk_match = kFALSE;
+  if(count==4) chk_match = kTRUE;
+  
+  if(chk_print)
+    {
+      if(chk_match==kTRUE) cout << "GOOD" << endl;
+      else cout << "BAD" << endl;
+    }
+
+  delete[] match;
+  delete[] chk_btag;
+
+  return chk_match;
+  
+}//Bool_t AnalyzerCore::Truth_Jet_Match(const snu::KTruth gen_quark[], const vector<snu::KJet>& jet_vector, Int_t permutation_truth[4])
+
+//////////

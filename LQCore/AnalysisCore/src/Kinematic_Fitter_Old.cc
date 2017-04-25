@@ -71,7 +71,7 @@ void Kinematic_Fitter_Old::Fit()
 
 //////////
 
-void Kinematic_Fitter_Old::Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<snu::KJet>& a_jet_vector, const Bool_t* a_target_jet, const Bool_t* a_b_tag)
+void Kinematic_Fitter_Old::Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t* a_target_jet, const Bool_t* a_b_tag)
 {
   measured_met = a_met;
   

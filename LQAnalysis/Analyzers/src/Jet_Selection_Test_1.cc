@@ -4,6 +4,7 @@
 
 //Local includes
 #include "Jet_Selection_Test_1.h"
+#include "Fitter_Result_Container.h"
 
 //Needed to allow inheritance for use in LQCore/core classes
 ClassImp(Jet_Selection_Test_1);
@@ -65,178 +66,19 @@ void Jet_Selection_Test_1::ExecuteEvents() throw(LQError)
 
   FillCutFlow("NoCut", weight);
 
-  /*////////////////////*/
-  /*////////////////////*/
   /*Gen Truth*/
-  /*////////////////////*/
-  /*////////////////////*/
-    
-  std::vector<snu::KTruth> gen_parton_coll;
-  eventbase->GetTruthSel()->Selection(gen_parton_coll);
-
-  Int_t n_parton = gen_parton_coll.size();
- 
-  Int_t gen_truth_index[10];
-  for(Int_t i=0; i<10; i++){ gen_truth_index[i] = BLANK; }
   
-  snu::KTruth gen_truth[10];
-  
-  for(Int_t i=0; i<n_parton; i++)
-    {
-      snu::KTruth truth = gen_parton_coll.at(i);
-      
-      Int_t gen_index = i; 
-      Int_t pdg_id =  truth.PdgId();
-      Int_t index_mother = truth.IndexMother();
+  std::vector<snu::KTruth> gen_truth_coll;
+  eventbase->GetTruthSel()->Selection(gen_truth_coll);
 
-      //cout << gen_index << "\t" << pdg_id << "\t" << index_mother << endl;
-      
-      //top observed
-      if(pdg_id==6 && gen_truth_index[TOP]==BLANK)
-	{
-	  gen_truth[TOP] = truth;
-	  gen_truth_index[TOP]= gen_index;
-	}
-      
-      //anti_top observed
-      if(pdg_id==-6 && gen_truth_index[A_TOP]==BLANK)
-	{
-	  gen_truth[A_TOP] = truth;
-          gen_truth_index[A_TOP]= gen_index;
-	}
-      
-      //t -> b w+ or t -> b h+
-      if(index_mother==gen_truth_index[TOP] && pdg_id!=gen_truth[TOP].PdgId())
-	{
-	  //bottom from top decay observed
-	  if(pdg_id==5)
-	    {
-	      gen_truth[BOTTOM] = truth;
-	      gen_truth_index[BOTTOM]= gen_index;
-	    }
-
-	  //w+ or h+ from top decay observed
-	  else
-	    {
-	      gen_truth[D_0] = truth;
-	      gen_truth_index[D_0]= gen_index;
-	    }
-	}
-
-      //D_0 -> D_0_0 D_0_1
-      if(index_mother==gen_truth_index[D_0] && pdg_id!=gen_truth[D_0].PdgId())
-	{
-	  if(gen_truth_index[D_0_0]==BLANK)
-	    {
-	      gen_truth[D_0_0] = truth;
-              gen_truth_index[D_0_0]= gen_index;
-	    }
-	  else
-	    {
-	      gen_truth[D_0_1] = truth;
-              gen_truth_index[D_0_1]= gen_index;
-	    }
-	}
-
-      //anti_t -> anti_b w- or anti_t -> anti_b h-
-      if(index_mother==gen_truth_index[A_TOP] && pdg_id!=gen_truth[A_TOP].PdgId())
-        {
-          //anti_bottom from top decay observed
-          if(pdg_id==-5)
-            {
-	      gen_truth[A_BOTTOM]= truth;
-	      gen_truth_index[A_BOTTOM]= gen_index;
-            }
-
-          //w- or h- from top decay observed 
-          else
-            {
-	      gen_truth[D_1] = truth;
-              gen_truth_index[D_1]= gen_index;
-            }
-        }
-      
-      //D_1 -> D_1_0 D_1_1
-      if(index_mother==gen_truth_index[D_1] && pdg_id!=gen_truth[D_1].PdgId())
-	{
-          if(gen_truth_index[D_1_0]==BLANK)
-            {
-	      gen_truth[D_1_0] = truth;
-              gen_truth_index[D_1_0]= gen_index;
-            }
-          else
-	    {
-	      gen_truth[D_1_1] = truth;
-              gen_truth_index[D_1_1]= gen_index;
-            }
-        }
-
-      //tracing parton shower
-      for(Int_t j=0; j<10; j++)
-      {
-        if(index_mother==gen_truth_index[j] && pdg_id==gen_truth[j].PdgId())
-          {
-	      gen_truth[j] = truth;
-	      gen_truth_index[j] = gen_index;
-	  }
-      }      
-    }//for loop over ntruth
-  
-  //cout << endl;
-  //for(Int_t i=0; i<10; i++){ cout << gen_truth_index[i] << "\t" << gen_truth[i].PdgId() << endl; }
-  //cout << endl;
-  
-  //Check one lepton decay and one hadronic decay
-  Bool_t chk_leptonic_decay_0 = kFALSE;
-  Bool_t chk_leptonic_decay_1 = kFALSE;
-  
-  if(gen_truth[D_0_0].PdgId()==-11 || gen_truth[D_0_0].PdgId()==-13 || gen_truth[D_0_1].PdgId()==-11 || gen_truth[D_0_1].PdgId()==-13) chk_leptonic_decay_0 = kTRUE;
-  if(gen_truth[D_1_0].PdgId()==11 || gen_truth[D_1_0].PdgId()==13 || gen_truth[D_1_1].PdgId()==11 || gen_truth[D_1_1].PdgId()==13) chk_leptonic_decay_1 = kTRUE;
-  
-  if((chk_leptonic_decay_0==kTRUE && chk_leptonic_decay_1==kTRUE) || (chk_leptonic_decay_0==kFALSE && chk_leptonic_decay_1==kFALSE)) throw LQError("Fail truth cuts", LQError::SkipEvent);
-  FillCutFlow("Truth", weight);
- 
-  //constuct gen parton array for easy handling
-  snu::KTruth four_gen_truth[4];
+  snu::KTruth gen_quark[4];
   snu::KTruth gen_neutrino;
   snu::KTruth gen_lepton;
-  if(chk_leptonic_decay_0==kFALSE)
-    {
-      four_gen_truth[0] = gen_truth[A_BOTTOM];
-      four_gen_truth[1] = gen_truth[BOTTOM];
-      four_gen_truth[2] = gen_truth[D_0_0];
-      four_gen_truth[3] = gen_truth[D_0_1];
-      
-      if(gen_truth[D_1_0].PdgId()==11 || gen_truth[D_1_0].PdgId()==13)
-	{
-	  gen_neutrino = gen_truth[D_1_1];
-	  gen_lepton = gen_truth[D_1_0];
-	}
-      else
-	{
-	  gen_neutrino = gen_truth[D_1_0];
-	  gen_lepton = gen_truth[D_1_1];
-	}
-    }
-  else
-    {
-      four_gen_truth[0] = gen_truth[BOTTOM];
-      four_gen_truth[1] = gen_truth[A_BOTTOM];
-      four_gen_truth[2] = gen_truth[D_1_0];
-      four_gen_truth[3] = gen_truth[D_1_1];
-
-      if(gen_truth[D_0_0].PdgId()==-11 || gen_truth[D_0_0].PdgId()==-13)
-	{
-	  gen_neutrino = gen_truth[D_0_1];
-	  gen_lepton = gen_truth[D_0_0];
-	}
-      else
-	{
-	  gen_neutrino = gen_truth[D_0_0];
-	  gen_lepton = gen_truth[D_0_1];
-	}
-    }
+  Bool_t chk_semi_leptonic = Search_Truth_Value(gen_truth_coll, gen_quark, gen_neutrino, gen_lepton);
   
+  if(chk_semi_leptonic==kFALSE) throw LQError("No semi-leptonic decay", LQError::SkipEvent);
+  FillCutFlow("SemiLeptonic", weight);
+
   //Vertex cut
   if(!eventbase->GetEvent().HasGoodPrimaryVertex()) throw LQError("Fails vertex cuts", LQError::SkipEvent);
   FillCutFlow("VertexCut", weight);
@@ -297,11 +139,14 @@ void Jet_Selection_Test_1::ExecuteEvents() throw(LQError)
   sort(jet_hard_coll.begin(), jet_hard_coll.end(), Compare_Jet_Pt);
   sort(jet_soft_coll.begin(), jet_soft_coll.end(), Compare_Jet_Pt);
 
+  Int_t n_jet_soft = jet_soft_coll.size();
+  
+  vector<TLorentzVector> jet_soft_vec;
+  for(Int_t i=0; i<n_jet_soft; i++){ jet_soft_vec.push_back(jet_soft_coll.at(i)); }
+  
   //at least four hard jets cut
   if(jet_hard_coll.size()<4) throw LQError("Fails at least four hard jets cuts.", LQError::SkipEvent);
   FillCutFlow("FourJets", weight);
-
-  Int_t n_jet_soft = jet_soft_coll.size();
   
   Bool_t* chk_btag = new Bool_t[n_jet_soft];
   Bool_t* target_jet = new Bool_t[n_jet_soft];
@@ -328,24 +173,24 @@ void Jet_Selection_Test_1::ExecuteEvents() throw(LQError)
   FillCutFlow("TwoBJets", weight);
   
   //parton-jet matching for all jets
-  Int_t permutation_real[4] = {0, 0, 0, 0};
-  Bool_t chk_match_all = Parton_Jet_Match(four_gen_truth, jet_soft_coll, permutation_real);
+  Int_t permutation_truth[4] = {0, 0, 0, 0};
+  Bool_t chk_match_all = Truth_Jet_Match(gen_quark, jet_soft_coll, permutation_truth);
 
   if(chk_match_all==kFALSE) throw LQError("Fails jet match", LQError::SkipEvent);
   FillCutFlow("JetMatchAll", weight);
   
-  //ordering permutation_real
-  Int_t permutation_real_temp[4];
-  Int_t permutation_real_order[4];
-  for(Int_t i=0; i<4; i++){ permutation_real_temp[i] = permutation_real[i]; }
+  //ordering permutation_truth
+  Int_t permutation_truth_temp[4];
+  Int_t permutation_truth_order[4];
+  for(Int_t i=0; i<4; i++){ permutation_truth_temp[i] = permutation_truth[i]; }
 
-  sort(permutation_real_temp, permutation_real_temp+4);
+  sort(permutation_truth_temp, permutation_truth_temp+4);
 
   for(Int_t i=0; i<4; i++)
     {
       for(Int_t j=0; j<4; j++)
         {
-          if(permutation_real[i] == permutation_real_temp[j]) permutation_real_order[i] = j;
+          if(permutation_truth[i] == permutation_truth_temp[j]) permutation_truth_order[i] = j;
         }
     }
     
@@ -353,79 +198,127 @@ void Jet_Selection_Test_1::ExecuteEvents() throw(LQError)
   /*target jets selection*/
   /////////////////////////
   
-  cout << endl;
+  Fitter_Result_Container result_new;
+  Fitter_Result_Container result_old;
+
   if(n_bjet_soft==4)
     {
       //in case of 4 b tagged jets events, just use the 4 b tagged jets
       
       for(Int_t i=0; i<n_jet_soft; i++){ if(chk_btag[i]==kTRUE) target_jet[i] = kTRUE; }
-
+      
       //fit
-      fitter->Set(met_vector, muon_vector, jet_soft_coll, target_jet, chk_btag);
+      fitter->Set(met_vector, muon_vector, jet_soft_vec, target_jet, chk_btag);
       fitter->Fit();
+
+      //check convergence
+      Bool_t chk_convergence = fitter->Get_Convergence_Checker();
+      if(chk_convergence==kFALSE) throw LQError("Fitter can't find suitable jets", LQError::SkipEvent);
+      
+      result_old = fitter->Get_Fitter_Result();
+      
     }//if(n_bjet_soft==4)
   
- else if(n_bjet_soft==3)
+  else if(n_bjet_soft==3)
     {
       //in case of 3 b tagged jets events, use the 3 b tagged jets, and iterate the other non-b tagged jets.
       //then, choose jet with lowest chi^2 
       
-      throw LQError("No b", LQError::SkipEvent);
-    }//
+      //let's choose 2 b tagged jet first
+      for(Int_t i=0; i<n_jet_soft; i++){ if(chk_btag[i]==kTRUE) target_jet[i] = kTRUE; }
+      
+      //let's iterate
+      for(Int_t i=0; i<n_jet_soft; i++)
+	{
+	  //clear first
+	  for(Int_t j=0; j<n_jet_soft; j++){ if(chk_btag[j]==kFALSE) target_jet[j] = kFALSE; }
+	  
+	  //choose jet
+	  if(chk_btag[i]==kFALSE) target_jet[i] = kTRUE;
+
+	  //fit
+	  fitter->Set(met_vector, muon_vector, jet_soft_vec, target_jet, chk_btag);
+	  fitter->Fit();
+
+	  //check convergence
+	  Bool_t chk_convergence = fitter->Get_Convergence_Checker();
+	  if(chk_convergence==kFALSE) continue;
  
+	  result_new = fitter->Get_Fitter_Result();
+
+	  Double_t chi2_new = result_new.Get_Chi2();
+	  Double_t chi2_old = result_old.Get_Chi2();
+
+	  if(chi2_new < chi2_old) result_old = result_new;
+	}//
+      
+    }//if(n_bjet_soft=3)
+  
   else if(n_bjet_soft==2)
     {
       //in case of 2 b tagged jets events, user the 2 b tagged jets, and iterate all the combitation of choosing 2 non-b tagged jets
       //then, choose 2 non b tagged jets combination with lowest chi^2
-
+      
       //let's choose 2 b tagged jet first
-      for(Int_t i=0; i<n_jet_soft; i++){ if(chk_btag[i]==kTRUE) target_jet[i] = kTRUE; 
-
+      for(Int_t i=0; i<n_jet_soft; i++){ if(chk_btag[i]==kTRUE) target_jet[i] = kTRUE; }
+            
+      //let's iterate
       for(Int_t i=0; i<n_jet_soft; i++)
-	{
-	  //clear first
-	  for(Int_t j=0; j<n_jet_soft; j++){ if(chk_btag[i]==kFALSE) target_jet[j] = kFALSE; }
-	  
-	  //let's iterate 
-	  if(chk_btag[i]==kFALSE) target_jet[i] = kTRUE;
-	  
+	{	  
 	  for(Int_t j=0; j<n_jet_soft; j++)
 	    {
-	      if(i<j) continue;
+	      if(i<=j) continue;
 	      
-	      cout << i << "\t" << j << endl;
-	      
-	      //
-	      if(chk_btag[j]==kFALSE) target_jet[j] = kTRUE;
+	      //clear first
+	      for(Int_t k=0; k<n_jet_soft; k++){ if(chk_btag[k]==kFALSE) target_jet[k] = kFALSE; }
 
+	      //choose first jet
+	      if(chk_btag[i]==kFALSE) target_jet[i] = kTRUE;
+	      else continue;
 	      
+	      //choose second jet
+	      if(chk_btag[j]==kFALSE) target_jet[j] = kTRUE;
+	      else continue;
+
+	      //fit
+	      fitter->Set(met_vector, muon_vector, jet_soft_vec, target_jet, chk_btag);
+	      fitter->Fit();
+	      
+	      //check convergence
+	      Bool_t chk_convergence = fitter->Get_Convergence_Checker();
+              if(chk_convergence==kFALSE) continue;
+
+	      result_new = fitter->Get_Fitter_Result();
+	      
+	      Double_t chi2_new = result_new.Get_Chi2();
+	      Double_t chi2_old = result_old.Get_Chi2();
+	      
+	      if(chi2_new < chi2_old) result_old = result_new;
 	    }//for loop over j
 	}//for loop over i
       
-      }//if(n_bjet_soft==2)
-    
+    }//if(n_bjet_soft==2)
+  
   delete[] chk_btag;
   delete[] target_jet;
-
-  Bool_t chk_convergence = fitter->Get_Convergence_Checker();
-  if(chk_convergence==kFALSE) throw LQError("Fitter Fail", LQError::SkipEvent);
-
-  Double_t chi2 = fitter->Get_Chi2();
-
+  
+  Double_t chi2 = result_old.Get_Chi2();
+  if(chi2==999) throw LQError("Fitter can't find suitable jets", LQError::SkipEvent);
+  
   Int_t permutation_fitter[4];
-  fitter->Get_Permutation(permutation_fitter);
+  result_old.Get_Permutation(permutation_fitter);
   
   //check jet permutation match
   Int_t jet_permutation_match = 0;
-  if(permutation_real_order[0]==permutation_fitter[0] && permutation_real_order[1]==permutation_fitter[1]) jet_permutation_match = 1;
+  if(permutation_truth_order[0]==permutation_fitter[0] && permutation_truth_order[1]==permutation_fitter[1]) jet_permutation_match = 1;
   else jet_permutation_match = 0;
     
   Double_t para_result[9];
-  fitter->Get_Parameters(para_result);
+  result_old.Get_Parameters(para_result);
 
   TLorentzVector fitted_object[6];
-  for(Int_t i=0; i<6; i++){ fitted_object[i] = fitter->Get_Fitted_Object(i); }
-  
+  for(Int_t i=0; i<6; i++){ fitted_object[i] = result_old.Get_Fitted_Object(i); }  
+
   TLorentzVector leptonic_w = fitted_object[4] + fitted_object[5];
   Double_t leptonic_w_mass = leptonic_w.M();
     
@@ -485,8 +378,8 @@ void Jet_Selection_Test_1::ExecuteEvents() throw(LQError)
               FillHist(hname, para_result[8], chi2, weight, 0, 0, 0, 0, 0, 0);
             }
         }
-    }
-  else
+    }//if(n_bjet_soft==2)
+  else if(n_bjet_soft==3)
     {
       FillHist("Chi2_3B", chi2, weight);
       FillHist("DiJetMass_3B", para_result[8], weight);
@@ -494,7 +387,10 @@ void Jet_Selection_Test_1::ExecuteEvents() throw(LQError)
    
       //check jet permutation match
       FillHist("Jet_Permutation_Match_3B", jet_permutation_match, weight);
-    }
+    }//if(n_bjet_soft==3)
+  else if(n_bjet_soft==4)
+    {
+    }//if(n_bjet_soft==4)
 
   FillCLHist(muhist, "Muon", muon_tight_coll, weight);
   FillCLHist(jethist, "Jet", jet_hard_coll, weight);
@@ -574,127 +470,5 @@ void Jet_Selection_Test_1::InitialiseAnalysis() throw(LQError)
 
   return;
 }//void Jet_Selection_Test_1::InitialiseAnalysis()
-
-//////////
-
-Double_t Jet_Selection_Test_1::Distance(const snu::KTruth& truth, const snu::KJet& jet)
-{
-  Double_t truth_phi = truth.Phi();
-  Double_t truth_eta = truth.Eta();
-  
-  Double_t jet_phi = jet.Phi();
-  Double_t jet_eta = jet.Eta();
-
-  Double_t distance = TMath::Sqrt(TMath::Power(truth_phi-jet_phi, 2) + TMath::Power(truth_eta-jet_eta, 2));
-  
-  //cout << truth_phi << "\t" << truth_eta << "\t" << jet_phi << "\t" << jet_eta << "\t" << distance << endl;
-  
-  return distance;
-}//Double_t Jet_Selection_Test_1::Distance(const snu::KTruth& truth, const snu::KJet& jet)
-
-//////////
-
-Bool_t Jet_Selection_Test_1::Parton_Jet_Match(const snu::KTruth gen_truth[], const vector<snu::KJet>& jet_vector, Int_t permutation_real[4])
-{
-  //Bool_t chk_print = kTRUE;
-  Bool_t chk_print = kFALSE;
-  
-  if(chk_print) cout << endl;
-  
-  Int_t njet = jet_vector.size();
-
-  Bool_t* match = new Bool_t[njet];
-  Bool_t* chk_btag = new Bool_t[njet];
-  Int_t nbjet = 0;
-    for(Int_t i=0; i<njet; i++)
-    {
-      match[i] = kFALSE; 
-
-      snu::KJet jet = jet_vector.at(i);
-      Double_t cvs = jet.BJetTaggerValue(snu::KJet::CSVv2);
-      if(cvs>CSV_THRESHOLD_MEDIUM)
-	{
-	  chk_btag[i] = kTRUE;
-	  nbjet++;
-	}
-      else chk_btag[i] = kFALSE;
-    }
-
-    if(chk_print) cout << "njet = " << njet << ", nbjet = " << nbjet << endl;
-    
-  for(Int_t i=0; i<4; i++)
-    {
-      for(Int_t j=0; j<njet; j++)
-	{
-	  if(match[j]==kTRUE) continue;
-
-	  snu::KJet jet = jet_vector.at(j);
-	  Double_t distance = Distance(gen_truth[i], jet);
-	  
-	  if(chk_print) cout << i << "\t" << gen_truth[i].PdgId() << "\t" << gen_truth[i].Pt() << "\t" << j << "\t" << jet.Pt() << "\t" << distance << "\t" << chk_btag[j] << endl;
-	  
-	  if(distance<DISTANCE_MATCH)
-	    { 
-	      if(chk_print) cout << "Distance Match" << endl;
-	      
-	      if(chk_btag[j]==kTRUE && (gen_truth[i].PdgId()==5||gen_truth[i].PdgId()==-5) )
-	      	{
-	      	  match[j] = kTRUE;
-	      	  permutation_real[i] = j;
-		  
-	      	  if(chk_print) cout << "Found b tag" << endl;
-		  
-	      	  break;
-	      	}//b tag jet
-	      else
-	      	{
-	      	  match[j] = kTRUE; 
-	      	  permutation_real[i] = j;
-		  
-	      	  if(chk_print) cout << "Found No b tag" << endl;
-
-	      	  break;
-	      	}//no b tag jet
-	      
-	      // if((i==0||i==1)&&chk_btag[j]==kTRUE)
-	      // 	{
-	      // 	  match[j] = kTRUE;
-	      // 	  permutation_real[i] = j;
-		  
-	      // 	  if(chk_print) cout << "Found" << endl;
-
-	      // 	  break;
-	      // 	}
-	      // else
-	      // 	{
-	      // 	  match[j] = kTRUE;
-	      // 	  permutation_real[i] = j;
-
-	      // 	  if(chk_print) cout << "Found" << endl;
-		  
-	      // 	  break;
-	      // 	}
-	    
-	    }//If distance
-	}//for loop over leading four jet
-    }//for loop over four parton
-  
-  Int_t count = 0;
-  for(Int_t i=0; i<njet; i++){ if(match[i]==kTRUE) count++; }
-  
-  Bool_t chk_match = kFALSE;
-  if(count==4) chk_match = kTRUE;
-  
-  if(chk_print)
-    {
-      if(chk_match==kTRUE) cout << "GOOD" << endl;
-      else cout << "BAD" << endl;
-    }
-  
-  delete[] match;
-  delete[] chk_btag;
-
-  return chk_match;
-}//Bool_t Jet_Selection_Test_1::Jet_Match()
 
 //////////

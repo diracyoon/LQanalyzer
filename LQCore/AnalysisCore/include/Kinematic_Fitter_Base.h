@@ -6,9 +6,8 @@
 #include "Math/Factory.h"
 #include "Math/Functor.h"
 
-#include "KJet.h"
-
 #include "TS_Correction.h"
+#include "Fitter_Result_Container.h"
 
 #define NFIT 9
 
@@ -29,15 +28,15 @@ class Kinematic_Fitter_Base
   virtual ~Kinematic_Fitter_Base();
 
   virtual void Fit()=0;
-  virtual void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<snu::KJet>& a_jet_vector, const Bool_t* a_target_jet,  const Bool_t* a_b_tag)=0;
+  virtual void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t* a_target_jet,  const Bool_t* a_b_tag)=0;
     
   Double_t Get_Chi2(const TString& type="BEST", const Int_t& index=-1);
   void Get_Chi2_Piece(Double_t chi2_piece_return[11],  const TString& type="BEST", const Int_t& index=-1);
   Bool_t Get_Convergence_Checker(){ return chk_convergence; }
-  TLorentzVector Get_Fitted_Object(const Int_t& obj_index, const TString& type="BEST", const Int_t& index=-1);
+  TLorentzVector& Get_Fitted_Object(const Int_t& obj_index, const TString& type="BEST", const Int_t& index=-1);
+  Fitter_Result_Container Get_Fitter_Result();
   void Get_Parameters(Double_t parameter_return[NFIT], const TString& type="BEST", const Int_t& index=-1);
   void Get_Permutation(Int_t permuatation_return[4]);
-
   Bool_t Pass_Goodness_Cut();
   Bool_t Pass_Goodness_Cut(const Double_t& cut_level);
 
@@ -59,7 +58,7 @@ class Kinematic_Fitter_Base
 
   Bool_t chk_convergence;
   
-  vector<snu::KJet> jet_vector;
+  vector<TLorentzVector> jet_vector;
 
   static TLorentzVector measured_extra_jet;
   static TLorentzVector measured_met;

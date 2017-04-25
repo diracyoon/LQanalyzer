@@ -24,6 +24,13 @@ class EventBase;
 #include "DataDrivenBackgrounds.h"
 #include "HNGenMatching.h"
 
+#define CSV_THRESHOLD_LOOSE 0.460
+#define CSV_THRESHOLD_MEDIUM 0.800
+#define CSV_THRESHOLD_TIGHT 0.935
+
+#define DISTANCE_MATCH 0.2
+
+#define BLANK -999
 
 class AnalyzerCore : public LQCycleBase {
   
@@ -360,6 +367,14 @@ class AnalyzerCore : public LQCycleBase {
   std::vector<snu::KMuon> sort_muons_ptorder(std::vector<snu::KMuon> muons);
 
   //private methods
-  static bool Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1);
+  static Bool_t Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1);
+  static Bool_t Compare_Jet_CSV(const snu::KJet& jet0, const snu::KJet& jet1); 
+
+  Double_t Distance(const snu::KTruth& truth, const snu::KJet& jet);
+  
+  Bool_t Search_Truth_Value(std::vector<snu::KTruth>& gen_truth_coll, snu::KTruth gen_quark[4], snu::KTruth& gen_neutrino, snu::KTruth& gen_lepton);
+  enum TRUTH_TABLE {TOP, A_TOP, BOTTOM, D_0, D_0_0, D_0_1, A_BOTTOM, D_1, D_1_0, D_1_1} Truth_Table;
+
+  Bool_t Truth_Jet_Match(const snu::KTruth gen_quark[], const vector<snu::KJet>& jet_vector, Int_t permutation_truth[4]);
 };
 #endif

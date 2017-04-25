@@ -15,6 +15,7 @@
 #pragma link C++ class GetFakeSF+;
 #pragma link C++ class PileupValidation+;
 #pragma link C++ class Fitter_Test+;
+#pragma link C++ class Jet_Inclusion_Prob+;
 #pragma link C++ class Jet_Selection_Test_0+;
 #pragma link C++ class Jet_Selection_Test_1+;
 

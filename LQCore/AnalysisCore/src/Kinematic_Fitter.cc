@@ -19,7 +19,7 @@ Kinematic_Fitter::~Kinematic_Fitter()
 
 //////////
 
-void Kinematic_Fitter::Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<snu::KJet>& a_jet_vector, const Bool_t* a_target_jet, const Bool_t* a_b_tag)
+void Kinematic_Fitter::Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t* a_target_jet, const Bool_t* a_b_tag)
 {
   measured_met = a_met;
   
@@ -67,7 +67,12 @@ void Kinematic_Fitter::Fit()
 
   //calculate neutrino P_z solution
   Bool_t chk_real = Sol_Neutrino_Pz();
-  if(chk_real==kFALSE) return;
+  
+  //take real sol only
+  //if(chk_real==kFALSE) return;
+
+  //take imaginary sol only
+  //if(chk_real==kTRUE) return;
 
   //Apply top specific correction
   Apply_TS_Correction();

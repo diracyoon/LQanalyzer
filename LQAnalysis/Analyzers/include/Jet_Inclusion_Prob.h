@@ -1,5 +1,5 @@
-#ifndef __Jet_Selection_Test_0_h__
-#define __Jet_Selection_Test_0_h__
+#ifndef __Jet_Inclusion_Prob_h__
+#define __Jet_Inclusion_Prob_h__
 
 #include "AnalyzerCore.h"
 #include "Kinematic_Fitter_Base.h"
@@ -10,12 +10,16 @@
 #define CSV_THRESHOLD_MEDIUM 0.800
 #define CSV_THRESHOLD_TIGHT 0.935
 
-class Jet_Selection_Test_0 : public AnalyzerCore 
+#define DISTANCE_MATCH 0.2
+
+#define BLANK -999
+
+class Jet_Inclusion_Prob : public AnalyzerCore 
 {
  public:
   //constructors                                                                                   
-  Jet_Selection_Test_0();
-  ~Jet_Selection_Test_0();
+  Jet_Inclusion_Prob();
+  ~Jet_Inclusion_Prob();
 
   //Functions from core
   virtual void BeginCycle() throw(LQError);
@@ -30,7 +34,7 @@ class Jet_Selection_Test_0 : public AnalyzerCore
 
   Kinematic_Fitter_Base* fitter;
 
-  ClassDef(Jet_Selection_Test_0, 1);
+  ClassDef(Jet_Inclusion_Prob, 1);
 };
 
-#endif /* __Jet_Selection_Test_0_h__ */
+#endif /* __Jet_Inclusion_Prob_h__ */

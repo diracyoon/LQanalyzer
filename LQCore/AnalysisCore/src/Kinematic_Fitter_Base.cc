@@ -123,7 +123,7 @@ void Kinematic_Fitter_Base::Get_Chi2_Piece(Double_t chi2_piece_return[11], const
 
 //////////
 
-TLorentzVector Kinematic_Fitter_Base::Get_Fitted_Object(const Int_t& obj_index, const TString& type, const Int_t& index)
+TLorentzVector& Kinematic_Fitter_Base::Get_Fitted_Object(const Int_t& obj_index, const TString& type, const Int_t& index)
 {
   Int_t i = index/24;  
   Int_t j = index%24;
@@ -152,6 +152,29 @@ TLorentzVector Kinematic_Fitter_Base::Get_Fitted_Object(const Int_t& obj_index, 
   TLorentzVector empty;
   return empty; 
 }//TLorentzVector Kinematic_Fitter_Base::Get_Fitted_Object(const Int_t& obj_index)
+
+//////////
+
+Fitter_Result_Container Kinematic_Fitter_Base::Get_Fitter_Result()
+{
+  Fitter_Result_Container result_container;
+  
+  //chi2
+  result_container.Set_Chi2(best_chi2);
+  
+  //permutation
+  result_container.Set_Permutation(best_permutation);
+  
+  //parameter
+  result_container.Set_Parameters(best_parameter);
+
+  //fitted objects
+  for(Int_t i=0; i<4; i++){ result_container.Set_Fitted_Object(i, best_fitted_jet[i]); }
+  result_container.Set_Fitted_Object(4, best_fitted_lepton);
+  result_container.Set_Fitted_Object(5, best_fitted_neutrino);
+    
+  return result_container; 
+}//Fitter_Result_Container& Kinematic_Fitter_Base::Get_Fitter_Result()
 
 //////////
 

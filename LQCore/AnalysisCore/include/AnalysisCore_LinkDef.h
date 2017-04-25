@@ -11,6 +11,7 @@
 #pragma link C++ class Kinematic_Fitter_Base+;
 #pragma link C++ class Kinematic_Fitter+;
 #pragma link C++ class Kinematic_Fitter_Old+;
+#pragma link C++ class Fitter_Result_Container+;
 #pragma link C++ class TS_Correction+;
 
 #endif // __CINT__

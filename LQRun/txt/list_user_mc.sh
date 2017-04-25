@@ -25,6 +25,6 @@ declare -a hn_ee_sigcf=('DYJets' 'TT_powheg' 'WWTo2L2Nu' )
 
 declare -a hn_ee_type=('DYJets' 'TT_powheg' 'WJets' 'ZGto2LG' 'QCD_Pt-30to50_EMEnriched')
 
-#declare -a ch_cb=('TT_powheg' 'CHToCB_M125_madgraph_13TeV_2016')
 #declare -a ch_cb=('TT_powheg' 'CHToCB_M090_madgraph_13TeV_2016' 'CHToCB_M100_madgraph_13TeV_2016' 'CHToCB_M110_madgraph_13TeV_2016' 'CHToCB_M120_madgraph_13TeV_2016' 'CHToCB_M125_madgraph_13TeV_2016' 'CHToCB_M130_madgraph_13TeV_2016' 'CHToCB_M140_madgraph_13TeV_2016' 'CHToCB_M150_madgraph_13TeV_2016')
 declare -a ch_cb=('TT_powheg')
+#declare -a ch_cb=('CHToCB_M125_madgraph_13TeV_2016')

@@ -12,7 +12,7 @@ class Kinematic_Fitter : public Kinematic_Fitter_Base
   virtual ~Kinematic_Fitter();
   
   virtual void Fit();
-  virtual void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<snu::KJet>& a_jet_vector, const Bool_t* a_target_jet, const Bool_t* a_b_tag);
+  virtual void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t* a_target_jet, const Bool_t* a_b_tag);
   
  protected:
   static Double_t Chi2_Func(const Double_t* par);
