@@ -1752,6 +1752,7 @@ bool AnalyzerCore::ISCF(snu::KElectron el){
   if(el.GetType() == 4) return true;
   if(el.GetType() == 5)return true;
   if(el.GetType() == 6)return true;
+  if(el.GetType() == 13)return true;
   if(el.GetType() == 19)return true;
   if(el.GetType() == 20)return true;
   if(el.GetType() == 21)return true;

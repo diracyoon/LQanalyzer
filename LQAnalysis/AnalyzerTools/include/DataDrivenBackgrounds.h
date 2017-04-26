@@ -80,6 +80,7 @@ class DataDrivenBackgrounds{
   float Get_DataDrivenWeight_M(bool geterr, std::vector<snu::KMuon> k_muons,  TString ID, TString method);
   
 
+  void Test();
 
   // Class object to get event weights for Fakes
 

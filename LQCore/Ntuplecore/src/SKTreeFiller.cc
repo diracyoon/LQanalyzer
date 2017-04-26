@@ -235,7 +235,6 @@ snu::KEvent SKTreeFiller::GetEventInfo(){
     float met_newpt = sqrt(met_x*met_x+ met_y*met_y);
     float met_newphi = TMath::ATan2(met_y,met_x);
     
-    //cout << met_newphi << "  phi " << met_xyshift_phi->(0) << endl;
     kevent.SetMET(snu::KEvent::pfmet,  met_newpt,met_newphi,  met_xyshift_sumet->at(0));  
     kevent.SetPFMETx(met_x);
     kevent.SetPFMETy(met_y);

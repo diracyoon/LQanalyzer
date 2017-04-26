@@ -31,7 +31,7 @@ SignalPlotsEE::SignalPlotsEE(TString name, int nel): StdPlots(name){
     map_sig["h_z1_z2_dphi"]                 = SetupHist("h_z1_z2_dphi_"   + name,"Delta Phi Z1,Z2", 28, 0., 3.5,"#Delta(#phi) (Z_{1},Z_{2})");
   }
   
-  if(doubleel){
+  else if(doubleel){
     map_sig["h_llmass"]                 = SetupHist("h_llmass_"           + name,"Invariant mass of the two leading electrons",1000,0,1000,"M_{ll} GeV");
     map_sig["h_llpt"]                 = SetupHist("h_llpt_"           + name,"Invariant pt of the two leading electrons",500,0,1000,"P_T (ll) GeV");
     map_sig["h_lljjmass"]               = SetupHist("h_lljjmass_"         + name,"Invariant mass of the four particles",200,0,2000,"M_{lljj} GeV");
@@ -46,6 +46,10 @@ SignalPlotsEE::SignalPlotsEE(TString name, int nel): StdPlots(name){
     map_sig["h_central_jet_pt"]             = SetupHist("h_central_jet_pt_"                + name,"h_central_jet_pt",60,0,300);
     map_sig["h_forward_jet_eta"]             = SetupHist("h_forward_jet_eta_"                + name,"h_forward_jet_eta",50,-2.5,2.5);
     map_sig["h_central_jet_eta"]             = SetupHist("h_central_jet_eta_"                + name,"h_central_jet_eta",50,-2.5,2.5);
+    
+    
+  }
+  else{
     
   }
   

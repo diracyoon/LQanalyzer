@@ -33,6 +33,7 @@ class HNDiElectronOptimisation : public AnalyzerCore {
   bool HighMassCheckSignalRegion(  std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, bool runcf);
 
   bool CheckSignalRegion( bool isss,  std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, TString name, float w);
+  bool CheckSignalRegionNN( bool isss,  std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, TString name, float w);
   bool CheckSignalRegionTriLep(  std::vector<snu::KMuon> muons, std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, TString name, float w);
 
   void FillTriggerEfficiency(TString cut, float w, TString label,  std::vector<TString> list);

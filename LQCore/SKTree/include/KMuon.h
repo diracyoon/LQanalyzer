@@ -109,7 +109,10 @@ namespace snu {
     inline Bool_t   IsTight () const {return k_istight;}
     inline Bool_t   IsMedium () const {return k_ismedium;}
     inline Bool_t   IsSoft () const {return k_issoft;}
-    inline Bool_t   MCMatched () const {return k_matched;}
+    inline Bool_t   MCMatched () const {
+      if(k_is_fromtau) return true;
+      return k_matched;
+    }
     inline Bool_t MCIsCF() const{return k_is_cf;}
     inline Bool_t MCIsFromConversion() const{return k_is_conv;}
     inline Bool_t IsRochesterCorrected() const{return k_corrected_rc;}

@@ -428,6 +428,18 @@ float DataDrivenBackgrounds::Get_DataDrivenWeight_E(bool geterr,vector<snu::KEle
 
 }
 
+void  DataDrivenBackgrounds::Test(){
+
+  cout << "HNTight_dxy_b017_e011 B = " << m_fakeobj->getFakeRate_electronEta(0,20., 1.2,"dxysig_pt_eta_HNTight_dxy_b017_e011_40") << endl;
+  cout << "HNTight_dxy_b015_e011 B= " << m_fakeobj->getFakeRate_electronEta(0,20., 1.2,"dxysig_pt_eta_HNTight_dxy_b015_e011_40") << endl;
+  cout << "HNTight_dxy_b014_e011 B= " << m_fakeobj->getFakeRate_electronEta(0,20., 1.2,"dxysig_pt_eta_HNTight_dxy_b014_e011_40") << endl;
+  cout << "HNTight_dxy_b013_e011 B= " << m_fakeobj->getFakeRate_electronEta(0,20., 1.2,"dxysig_pt_eta_HNTight_dxy_b013_e011_40") << endl;
+  cout << "HNTight_dxy_b017_e017 E = " << m_fakeobj->getFakeRate_electronEta(0,20., 2.2,"dxysig_pt_eta_HNTight_dxy_b017_e017_40") << endl;
+  cout << "HNTight_dxy_b017_e015 E= " << m_fakeobj->getFakeRate_electronEta(0,20., 2.2,"dxysig_pt_eta_HNTight_dxy_b017_e015_40") << endl ;
+  cout << "HNTight_dxy_b017_e014 E= " << m_fakeobj->getFakeRate_electronEta(0,20., 2.2,"dxysig_pt_eta_HNTight_dxy_b017_e014_40") << endl;
+  cout << "HNTight_dxy_b017_e013 E= " << m_fakeobj->getFakeRate_electronEta(0,20., 2.2,"dxysig_pt_eta_HNTight_dxy_b017_e013_40") << endl;
+  cout << "HNTight_dxy_b017_e012 E= " << m_fakeobj->getFakeRate_electronEta(0,20., 2.2,"dxysig_pt_eta_HNTight_dxy_b017_e012_40") << endl;
+}
 float DataDrivenBackgrounds::Get_DataDrivenWeight_EE(bool geterr,vector<snu::KElectron> k_electrons){
 
   return Get_DataDrivenWeight_EE( geterr,k_electrons, "ELECTRON16_HN_FAKELOOSE_NOD0","ELECTRON16_HN_TIGHT","dijet_ajet40");
@@ -451,9 +463,8 @@ float DataDrivenBackgrounds::Get_DataDrivenWeight_EE(bool geterr,vector<snu::KEl
     vector<TLorentzVector> electrons=MakeTLorentz(k_electrons);
 
     TString elkey = GetElFRKey(IDloose, IDtight,  method);
-    
+
     return  m_fakeobj->get_dilepton_ee_eventweight(geterr,electrons, is_el1_tight, is_el2_tight, elkey );
-    
       
     /// "" loose ID needs filling here
   }
@@ -479,7 +490,7 @@ TString DataDrivenBackgrounds::GetElFRKey( TString IDloose,TString IDtight, TStr
         IDtightmod.erase(i, sr.length());
     }
     
-    
+
     TString sjpt="";
     if(method.Contains("ajet20"))sjpt="20";
     if(method.Contains("ajet30"))sjpt="30";

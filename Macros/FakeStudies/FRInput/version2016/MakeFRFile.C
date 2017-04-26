@@ -237,6 +237,12 @@ void MakeFRRootFile(){
   fakes_opt.push_back("HNTight_dxysig_");
   fakes_opt.push_back("HNTight_miniiso_dxysig_");
   
+  std::vector<TString> fakes_optd0;
+  fakes_optd0.push_back("HNTight_");
+  fakes_optd0.push_back("HNTight_dxysig_");
+  fakes_optd0.push_back("HNTight_miniiso_dxysig_");
+
+
   for(vector<TString>::iterator it2 = fakes40.begin(); it2!=fakes40.end(); ++it2){
     for(vector<TString>::iterator it = fakes.begin(); it!=fakes.end(); ++it){
       cout << *it2 << endl;
@@ -364,7 +370,7 @@ void MakeFRRootFile(){
 
   for(vector<TString>::iterator it2 = fakes40.begin(); it2!=fakes40.end(); ++it2){
     for(vector<TString>::iterator it3 = isocut.begin(); it3!=isocut.end(); ++it3){
-      for(vector<TString>::iterator it = fakes_opt.begin(); it!=fakes_opt.end(); ++it){
+      for(vector<TString>::iterator it = fakes_optd0.begin(); it!=fakes_optd0.end(); ++it){
 
         if(it3->Contains("dxy") && it->Contains("mini")) continue;
 
@@ -380,6 +386,7 @@ void MakeFRRootFile(){
           denom ="LooseEl" + *it + *it3+ "_dijet_d0_dxysig_miniiso_"+ *it2;
           num ="TightEl" + *it + *it3+  "_dijet_d0_dxysig_miniiso_"+ *it2;
         }
+
 
         TH2D* h_pt_num= (TH2D*)fdata->Get(num.Data());
         TH2D* h_pt_denom= (TH2D*)fdata->Get(denom.Data());

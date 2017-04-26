@@ -205,9 +205,9 @@ void HNCommonLeptonFakes::InitialiseFake(){
   for(unsigned int fj = 0; fj < datajetcut.size() ; fj++){
     for(unsigned int fk = 0; fk < cut.size() ; fk++){
       for(unsigned int fl = 0; fl < opt.size() ; fl++){
-	_2DEfficiencyMap_Double["fake_el_eff_" + cut.at(fk) +"_HNTight_" + opt.at(fl) +"_" + datajetcut.at(fj)+"_d0"] =  dynamic_cast<TH2D*>((file_fake->Get("FakeRate_HNTight_d0" + datajetcut.at(fj) + "_" + cut.at(fk) + opt.at(fl)))->Clone());
-	_2DEfficiencyMap_Double["fake_el_eff_dxysig_" + cut.at(fk) +"_HNTight_" + opt.at(fl) +"_d0" + datajetcut.at(fj)+"_d0"] = dynamic_cast<TH2D*>((file_fake->Get("FakeRate_HNTight_dxysig_d0"  + datajetcut.at(fj) + "_" + cut.at(fk) + opt.at(fl)))->Clone());
-	if(!opt[fl].Contains("dxy")) _2DEfficiencyMap_Double["fake_el_eff_miniiso_dxysig_" + cut.at(fk) +"_HNTight_" + opt.at(fl) +"_" + datajetcut.at(fj)+"_d0"] = dynamic_cast<TH2D*>((file_fake->Get("FakeRate_HNTight_miniiso_dxysig_d0"  + datajetcut.at(fj) + "_" + cut.at(fk) + opt.at(fl)))->Clone());
+	_2DEfficiencyMap_Double["fake_el_eff_" + cut.at(fk) +"_HNTight_" + opt.at(fl) +"_" + datajetcut.at(fj)+"_d0"] =  dynamic_cast<TH2D*>((file_fake->Get("FakeRate_HNTight_" + datajetcut.at(fj) + "_" + cut.at(fk) + opt.at(fl)+  "_d0"))->Clone());
+	_2DEfficiencyMap_Double["fake_el_eff_dxysig_" + cut.at(fk) +"_HNTight_" + opt.at(fl) + "_"+datajetcut.at(fj)+"_d0"] = dynamic_cast<TH2D*>((file_fake->Get("FakeRate_HNTight_dxysig_"  + datajetcut.at(fj) + "_" + cut.at(fk) + opt.at(fl)+  "_d0"))->Clone());
+	if(!opt[fl].Contains("dxy")) _2DEfficiencyMap_Double["fake_el_eff_miniiso_dxysig_" + cut.at(fk) +"_HNTight_" + opt.at(fl) +"_" + datajetcut.at(fj)+"_d0"] = dynamic_cast<TH2D*>((file_fake->Get("FakeRate_HNTight_miniiso_dxysig_"  + datajetcut.at(fj) + "_" + cut.at(fk) + opt.at(fl)+  "_d0"))->Clone());
       }
     }
   }
@@ -378,7 +378,7 @@ float HNCommonLeptonFakes::get_dilepton_ee_eventweight(bool geterr, std::vector<
   if(ev_weight!=ev_weight){
     cout << "(r1, r2, fr1, fr2) = (" << r1 << ", " << r2 << ", " <<  fr1 << ", " << fr2 << ")" << endl;
   }
-
+  
   
   return ev_weight;
 }
