@@ -206,9 +206,9 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   fitter->Get_Permutation(permutation_fitter);
   
   //check jet permutation match
-  if(permutation_truth[0]==permutation_fitter[0] && permutation_truth[1]==permutation_fitter[1]) FillHist("Jet_Permutation_Match", 1, weight); 
-  else FillHist("Jet_Permutation_Match", 0, weight);
-    
+  Int_t jet_permutation_match = 0;
+  if(permutation_truth[0]==permutation_fitter[0] && permutation_truth[1]==permutation_fitter[1]) jet_permutation_match = 1;
+  
   Double_t para_result[9];
   fitter->Get_Parameters(para_result);
 
@@ -253,10 +253,12 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   
   if(nbjet_target==2)
     {
+      FillHist("Jet_Permutation_Match_2B", jet_permutation_match, weight);
+      
       FillHist("Chi2_2B", chi2, weight);
       FillHist("DiJetMass_2B", para_result[8], weight);
       FillHist("DiJetMass_Chi2_2B", para_result[8], chi2, weight, 0, 0, 0, 0, 0, 0);
-
+      
       //goodness cut study
       for(Int_t cut_level=0; cut_level<20; cut_level++)
         {
@@ -274,6 +276,8 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
     }
   else
     {
+      FillHist("Jet_Permutation_Match_3B", jet_permutation_match, weight);
+
       FillHist("Chi2_3B", chi2, weight);
       FillHist("DiJetMass_3B", para_result[8], weight);
       FillHist("DiJetMass_Chi2_3B", para_result[8], chi2, weight, 0, 0, 0, 0, 0, 0);
@@ -304,8 +308,9 @@ void Fitter_Test::InitialiseAnalysis() throw(LQError)
   MakeHistograms();
   
   //jet permutation efficiency
-  MakeHistograms("Jet_Permutation_Match", 2, -0.5, 1.5);
-
+  MakeHistograms("Jet_Permutation_Match_2B", 2, -0.5, 1.5);
+  MakeHistograms("Jet_Permutation_Match_3B", 2, -0.5, 1.5);
+  
   //lepton
 
   //neutrino 
