@@ -66,13 +66,13 @@ void Kinematic_Fitter::Fit()
   Clear();
 
   //calculate neutrino P_z solution
-  Bool_t chk_real = Sol_Neutrino_Pz();
+  chk_neutrino_pz_real = Sol_Neutrino_Pz();
   
   //take real sol only
-  //if(chk_real==kFALSE) return;
+  //if(chk_neutrino_pz_real==kFALSE) return;
 
   //take imaginary sol only
-  //if(chk_real==kTRUE) return;
+  //if(chk_neutrino_pz_real==kTRUE) return;
 
   //Apply top specific correction
   Apply_TS_Correction();
