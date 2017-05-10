@@ -1,5 +1,5 @@
-#ifndef __KINEMATIC_FITTER_BASE_H__
-#define __KINEMATIC_FITTER_BASE_H__
+#ifndef __Kinematic_Fitter_Base_H__
+#define __Kinematic_Fitter_Base_H__
 
 #include "TLorentzVector.h"
 #include "Math/Minimizer.h"
@@ -33,6 +33,7 @@ class Kinematic_Fitter_Base
   Double_t Get_Chi2(const TString& type="BEST", const Int_t& index=-1);
   void Get_Chi2_Piece(Double_t chi2_piece_return[11],  const TString& type="BEST", const Int_t& index=-1);
   Bool_t Get_Convergence_Checker(){ return chk_convergence; }
+  Bool_t Get_Neutrino_Pz_Sol_Checker(){ return chk_neutrino_pz_real; }
   TLorentzVector& Get_Fitted_Object(const Int_t& obj_index, const TString& type="BEST", const Int_t& index=-1);
   Fitter_Result_Container Get_Fitter_Result();
   void Get_Parameters(Double_t parameter_return[NFIT], const TString& type="BEST", const Int_t& index=-1);
@@ -42,7 +43,8 @@ class Kinematic_Fitter_Base
 
  protected:
   Bool_t chk_debug;
-
+  Bool_t chk_neutrino_pz_real; 
+  
   Int_t reordering_index[4];
   
   Double_t neutrino_pz[2];
@@ -114,6 +116,7 @@ class Kinematic_Fitter_Base
   Bool_t Pass_Native_Top_Mass();
   void Permutation();
   void Reordering_Jets();
+  void Resol_Neutrino_Pt();
   void Set_Minimizer_Parameters(const Int_t& i);
   Bool_t Sol_Neutrino_Pz();
   void Store_Results(const Int_t& i, const Int_t& j);
@@ -121,4 +124,4 @@ class Kinematic_Fitter_Base
   ClassDef(Kinematic_Fitter_Base, 1);
 };
 
-#endif /* __KINEMATIC_FITTER_BASE_H__ */
+#endif /*__Kinematic_Fitter_Base_H__*/

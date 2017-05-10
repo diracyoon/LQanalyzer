@@ -2,9 +2,6 @@
 #define __Jet_Inclusion_Prob_h__
 
 #include "AnalyzerCore.h"
-#include "Kinematic_Fitter_Base.h"
-#include "Kinematic_Fitter.h"
-#include "Kinematic_Fitter_Old.h"
 
 #define CSV_THRESHOLD_LOOSE 0.460
 #define CSV_THRESHOLD_MEDIUM 0.800
@@ -31,8 +28,6 @@ class Jet_Inclusion_Prob : public AnalyzerCore
   
  private:
   Bool_t chk_debug;
-
-  Kinematic_Fitter_Base* fitter;
 
   ClassDef(Jet_Inclusion_Prob, 1);
 };

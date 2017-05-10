@@ -21,9 +21,6 @@ Jet_Inclusion_Prob::Jet_Inclusion_Prob() : AnalyzerCore()
   InitialiseAnalysis();
 
   chk_debug = kFALSE;
-
-  fitter = new Kinematic_Fitter(chk_debug);
-  //fitter = new Kinematic_Fitter_Old(chk_debug);
 }//Jet_Inclusion_Prob::Jet_Inclusion_Prob()
 
 //////////
@@ -31,8 +28,6 @@ Jet_Inclusion_Prob::Jet_Inclusion_Prob() : AnalyzerCore()
 Jet_Inclusion_Prob::~Jet_Inclusion_Prob() 
 {
   m_logger << INFO << "Destruct Jet_Inclusion_Prob." << LQLogger::endmsg;
-
-  delete fitter;
 }//Jet_Inclusion_Prob::~Jet_Inclusion_Prob()
 
 //////////

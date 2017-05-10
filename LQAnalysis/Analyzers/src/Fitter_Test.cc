@@ -22,8 +22,7 @@ Fitter_Test::Fitter_Test() : AnalyzerCore()
 
   chk_debug = kFALSE;
 
-  //fitter = new Kinematic_Fitter(chk_debug);
-  fitter = new Kinematic_Fitter_Old(chk_debug);
+  fitter = new Kinematic_Fitter_1(chk_debug);
 }//Fitter_Test::Fitter_Test()
 
 //////////
@@ -197,6 +196,11 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   delete[] chk_btag;
   delete[] target_jet;
 
+  //neutrino pz solution. Is it real or complex
+  Bool_t chk_pz_real = fitter->Get_Neutrino_Pz_Sol_Checker();
+  if(chk_pz_real==kTRUE) FillHist("Neutrino_Pz_Sol", 1, weight);
+  else FillHist("Neutrino_Pz_Sol", 0, weight);
+
   Bool_t chk_convergence = fitter->Get_Convergence_Checker();
   if(chk_convergence==kFALSE) throw LQError("Fitter Fail", LQError::SkipEvent);
 
@@ -313,7 +317,9 @@ void Fitter_Test::InitialiseAnalysis() throw(LQError)
   
   //lepton
 
-  //neutrino 
+  //neutrino
+  MakeHistograms("Neutrino_Pz_Sol", 2, -0.5, 1.5);
+  
   MakeHistograms2D("MET_Truth_Vs_Measured", 100, 0, 200, 100, -100, 100);
   MakeHistograms2D("METPhi_Truth_Vs_Measured", 100, -4, 4, 100, -4, 4);
 

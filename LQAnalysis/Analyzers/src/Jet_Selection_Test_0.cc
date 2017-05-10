@@ -22,8 +22,7 @@ Jet_Selection_Test_0::Jet_Selection_Test_0() : AnalyzerCore()
 
   chk_debug = kFALSE;
 
-  fitter = new Kinematic_Fitter(chk_debug);
-  //fitter = new Kinematic_Fitter_Old(chk_debug);
+  fitter = new Kinematic_Fitter_1(chk_debug);
 }//Jet_Selection_Test_0::Jet_Selection_Test_0()
 
 //////////

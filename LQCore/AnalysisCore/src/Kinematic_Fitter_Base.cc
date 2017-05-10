@@ -379,6 +379,57 @@ void Kinematic_Fitter_Base::Reordering_Jets()
 
 //////////
 
+void Kinematic_Fitter_Base::Resol_Neutrino_Pt()
+{
+  cout << "Kinematic_Fitter_Base::Resol_Neutino_Pt" << endl;
+    
+  //recal MET
+  Double_t lepton_mass = measured_lepton.M();
+  Double_t cosine = TMath::Cos(measured_met.Phi());
+  Double_t sine = TMath::Sin(measured_met.Phi());
+  
+  Double_t a = measured_lepton.E()*measured_lepton.E() - measured_lepton.Pz()*measured_lepton.Pz() - TMath::Power(measured_lepton.Px()*cosine + measured_lepton.Py()*sine , 2.0);
+  Double_t b = (measured_lepton.Px()*cosine + measured_lepton.Py()*sine)*(lepton_mass*lepton_mass - W_MASS*W_MASS);
+  Double_t determinant = TMath::Power(lepton_mass*lepton_mass - W_MASS*W_MASS, 2.)*(measured_lepton.E()*measured_lepton.E() - measured_lepton.Pz()*measured_lepton.Pz());
+  
+  //cout << "a = " << a << endl;
+  //cout << "b = " << b << endl;
+  //cout << "det = "<< determinant << endl;
+
+  Double_t met_recal[2];
+  met_recal[0] = (-b + TMath::Sqrt(determinant))/2./a;
+  met_recal[1] = (-b - TMath::Sqrt(determinant))/2./a;
+  
+  Double_t mass_diff[2];
+  TLorentzVector met_recal_vector[2];
+  for(Int_t i=0; i<2; i++)
+    {
+      met_recal_vector[i].SetPxPyPzE(met_recal[i]*cosine, met_recal[i]*sine, 0, met_recal[i]);
+      
+      TLorentzVector w_lnu;
+      w_lnu = measured_lepton + met_recal_vector[i];
+      
+      Double_t w_lnu_mass = w_lnu.M();
+      mass_diff[i] = TMath::Abs(W_MASS - w_lnu_mass);
+      
+      cout << measured_met.Pt() << "\t" << met_recal[i] << "\t" << w_lnu.M() << "\t" << mass_diff[i] << endl;
+    }
+  //cout << endl;
+  
+  if(mass_diff[0]<mass_diff[1])
+    {
+      cout << "Test 0" << endl;
+      //measured_met = met_recal_vector[0];
+    
+      cout << measured_met.Pt() << endl;
+    }
+  else measured_met = met_recal_vector[1];
+  
+  return;
+}//void Kinematic_Fitter_Base::Resol_Neutrino_Pt()
+
+//////////
+
 void Kinematic_Fitter_Base::Set_Minimizer_Parameters(const Int_t& i)
 {
   parameter_start[7] = neutrino_pz[i];
@@ -391,26 +442,34 @@ void Kinematic_Fitter_Base::Set_Minimizer_Parameters(const Int_t& i)
 
 Bool_t Kinematic_Fitter_Base::Sol_Neutrino_Pz()
 {
-  Double_t k = W_MASS*W_MASS/2.0 + measured_lepton.Px()*measured_met.Px() + measured_lepton.Py()*measured_met.Py();
+  //cout << "Kinematic_Fitter_Base::Sol_Neutrino_Pz" << endl;
+  
+  Double_t lepton_mass =  measured_lepton.M();
+
+  Double_t k = W_MASS*W_MASS/2.0 - lepton_mass*lepton_mass/2.0 + measured_lepton.Px()*measured_met.Px() + measured_lepton.Py()*measured_met.Py();
   Double_t a = TMath::Power(measured_lepton.Px(), 2.0) + TMath::Power(measured_lepton.Py(), 2.0);   
   Double_t b = -2*k*measured_lepton.Pz();                                                           
   Double_t c = TMath::Power(measured_lepton.Pt(), 2.0)*TMath::Power(measured_met.Pt(), 2.0) - TMath::Power(k, 2.0);
 
   Double_t determinant = TMath::Power(b, 2.0) - 4*a*c;
   
+  //cout << "determinant = " << determinant << endl;
+  
   //real soluion
   if(determinant>=0)
     {
-      neutrino_pz[0] = (-b + TMath::Sqrt(TMath::Power(b, 2.0) - 4*a*c))/(2*a);                      
-      neutrino_pz[1] = (-b - TMath::Sqrt(TMath::Power(b, 2.0) - 4*a*c))/(2*a);                      
+      neutrino_pz[0] = (-b + TMath::Sqrt(determinant))/(2*a);                      
+      neutrino_pz[1] = (-b - TMath::Sqrt(determinant))/(2*a);                      
       
       return kTRUE;
     }
-  //complex solution. Let's take real part only.
+  
+  //complex solution. Let's take real part and recompute MET.
   else                                                                                              
     {
       neutrino_pz[0] = -b/(2*a);
-      neutrino_pz[1] = neutrino_pz[0];
+      
+      Resol_Neutrino_Pt();
       
       return kFALSE;
     }      

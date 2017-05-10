@@ -1,32 +1,32 @@
-#include "Kinematic_Fitter_Old.h"
+#include "Kinematic_Fitter_0.h"
 
 //////////
 
-ClassImp(Kinematic_Fitter_Old);
+ClassImp(Kinematic_Fitter_0);
 
 //////////
 
 
-Kinematic_Fitter_Old::Kinematic_Fitter_Old(Bool_t a_chk_debug) : Kinematic_Fitter_Base(a_chk_debug)
+Kinematic_Fitter_0::Kinematic_Fitter_0(Bool_t a_chk_debug) : Kinematic_Fitter_Base(a_chk_debug)
 {
-  cout << "Kinematic_Fitter type : Old" << endl;
-}//Kinematic_Fitter_Old::Kinematic_Fitter_Old()
+  cout << "Kinematic_Fitter type : 0" << endl;
+}//Kinematic_Fitter_0::Kinematic_Fitter_0()
 
 ///////////
 
-Kinematic_Fitter_Old::~Kinematic_Fitter_Old()
+Kinematic_Fitter_0::~Kinematic_Fitter_0()
 {
-}//Kinematic_Fitter_Old::~Kinematic_Fitter_Old()
+}//Kinematic_Fitter_0::~Kinematic_Fitter_0()
 
 //////////
 
-void Kinematic_Fitter_Old::Fit()
+void Kinematic_Fitter_0::Fit()
 {
   //clear result value storage
   Clear();
   
   //Calculate neutrion p_z solution
-  Sol_Neutrino_Pz();
+  chk_neutrino_pz_real = Sol_Neutrino_Pz();
   
   //Top specific correction
   Apply_TS_Correction();
@@ -34,6 +34,9 @@ void Kinematic_Fitter_Old::Fit()
   /*Leading four jets & neutrino p_z sol permutation*/
   for(Int_t i=0; i<2; i++)
     {
+      //if neutrino_pz is complex, only take real part and skip iteration
+      if(chk_neutrino_pz_real==kFALSE && i==1) continue;
+
       for(Int_t j=0; j<24; j++)
         {
 	  //permutation on jets
@@ -67,11 +70,11 @@ void Kinematic_Fitter_Old::Fit()
     }//neutrino p_z loop
   
   return;
-}//void Kinematic_Fitter_Old::Fit
+}//void Kinematic_Fitter_0::Fit
 
 //////////
 
-void Kinematic_Fitter_Old::Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t* a_target_jet, const Bool_t* a_b_tag)
+void Kinematic_Fitter_0::Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t* a_target_jet, const Bool_t* a_b_tag)
 {
   measured_met = a_met;
   
@@ -108,11 +111,11 @@ void Kinematic_Fitter_Old::Set(const TLorentzVector& a_met, const TLorentzVector
   error_ue = 0.5*measured_ue.Et();
 
   return;
-}//void Kinematic_Fitter_Old::Set
+}//void Kinematic_Fitter_0::Set
 
 //////////
 
-Double_t Kinematic_Fitter_Old::Chi2_Func(const Double_t* par)
+Double_t Kinematic_Fitter_0::Chi2_Func(const Double_t* par)
 {
   Double_t chi2 = 0;
   
@@ -193,6 +196,6 @@ Double_t Kinematic_Fitter_Old::Chi2_Func(const Double_t* par)
   chi2 += TMath::Power(fitting_t_jjj.M()-T_MASS, 2.0)/TMath::Power(T_WIDTH, 2.0);
     
   return chi2;
-}//Double_t Kinematic_Fitter_Old::Chi2_Func(const Double_t* par)
+}//Double_t Kinematic_Fitter_0::Chi2_Func(const Double_t* par)
 
 //////////

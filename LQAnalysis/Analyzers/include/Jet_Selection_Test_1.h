@@ -3,8 +3,10 @@
 
 #include "AnalyzerCore.h"
 #include "Kinematic_Fitter_Base.h"
-#include "Kinematic_Fitter.h"
-#include "Kinematic_Fitter_Old.h"
+#include "Kinematic_Fitter_0.h"
+#include "Kinematic_Fitter_1.h"
+#include "Kinematic_Fitter_2.h"
+
 
 #define CSV_THRESHOLD_LOOSE 0.460
 #define CSV_THRESHOLD_MEDIUM 0.800
