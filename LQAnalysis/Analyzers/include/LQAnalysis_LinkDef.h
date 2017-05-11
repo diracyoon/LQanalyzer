@@ -20,5 +20,6 @@
 #pragma link C++ class HNEMu+;
 #pragma link C++ class GetFakeSF+;
 #pragma link C++ class PileupValidation+;
+#pragma link C++ class Fitter_Test+;
 
 #endif // __CINT__
