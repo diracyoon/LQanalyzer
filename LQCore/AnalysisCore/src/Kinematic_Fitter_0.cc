@@ -187,10 +187,6 @@ Double_t Kinematic_Fitter_0::Chi2_Func(const Double_t* par)
   TLorentzVector fitting_t_lnuj = fitting_lepton + fitting_neutrino + fitting_jet[0];
   chi2 += TMath::Power(fitting_t_lnuj.M()-T_MASS, 2.0)/TMath::Power(T_WIDTH, 2.0);
 
-  //add chi2 of w or charged higgs in hadronic side
-  TLorentzVector fitting_w_jj = fitting_jet[2] + fitting_jet[3];
-  chi2 += TMath::Power(fitting_w_jj.M()-par[8], 2.0)/TMath::Power(W_WIDTH, 2.0);
-
   //add chi2 of t in hadronic side
   TLorentzVector fitting_t_jjj = fitting_jet[1] + fitting_jet[2] + fitting_jet[3];
   chi2 += TMath::Power(fitting_t_jjj.M()-T_MASS, 2.0)/TMath::Power(T_WIDTH, 2.0);

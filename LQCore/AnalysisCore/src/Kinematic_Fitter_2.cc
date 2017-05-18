@@ -31,6 +31,7 @@ void Kinematic_Fitter_2::Set(const TLorentzVector& a_met, const TLorentzVector& 
 
   n_b_tag = 0;
   Int_t target_index = 0;
+  Double_t pt_scalar_sum = 0;
   for(Int_t i=0; i<n_jet; i++)
     {
       
@@ -42,18 +43,27 @@ void Kinematic_Fitter_2::Set(const TLorentzVector& a_met, const TLorentzVector& 
 	  if(measured_b_tag[target_index]==kTRUE) n_b_tag++;
 	
 	  target_index++;
-	}
+	}//target jet
+      else pt_scalar_sum += TMath::Abs(jet_vector.at(i).Pt());
     }
        
-  //construct unclustered energy
+  //construct extra jet
   measured_extra_jet.SetPtEtaPhiM(0, 0, 0, 0);
   measured_extra_jet -= measured_met;
   measured_extra_jet -= measured_lepton;
   for(Int_t i=0; i<4; i++){ measured_extra_jet -= measured_jet[i]; }
-
+  
   Double_t value[2];
   ts_correction->Get_Correction(measured_extra_jet, 0, value);
   error_extra_jet = value[1];
+  cout << endl;
+  cout << "error old = " << error_extra_jet << endl;
+
+  TLorentzVector ts_vector;
+  ts_vector.SetPtEtaPhiM(pt_scalar_sum, measured_extra_jet.Eta(), measured_extra_jet.Phi(), measured_extra_jet.M());
+  ts_correction->Get_Correction(ts_vector, 0, value);
+  error_extra_jet = value[1];
+  cout << "pt_scalar_sum = " <<  pt_scalar_sum << ", error new = " << error_extra_jet << endl;
 
   return;
 }//void Kinematic_Fitter_2::S
@@ -187,17 +197,13 @@ Double_t Kinematic_Fitter_2::Chi2_Func(const Double_t* par)
   //add chi2 of t in leptonic side
   TLorentzVector fit_t_lnuj = fitting_lepton + fitting_neutrino + fitting_jet[0];
   f_chi2_piece[8] = TMath::Power(fit_t_lnuj.M()-T_MASS, 2.0)/TMath::Power(T_WIDTH, 2.0);
-
-  //add chi2 of w or charged higgs in hadronic side
-  TLorentzVector fit_w_jj = fitting_jet[2] + fitting_jet[3];
-  f_chi2_piece[9] = TMath::Power(fit_w_jj.M()-par[8], 2.0)/TMath::Power(W_WIDTH, 2.0);
-
+  
   //add chi2 of t in hadronic side
   TLorentzVector fit_t_jjj = fitting_jet[1] + fitting_jet[2] + fitting_jet[3];
-  f_chi2_piece[10] = TMath::Power(fit_t_jjj.M()-T_MASS, 2.0)/TMath::Power(T_WIDTH, 2.0);
+  f_chi2_piece[9] = TMath::Power(fit_t_jjj.M()-T_MASS, 2.0)/TMath::Power(T_WIDTH, 2.0);
 
   Double_t chi2 = 0;
-  for(Int_t i=0; i<11; i++){ chi2 += f_chi2_piece[i]; }
+  for(Int_t i=0; i<N_CHI2_PIECE; i++){ chi2 += f_chi2_piece[i]; }
 
   return chi2;
 }//Double_t Kinematic_Fitter_2::Chi2_Func(const Double_t* par)

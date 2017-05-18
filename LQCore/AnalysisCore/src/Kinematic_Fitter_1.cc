@@ -72,7 +72,7 @@ void Kinematic_Fitter_1::Fit()
   //if(chk_neutrino_pz_real==kFALSE) return;
 
   //take imaginary sol only
-  if(chk_neutrino_pz_real==kTRUE) return;
+  //if(chk_neutrino_pz_real==kTRUE) return;
 
   //Apply top specific correction
   Apply_TS_Correction();
@@ -87,6 +87,9 @@ void Kinematic_Fitter_1::Fit()
 	{
 	  //permutation on jets
 	  Reordering_Jets();
+
+	  //store unfitted object
+	  Store_Unfitted_Object(i, j);
 
 	  //b tag configuration check
 	  Bool_t b_tag_config_check = Pass_B_Tag_Configuration();
@@ -147,59 +150,55 @@ Double_t Kinematic_Fitter_1::Chi2_Func(const Double_t* par)
    Double_t fitting_extra_jet_px = par[5]*measured_extra_jet.Px();
    Double_t fitting_extra_jet_py = par[6]*measured_extra_jet.Py();
    Double_t fitting_extra_jet_et = TMath::Sqrt(TMath::Power(fitting_extra_jet_px, 2.0)+TMath::Power(fitting_extra_jet_py, 2.0));
-  
+   
    TLorentzVector fitting_extra_jet;
    fitting_extra_jet.SetPxPyPzE(fitting_extra_jet_px, fitting_extra_jet_py, 0, fitting_extra_jet_et);
-  
-  //contruct a vector for fit neutrino
-  Double_t fitting_neutrino_px = 0;
-  fitting_neutrino_px -= fitting_lepton.Px();
-  for(Int_t i=0; i<4; i++){ fitting_neutrino_px -= fitting_jet[i].Px(); }
-  fitting_neutrino_px -= fitting_extra_jet.Px();
- 
-  Double_t fitting_neutrino_py = 0;
-  fitting_neutrino_py -= fitting_lepton.Py();
-  for(Int_t i=0; i<4; i++){ fitting_neutrino_py -= fitting_jet[i].Py(); }
-  fitting_neutrino_py -= fitting_extra_jet.Py();
    
-  Double_t fitting_neutrino_pz = par[7];
-
-  Double_t fitting_neutrino_e = TMath::Sqrt(TMath::Power(fitting_neutrino_px, 2.0) + TMath::Power(fitting_neutrino_py, 2.0) + TMath::Power(fitting_neutrino_pz, 2.0));
-
-  fitting_neutrino.SetPxPyPzE(fitting_neutrino_px, fitting_neutrino_py, fitting_neutrino_pz, fitting_neutrino_e);
-
-  /*Add chi2*/
-
-  //add chi2 of four jets
-  for(Int_t i=0; i<4; i++){ f_chi2_piece[i] = TMath::Power(fitting_jet[i].Pt()-reordered_jet[i].Pt(), 2.0)/TMath::Power(error_reordered_jet_pt[i], 2.0); }
-    
-  //add chi2 of lepton
-  f_chi2_piece[4] = TMath::Power(fitting_lepton.Pt()-measured_lepton.Pt(), 2.0)/TMath::Power(error_lepton_pt, 2.0);
-  
-  //add chi2 of unclustered energy
-  f_chi2_piece[5] = TMath::Power(fitting_extra_jet.Px()-measured_extra_jet.Px(), 2.0)/TMath::Power(error_extra_jet, 2.0);
-  f_chi2_piece[6] = TMath::Power(fitting_extra_jet.Py()-measured_extra_jet.Py(), 2.0)/TMath::Power(error_extra_jet, 2.0);
-
-  //add chi2 of w in leptonic side
-  TLorentzVector fit_w_lnu = fitting_lepton + fitting_neutrino;
-  f_chi2_piece[7] = TMath::Power(fit_w_lnu.M()-W_MASS, 2.0)/TMath::Power(W_WIDTH, 2.0);
-  
-  //add chi2 of t in leptonic side
-  TLorentzVector fit_t_lnuj = fitting_lepton + fitting_neutrino + fitting_jet[0];
-  f_chi2_piece[8] = TMath::Power(fit_t_lnuj.M()-T_MASS, 2.0)/TMath::Power(T_WIDTH, 2.0);
-
-  //add chi2 of w or charged higgs in hadronic side
-  TLorentzVector fit_w_jj = fitting_jet[2] + fitting_jet[3];
-  f_chi2_piece[9] = TMath::Power(fit_w_jj.M()-par[8], 2.0)/TMath::Power(W_WIDTH, 2.0);
-
-  //add chi2 of t in hadronic side
-  TLorentzVector fit_t_jjj = fitting_jet[1] + fitting_jet[2] + fitting_jet[3];
-  f_chi2_piece[10] = TMath::Power(fit_t_jjj.M()-T_MASS, 2.0)/TMath::Power(T_WIDTH, 2.0);
-
-  Double_t chi2 = 0;
-  for(Int_t i=0; i<11; i++){ chi2 += f_chi2_piece[i]; }
-
-  return chi2;
+   //contruct a vector for fit neutrino
+   Double_t fitting_neutrino_px = 0;
+   fitting_neutrino_px -= fitting_lepton.Px();
+   for(Int_t i=0; i<4; i++){ fitting_neutrino_px -= fitting_jet[i].Px(); }
+   fitting_neutrino_px -= fitting_extra_jet.Px();
+   
+   Double_t fitting_neutrino_py = 0;
+   fitting_neutrino_py -= fitting_lepton.Py();
+   for(Int_t i=0; i<4; i++){ fitting_neutrino_py -= fitting_jet[i].Py(); }
+   fitting_neutrino_py -= fitting_extra_jet.Py();
+   
+   Double_t fitting_neutrino_pz = par[7];
+   
+   Double_t fitting_neutrino_e = TMath::Sqrt(TMath::Power(fitting_neutrino_px, 2.0) + TMath::Power(fitting_neutrino_py, 2.0) + TMath::Power(fitting_neutrino_pz, 2.0));
+   
+   fitting_neutrino.SetPxPyPzE(fitting_neutrino_px, fitting_neutrino_py, fitting_neutrino_pz, fitting_neutrino_e);
+   
+   /*Add chi2*/
+   
+   //add chi2 of four jets
+   for(Int_t i=0; i<4; i++){ f_chi2_piece[i] = TMath::Power(fitting_jet[i].Pt()-reordered_jet[i].Pt(), 2.0)/TMath::Power(error_reordered_jet_pt[i], 2.0); }
+   
+   //add chi2 of lepton
+   f_chi2_piece[4] = TMath::Power(fitting_lepton.Pt()-measured_lepton.Pt(), 2.0)/TMath::Power(error_lepton_pt, 2.0);
+   
+   //add chi2 of unclustered energy
+   f_chi2_piece[5] = TMath::Power(fitting_extra_jet.Px()-measured_extra_jet.Px(), 2.0)/TMath::Power(error_extra_jet, 2.0);
+   f_chi2_piece[6] = TMath::Power(fitting_extra_jet.Py()-measured_extra_jet.Py(), 2.0)/TMath::Power(error_extra_jet, 2.0);
+   
+   //add chi2 of w in leptonic side
+   TLorentzVector fit_w_lnu = fitting_lepton + fitting_neutrino;
+   f_chi2_piece[7] = TMath::Power(fit_w_lnu.M()-W_MASS, 2.0)/TMath::Power(W_WIDTH, 2.0);
+   
+   //add chi2 of t in leptonic side
+   TLorentzVector fit_t_lnuj = fitting_lepton + fitting_neutrino + fitting_jet[0];
+   f_chi2_piece[8] = TMath::Power(fit_t_lnuj.M()-T_MASS, 2.0)/TMath::Power(T_WIDTH, 2.0);
+   
+   //add chi2 of t in hadronic side
+   TLorentzVector fit_t_jjj = fitting_jet[1] + fitting_jet[2] + fitting_jet[3];
+   f_chi2_piece[9] = TMath::Power(fit_t_jjj.M()-T_MASS, 2.0)/TMath::Power(T_WIDTH, 2.0);
+   
+   Double_t chi2 = 0;
+   for(Int_t i=0; i<N_CHI2_PIECE; i++){ chi2 += f_chi2_piece[i]; }
+   
+   return chi2;
 }//Double_t Kinematic_Fitter_1::Chi2_Func(const Double_t* par)
 
 //////////

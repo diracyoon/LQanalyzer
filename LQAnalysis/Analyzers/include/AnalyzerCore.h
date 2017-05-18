@@ -24,13 +24,7 @@ class EventBase;
 #include "DataDrivenBackgrounds.h"
 #include "HNGenMatching.h"
 
-#define CSV_THRESHOLD_LOOSE 0.460
-#define CSV_THRESHOLD_MEDIUM 0.800
-#define CSV_THRESHOLD_TIGHT 0.935
-
-#define DISTANCE_MATCH 0.2
-
-#define BLANK -999
+#include "My_Defs.h"
 
 class AnalyzerCore : public LQCycleBase {
   

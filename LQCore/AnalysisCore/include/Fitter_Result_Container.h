@@ -5,9 +5,7 @@
 
 #include "TLorentzVector.h"
 
-#define NFIT 9
-
-using namespace std;
+#include "My_Defs.h"
 
 class Fitter_Result_Container
 {

@@ -6,20 +6,9 @@
 #include "Math/Factory.h"
 #include "Math/Functor.h"
 
+#include "My_Defs.h"
 #include "TS_Correction.h"
 #include "Fitter_Result_Container.h"
-
-#define NFIT 9
-
-#define C_MASS 1.27
-#define B_MASS 4.8
-#define T_MASS 172.5
-#define T_WIDTH 1.5
-#define W_MASS 80.398
-#define W_WIDTH 2.141
-
-#define GOODNESS_CUT_SLIDING 0.1
-#define CHI2_CUT 5
 
 class Kinematic_Fitter_Base
 {
@@ -35,6 +24,7 @@ class Kinematic_Fitter_Base
   Bool_t Get_Convergence_Checker(){ return chk_convergence; }
   Bool_t Get_Neutrino_Pz_Sol_Checker(){ return chk_neutrino_pz_real; }
   TLorentzVector& Get_Fitted_Object(const Int_t& obj_index, const TString& type="BEST", const Int_t& index=-1);
+  TLorentzVector& Get_Unfitted_Object(const Int_t& obj_index, const TString& type="BEST", const Int_t& index=-1);
   Fitter_Result_Container Get_Fitter_Result();
   void Get_Parameters(Double_t parameter_return[NFIT], const TString& type="BEST", const Int_t& index=-1);
   void Get_Permutation(Int_t permuatation_return[4]);
@@ -79,22 +69,28 @@ class Kinematic_Fitter_Base
   static TLorentzVector fitting_lepton;
   static TLorentzVector fitting_neutrino;
 
-  static Double_t f_chi2_piece[11];
+  static Double_t f_chi2_piece[N_CHI2_PIECE];
  
   TLorentzVector best_fitted_jet[4];
+  TLorentzVector best_unfitted_jet[4];
   TLorentzVector fitted_jet[2][24][4];
-
-  TLorentzVector best_fitted_lepton;
-  TLorentzVector fitted_lepton[2][24];
+  TLorentzVector unfitted_jet[24][4];
   
-  TLorentzVector best_fitted_neutrino;
-  TLorentzVector fitted_neutrino[2][24];
+  TLorentzVector best_fitted_lepton;
+  TLorentzVector best_unfitted_lepton;
+  TLorentzVector fitted_lepton[2][24];
+  TLorentzVector unfitted_lepton;
 
+  TLorentzVector best_fitted_neutrino;
+  TLorentzVector best_unfitted_neutrino;
+  TLorentzVector fitted_neutrino[2][24];
+  TLorentzVector unfitted_neutrino[2];
+  
   Double_t best_chi2;
   Double_t chi2[2][24];
   
-  Double_t best_chi2_piece[11];
-  Double_t chi2_piece[2][24][11];
+  Double_t best_chi2_piece[N_CHI2_PIECE];
+  Double_t chi2_piece[2][24][N_CHI2_PIECE];
   
   Int_t best_permutation[4];
   Int_t permutation[2][24][4];
@@ -107,7 +103,7 @@ class Kinematic_Fitter_Base
   Bool_t reordered_b_tag[4];
 
   TS_Correction* ts_correction;
-  
+ 
   ROOT::Math::Minimizer* minimizer;
   
   void Apply_TS_Correction();
@@ -120,7 +116,8 @@ class Kinematic_Fitter_Base
   void Set_Minimizer_Parameters(const Int_t& i);
   Bool_t Sol_Neutrino_Pz();
   void Store_Results(const Int_t& i, const Int_t& j);
-
+  void Store_Unfitted_Object(const Int_t& i, const Int_t& j);
+  
   ClassDef(Kinematic_Fitter_Base, 1);
 };
 

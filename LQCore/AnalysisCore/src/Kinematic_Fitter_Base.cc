@@ -23,7 +23,7 @@ TLorentzVector Kinematic_Fitter_Base::fitting_jet[4];
 TLorentzVector Kinematic_Fitter_Base::fitting_lepton;
 TLorentzVector Kinematic_Fitter_Base::fitting_neutrino;
 
-Double_t Kinematic_Fitter_Base::f_chi2_piece[11];
+Double_t Kinematic_Fitter_Base::f_chi2_piece[N_CHI2_PIECE];
 
 /////////
 
@@ -52,8 +52,7 @@ Kinematic_Fitter_Base::Kinematic_Fitter_Base(const Bool_t& a_chk_debug)
   parameter_name[5] = "UE_PX";
   parameter_name[6] = "UE_PY";
   parameter_name[7] = "Neutrino_Pz";
-  parameter_name[8] = "W_Or_CH_Mass";
-
+  
   parameter_start[0] = 1.0;
   parameter_start[1] = 1.0;
   parameter_start[2] = 1.0;
@@ -62,8 +61,7 @@ Kinematic_Fitter_Base::Kinematic_Fitter_Base(const Bool_t& a_chk_debug)
   parameter_start[5] = 1.0;
   parameter_start[6] = 1.0;
   parameter_start[7] = 1.0;
-  parameter_start[8] = W_MASS;
-
+  
   parameter_step[0] = 0.03;
   parameter_step[1] = 0.03;
   parameter_step[2] = 0.03;
@@ -72,7 +70,6 @@ Kinematic_Fitter_Base::Kinematic_Fitter_Base(const Bool_t& a_chk_debug)
   parameter_step[5] = 0.03;
   parameter_step[6] = 0.03;
   parameter_step[7] = 0.03;
-  parameter_step[8] = 0.03;
 }//Kinematic_Fitter_Base::Kinematic_Fitter_Base(const Bool_t& a_chk_debug)
 
 //////////
@@ -152,6 +149,38 @@ TLorentzVector& Kinematic_Fitter_Base::Get_Fitted_Object(const Int_t& obj_index,
   TLorentzVector empty;
   return empty; 
 }//TLorentzVector Kinematic_Fitter_Base::Get_Fitted_Object(const Int_t& obj_index)
+
+//////////
+
+TLorentzVector& Kinematic_Fitter_Base::Get_Unfitted_Object(const Int_t& obj_index, const TString& type, const Int_t& index)
+{
+  Int_t i = index/24;
+  Int_t j = index%24;
+  
+  //jets
+  if(obj_index<4)
+    {
+      if(type=="BEST") return best_unfitted_jet[obj_index];
+      else return unfitted_jet[j][obj_index];
+    }//jet
+
+  //lepton
+  else if(obj_index==4)
+    {
+      if(type=="BEST") return best_unfitted_lepton;
+      else return unfitted_lepton;
+    }
+
+  //neutrino
+  else if(obj_index==5)
+    {
+      if(type=="BEST") return best_unfitted_neutrino;
+      else return unfitted_neutrino[i];
+    }
+  
+  TLorentzVector empty;
+  return empty;
+}//TLorentzVector& Kinematic_Fitter_Base::Get_Unfitted_Object(const Int_t& obj_index, const TString& type, const Int_t& index)
 
 //////////
 
@@ -300,7 +329,7 @@ Bool_t Kinematic_Fitter_Base::Pass_B_Tag_Configuration()
     {
       if(reordered_b_tag[0]==kTRUE && reordered_b_tag[1]==kTRUE) b_tag_config_check = kTRUE;
     }
-  else
+  else if(n_b_tag==3)
     {
       //for three b tag event, let's choose jet[3] as b tagged jet. It doesn't destroy generality
       if(reordered_b_tag[0]==kTRUE && reordered_b_tag[1]==kTRUE && reordered_b_tag[2]==kTRUE) b_tag_config_check = kTRUE;
@@ -381,7 +410,7 @@ void Kinematic_Fitter_Base::Reordering_Jets()
 
 void Kinematic_Fitter_Base::Resol_Neutrino_Pt()
 {
-  cout << "Kinematic_Fitter_Base::Resol_Neutino_Pt" << endl;
+  //cout << "Kinematic_Fitter_Base::Resol_Neutino_Pt" << endl;
     
   //recal MET
   Double_t lepton_mass = measured_lepton.M();
@@ -412,17 +441,11 @@ void Kinematic_Fitter_Base::Resol_Neutrino_Pt()
       Double_t w_lnu_mass = w_lnu.M();
       mass_diff[i] = TMath::Abs(W_MASS - w_lnu_mass);
       
-      cout << measured_met.Pt() << "\t" << met_recal[i] << "\t" << w_lnu.M() << "\t" << mass_diff[i] << endl;
+      //cout << measured_met.Pt() << "\t" << met_recal[i] << "\t" << w_lnu.M() << "\t" << mass_diff[i] << endl;
     }
   //cout << endl;
   
-  if(mass_diff[0]<mass_diff[1])
-    {
-      cout << "Test 0" << endl;
-      //measured_met = met_recal_vector[0];
-    
-      cout << measured_met.Pt() << endl;
-    }
+  if(mass_diff[0]<mass_diff[1]) measured_met = met_recal_vector[0];
   else measured_met = met_recal_vector[1];
   
   return;
@@ -486,7 +509,7 @@ void Kinematic_Fitter_Base::Store_Results(const Int_t& i, const Int_t& j)
   //chi2
   chi2[i][j] = minimizer->MinValue();
   
-  for(Int_t k=0; k<11; k++){ chi2_piece[i][j][k] = f_chi2_piece[k]; }
+  for(Int_t k=0; k<10; k++){ chi2_piece[i][j][k] = f_chi2_piece[k]; }
   
   //parameters 
   const Double_t* parameter_result = minimizer->X();
@@ -508,26 +531,49 @@ void Kinematic_Fitter_Base::Store_Results(const Int_t& i, const Int_t& j)
       
       //chi
       best_chi2 = chi2[i][j];                                                           
-      for(Int_t k=0; k<11; k++){ best_chi2_piece[k] = chi2_piece[i][j][k]; } 
+      for(Int_t k=0; k<10; k++){ best_chi2_piece[k] = chi2_piece[i][j][k]; } 
 
       //parameters
       for(Int_t k=0; k<NFIT; k++){ best_parameter[k] = parameter[i][j][k]; } 
 	  
-      //permutation & fitted jets
+      //permutation & jets
       for(Int_t k=0; k<4; k++)
 	{
 	  best_permutation[k] = reordering_index[k];                                    
 	  best_fitted_jet[k] =  fitted_jet[i][j][k];                                    
+	  best_unfitted_jet[k] = unfitted_jet[j][k];
 	}    
       
-      //fitted lepton
+      //lepton
       best_fitted_lepton = fitted_lepton[i][j];
-    
+      best_unfitted_lepton = unfitted_lepton;
+      
       //fitted neutrino
       best_fitted_neutrino = fitted_neutrino[i][j];
+      best_unfitted_neutrino = unfitted_neutrino[i];
     }
   
   return;
 }//void Kinematic_Fitter_Base::Store_Results(const Int_t& i, const Int_t& j)
+
+//////////
+
+void Kinematic_Fitter_Base::Store_Unfitted_Object(const Int_t& i, const Int_t& j)
+{
+  //jets
+  for(Int_t k=0; k<4; k++){ unfitted_jet[j][k] = reordered_jet[k]; }
+  
+  //lepton
+  unfitted_lepton = measured_lepton;
+
+  //neutrino
+  Double_t px = measured_met.Px();
+  Double_t py = measured_met.Py();
+  Double_t pz = neutrino_pz[i];
+  Double_t energy = TMath::Sqrt(px*px + py*py + pz*pz);
+  
+  unfitted_neutrino[i].SetPxPyPzE(pz, py, pz, energy);
+
+}//void Kinematic_Fitter_Base::Store_Unfitted_Object(const Int_t& i, const Int_t& j)
 
 //////////

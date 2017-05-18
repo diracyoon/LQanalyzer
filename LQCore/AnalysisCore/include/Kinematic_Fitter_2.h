@@ -1,6 +1,7 @@
 #ifndef __Kinematic_Fitter_2_H__
 #define __Kinematic_Fitter_2_H__
 
+#include "My_Defs.h"
 #include "Kinematic_Fitter_Base.h"
 
 using namespace std;
