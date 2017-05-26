@@ -86,6 +86,8 @@ namespace snu {
 
     void SetTrigMatch(TString match);
 
+    void SetIsPromptFlag(bool pflag);
+
     bool TriggerMatched(TString path);
 
     inline Bool_t IsPF() const {return k_muon_ispf;}
@@ -99,6 +101,8 @@ namespace snu {
     inline Double_t muonVty() const {return k_muonVty;}
     inline Double_t muonVtz() const {return k_muonVtz;}
 
+
+    inline Bool_t IsPromptFlag() const {return k_isprompt;}
     inline Double_t dZ() const {return k_dz;}
     inline Double_t dXY() const {return k_dxy;}
     inline Double_t dXYSig() const {return k_dxy_sig;}
@@ -182,7 +186,8 @@ namespace snu {
     Bool_t k_corrected_rc;
     
     Int_t k_mctype;
-    ClassDef(KMuon,22)
+    Bool_t k_isprompt;
+    ClassDef(KMuon,23)
   };   
 }//namespace snu
 

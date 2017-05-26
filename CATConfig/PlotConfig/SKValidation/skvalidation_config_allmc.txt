@@ -1,0 +1,48 @@
+### alias                 |   Legend                                            |  Legend alias     |  Color  | uncert. |
+SingleTop_s               |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V		|  top              |  kRed     |	0.2     |    
+SingleTbar_t              |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V 		|  top              |  kRed     |	0.2     |
+SingleTop_t               |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V		|  top              |  kRed     |	0.2     |
+SingleTbar_tW             |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V		|  top              |  kRed     |	0.2     |
+SingleTop_tW              |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V		|  top              |  kRed     |	0.2     |
+TTJets_MG                 |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V		|  top              |  kRed     |	0.2     |
+ttH_nonbb                 |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V           |  top              |  kRed     |	0.2     |
+ttH_bb                    |    t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V          |  top              |  kRed     |	0.2     |
+ttW                       |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V           |  top              |  kRed     |	0.2     |
+ttZ                       |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V           |  top              |  kRed     |	0.2     |
+ttbb                      |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V           |  top              |  kRed     |	0.2     |
+GG_HToMuMu                |   Higgs                                             |  higgs            |  800    | 0.2     |
+VBF_HToMuMu               |   Higgs                                             |  higgs            |  800    | 0.2     |
+WJets                     |   W+Jets						|  wjet             |  kGreen     |	0.2     |
+WWW                       |   Triboson						|  vvv              |  kSpring+10    |	0.2     |
+ZZZ                       |   Triboson						|  vvv              |  kSpring+10    |	0.2     |
+WWZ                       |   Triboson						|  vvv              |  kSpring+10    |	0.2     |     
+WW                        |   Diboson						|  vv               |  kSpring-1     | 0.2     |
+WZZ                       |   Triboson						|  vv               |  kSpring-1     | 0.2     |
+WZ                        |   Diboson						|  vv               |  kSpring-1     | 0.2     |
+ZZ                        |   Diboson						|  vv               |  kSpring-1     | 0.2     |
+WpWpQCD			  |   Diboson						|  vv               |  kSpring-1     | 0.2     |
+WpWpEWK			  |   Diboson						|  vv               |  kSpring-1     | 0.2     |
+QCD_Pt-120to170_EMEnriched | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-170to300_EMEnriched | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-20to30_EMEnriched   | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-300toInf_EMEnriched | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-30to50_EMEnriched   | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-50to80_EMEnriched   | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-80to120_EMEnriched  | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-1000toInf_MuEnriched | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-120to170_MuEnriched  | QCD						| qcd               |  kOrange-5    | 0.2     |
+#QCD_Pt-15to20_MuEnriched    | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-170to300_MuEnriched  | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-20to30_MuEnriched    | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-300to470_MuEnriched  | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-30to50_MuEnriched    | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-470to600_MuEnriched  | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-50to80_MuEnriched    | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-600to800_MuEnriched  | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-800to1000_MuEnriched | QCD						| qcd               |  kOrange-5    | 0.2     |
+QCD_Pt-80to120_MuEnriched   | QCD						| qcd               |  kOrange-5    | 0.2     |
+DYJets_10to50             |   DY#rightarrow ll; 10 < m(ll) < 50                 |  DYlow            |  kYellow+2     | 0.15    |
+DYJets                    |   DY#rightarrow ll; m(ll) > 50                      |  DYhigh           |  kYellow     | 0.15    |
+#ZGto2LG                          |   Diboson                                           |  vv               |  74     | 0.2     |
+#WGtoLNuG                 |   Diboson                                           |  vv               |  74     | 0.2     |
+END

@@ -1,6 +1,6 @@
 /***************************************************************************
  * @Project: LQFakeRateCalculator_FinalEl Frame - ROOT-based analysis framework for Korea SNU
-OB * @Package: LQCycles
+ * @Package: LQCycles
  *
  * @author John Almond       <jalmond@cern.ch>           - SNU
  *
@@ -44,7 +44,7 @@ void FakeRateCalculator_FinalEl::InitialiseAnalysis() throw( LQError ) {
   // You can out put messages simply with Message function. Message( "comment", output_level)   output_level can be VERBOSE/INFO/DEBUG/WARNING 
   // You can also use m_logger << level << "comment" << int/double  << LQLogger::endmsg;
   //
-  
+  return;
   MakeCleverHistograms(sighist_ee, "SingleLooseElJet");
   MakeCleverHistograms(sighist_ee, "SingleTightElJet");
 
@@ -62,13 +62,27 @@ void FakeRateCalculator_FinalEl::InitialiseAnalysis() throw( LQError ) {
 
 void FakeRateCalculator_FinalEl::ExecuteEvents()throw( LQError ){
     
+
+  /// THIS COSE IS ONLY FOR GETTING FAKES USeD IN OPTIMISING ID.........
+
+  Message("In ExecuteEvents() " , DEBUG);
+
   //// Initial event cuts
   /// MET FIleters 
   if(!PassMETFilter()) return;     
   
+  Message("PASS MET FILTER " , DEBUG);
+
   /// Require good promary vertex 
   if (!eventbase->GetEvent().HasGoodPrimaryVertex()) return; //// Make cut on event wrt vertex  
   numberVertices = eventbase->GetEvent().nVertices();   
+
+  if (!k_isdata) {
+    //weight *= (MCweight * eventbase->GetEvent().PileUpWeight(snu::KEvent::down));
+    weight *= (MCweight * mcdata_correction->UserPileupWeight(eventbase->GetEvent()));
+  }
+
+  Message("PASS VERTEX " , DEBUG);
 
   /// These run on double electron dataset
   if((isData&&k_channel == "DoubleEG") || !isData){
@@ -81,13 +95,145 @@ void FakeRateCalculator_FinalEl::ExecuteEvents()throw( LQError ){
     /// ELECTRON_HN_FAKELOOSEST has no ID cuts
     /// only pt/eta/chargeconst/looseIP/
 
-    std::vector<snu::KElectron> tmploose_el = GetElectrons(false,false,"ELECTRON_HN_FAKELOOSEST");
+    /// | ELECTRON16_MVA_FAKELOOSE_CC_d0          | 10.     | 2.5      |   0.5         | 0.50       | false         | false          |  false       | false         | 0.05        | 0.05       | 0.10     | 0.10       | true        | true     | 999.         | 4.         | false      |      false     |  true           |
+    // | ELECTRON16_FR_MVA_TIGHT_DXYCC           | 10.     | 2.5      |   0.0588      | 0.0571     | false         | false          |  false       | false         | 0.05        | 0.05       | 0.10      | 0.10       | true        | true     |   999.       | 4.           | false      |      true      |  false          |
+
+
+    // | ELECTRON_HN_FAKELOOSEST              | 5.     | 2.5     |   0.5     | 0.50      | false         | false          |  false       | false         | 0.05    | 0.05  | 0.10   | 0.10   | true    | true     | 999.         | 4.            | false      |      false     |  false           | false |
+
+
+    /// MEDIUM MVA
+    // mvaCategoriesMapName = mvaCategoriesMapName, # map with category index for all particles                                                                             
+    //  cutCategory0 =  0.836695742607, # EB1                                                                                                                                
+    //  cutCategory1 =  0.715337944031, # EB2                                                                                                                                
+    //  cutCategory2 =  0.356799721718, # EE                                                                                                                                 
+    //  )
+    
+    
+    std::vector<snu::KElectron> vetoloose_el = GetElectrons(false,false,"ELECTRON_HN_FAKELOOSE");
+    std::vector<snu::KElectron> tmploose_el_mediumMVA = GetElectrons(false,false,"ELECTRON_MVA_FAKELOOSE");
+    std::vector<snu::KElectron> tmploose_el_tightMVA = GetElectrons(false,false,"ELECTRON_MVA_TIGHT");
+
+    // tmploose_el is ELECTRON16_MVA_FAKELOOSE_CC_d0 except MVA medium cuts not applied (dxy EC is changed
+
+
+    TString triggerslist_8="HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30_v";   /// -> tighter cut in lepton ID form tighter trigger emulation cut                                     
+    TString triggerslist_12="HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30_v";
+    TString triggerslist_18="HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30_v";
+    TString triggerslist_23="HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30_v";
+    TString triggerslist_33="HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30_v"; /// 
+
+    if(vetoloose_el.size() < 1) return;
+        
+
+
+    FillHist("N_vetoloose", vetoloose_el.size(), 1, 0., 4., 4);
+    FillHist("N_vetolooseMVAmedium",tmploose_el_mediumMVA.size() , 1, 0., 4., 4);
+    std::vector<snu::KMuon> muonColl = GetMuons("MUON_HN_VETO");  // loose selection                                                                                                                                                                                              
+    if(muonColl.size() > 0) return;
+    
+    std::vector<snu::KJet> jetCollTight = GetJets("JET_HN");
+
+    std::vector<snu::KJet> jetColl           = GetJets("JET_NOLEPTONVETO");
+
+    FillCLHist(sighist_e, "looseEl", eventbase->GetEvent(), muonColl,vetoloose_el,jetCollTight,weight);
+    
+    if(tmploose_el_mediumMVA.size()==1){
+      if(jetCollTight.size() >=1) {
+	if(jetCollTight.at(0).Pt() > 40.){
+	  float prescale_trigger =  GetPrescale(tmploose_el_mediumMVA,  PassTrigger(triggerslist_8), PassTrigger(triggerslist_12), PassTrigger(triggerslist_18), PassTrigger( triggerslist_23), PassTrigger(triggerslist_33), TargetLumi);
+	  
+	  if(tmploose_el_mediumMVA.size()==1)FillCLHist(sighist_e, "SingleElectron_prescaled", eventbase->GetEvent(), muonColl,tmploose_el_mediumMVA,jetCollTight, weight*prescale_trigger);
+	  if(tmploose_el_tightMVA.size()==1){
+	   
+	    Double_t TMETdphi = TVector2::Phi_mpi_pi(tmploose_el_tightMVA.at(0).Phi()- eventbase->GetEvent().METPhi(snu::KEvent::pfmet));
+	    Double_t TMT=sqrt(2.* tmploose_el_tightMVA.at(0).Et()*eventbase->GetEvent().MET(snu::KEvent::pfmet) * (1 - cos( TMETdphi)));
+	    if(eventbase->GetEvent().MET(snu::KEvent::pfmet)> 40 && (60. < TMT)  &&(TMT < 100.) &&(tmploose_el_tightMVA[0].MCMatched() || isData)){
+	      FillCLHist(sighist_e, "SingleTightElectron_prompt", eventbase->GetEvent(), muonColl,tmploose_el_tightMVA,jetCollTight, weight*prescale_trigger);
+
+	    }
+	  }
+	}
+      }
+    }
+      
+    GetFakeRateAndPromptRates(tmploose_el_mediumMVA,"MVA_TIGHT",tmploose_el_tightMVA,0.05,weight,true, false);
+    
+    
+    //if(vetoloose_el.size() != 1) return;
+
+    if(vetoloose_el.size() == 1){
+      Double_t METdphi = TVector2::Phi_mpi_pi(vetoloose_el.at(0).Phi()- eventbase->GetEvent().METPhi(snu::KEvent::pfmet));
+      Double_t MT=sqrt(2.* vetoloose_el.at(0).Et()*eventbase->GetEvent().MET(snu::KEvent::pfmet) * (1 - cos( METdphi)));
+      if(MT > 25.) return;
+      if (eventbase->GetEvent().MET(snu::KEvent::pfmet) > 20) return;
+      
+      float prescale_trigger =  GetPrescale(vetoloose_el,  PassTrigger(triggerslist_8), PassTrigger(triggerslist_12), PassTrigger(triggerslist_18), PassTrigger( triggerslist_23), PassTrigger(triggerslist_33), TargetLumi);
+      if(prescale_trigger==0.) return;
+    }
+
+    //GetFakeRateAndPromptRates(loose_el,"dijet_mva"+vcut_mva_s[imva]+"_iso"+vcut_iso_b_s[iso_b]+"_dxy"+vcut_dxy_b_s[dxy_b]+"_dz"+vcut_dz_b_s[dz_b],tight_el,vcut_iso_b[iso_b],weight,true,  false);
+    
     
 
-    ///// Setup cuts to optimise
+  }
+  return;
+  if((isData&&k_channel == "SingleElectron") || !isData){
+
+    std::vector<snu::KElectron> tmploose_el = GetElectrons(false,false,"ELECTRON_HN_FAKELOOSEST");
+    TString triggerslist="HLT_Ele27_WPTight_Gsf_v";
+
+    bool passtrig =  PassTrigger(triggerslist);
+    if(!passtrig) return;
+    
+    std::vector<snu::KElectron> vetoloose_el;
+    for(unsigned int iel=0; iel<tmploose_el.size(); iel++){
+      bool pass_trigger_emulation=true;
+      if(tmploose_el[iel].Pt() < 30.) continue;
+      
+      if(tmploose_el[iel].Pt() < 15.){
+        if(!tmploose_el[iel].PassHLTID()) pass_trigger_emulation=false;
+      }
+      else{
+        if(!tmploose_el[iel].IsTrigMVAValid()) pass_trigger_emulation=false;
+      }
+      if(!pass_trigger_emulation) continue;
+
+      if(fabs(tmploose_el[iel].SCEta())<0.8 ){
+        if(tmploose_el[iel].MVA() < -0.02) continue;
+      }
+      else  if(fabs(tmploose_el[iel].SCEta())<1.479 ){
+        if(tmploose_el[iel].MVA() < -0.52) continue;
+      }
+      else {
+        if(tmploose_el[iel].MVA() < -0.52) continue;
+      }
+
+      /// loose id has                                                                                                                                                                                                                                     
+      // - trigger emulation                                                                                                                                                                                                                               
+      // - loose mva (taken sae as gent group                                                                                                                                                                                                              
+      // - dxy/dz cuts applied                                                                                                                                                                                                                             
+      vetoloose_el.push_back(tmploose_el[iel]);
+    }
+    if(vetoloose_el.size() != 1) return;
+    
+
+    Double_t METdphi = TVector2::Phi_mpi_pi(vetoloose_el.at(0).Phi()- eventbase->GetEvent().METPhi(snu::KEvent::pfmet));
+    Double_t MT=sqrt(2.* vetoloose_el.at(0).Et()*eventbase->GetEvent().MET(snu::KEvent::pfmet) * (1 - cos( METdphi)));
+    if(MT > 25.) return;
+
+
+    ///// Setup cuts to optimise                                                                                                                                                                                                                           
     vector<float> vcut_mva;
     vector<TString> vcut_mva_s;
-    for(unsigned int imva=0; imva < 98; imva++){
+
+    int nmva=98;
+    int ndxy=5;
+    int ndz=3;
+    int niso=5;
+
+    
+    for(unsigned int imva=0; imva < nmva; imva++){
       float cut_dmva = float(imva)*0.01 -0.01;
       vcut_mva.push_back(cut_dmva);
       stringstream ss;
@@ -96,9 +242,9 @@ void FakeRateCalculator_FinalEl::ExecuteEvents()throw( LQError ){
     }
     vector<float> vcut_dxy_b;
     vector<TString> vcut_dxy_b_s;
-    
-    for(unsigned int dxy_b=0;dxy_b < 10; dxy_b++){
-      float cut_dxy_b =  float(dxy_b)*0.005 + 0.01;
+
+    for(unsigned int dxy_b=0;dxy_b < ndxy; dxy_b++){
+      float cut_dxy_b =  float(dxy_b)*0.01 + 0.01;
       vcut_dxy_b.push_back(cut_dxy_b);
       stringstream ss;
       ss <<cut_dxy_b;
@@ -107,144 +253,76 @@ void FakeRateCalculator_FinalEl::ExecuteEvents()throw( LQError ){
 
     vector<float> vcut_dz_b;
     vector<TString> vcut_dz_b_s;
-    
-    for(unsigned int dz_b=0;dz_b < 10; dz_b++){
-      float cut_dz_b =  float(dz_b)*0.02 + 0.02;
+
+    for(unsigned int dz_b=0;dz_b < ndz; dz_b++){
+      float cut_dz_b =  float(dz_b)*0.02 + 0.04;
       vcut_dz_b.push_back(cut_dz_b);
       stringstream ss;
       ss <<cut_dz_b;
       vcut_dz_b_s.push_back(TString(ss.str()));
-    }   
-
-    
+    }
 
     vector<float> vcut_iso_b;
     vector<TString> vcut_iso_b_s;
-    for(unsigned int iso_b=0;iso_b < 10; iso_b++){
-      float cut_iso_b = float(iso_b)*0.005 + 0.05;
+    for(unsigned int iso_b=0;iso_b < niso; iso_b++){
+      float cut_iso_b = float(iso_b)*0.01 + 0.05;
       vcut_iso_b.push_back(cut_iso_b);
       stringstream ss;
       ss <<cut_iso_b;
       vcut_iso_b_s.push_back(TString(ss.str()));
     }
 
-    //// Loop over cuts and fill loose and tight el and get fake rates for ID
+    //// Loop over cuts and fill loose and tight el and get fake rates for ID                                                                                                                                                                              
     for(unsigned int imva=0; imva < vcut_mva.size(); imva++){
       for(unsigned int dxy_b=0; dxy_b < vcut_dxy_b.size(); dxy_b++){
-	for(unsigned int dz_b=0; dz_b < vcut_dz_b.size(); dz_b++){
-	  for(unsigned int iso_b=0; iso_b < vcut_iso_b.size(); iso_b++){
-	    
+        for(unsigned int dz_b=0; dz_b < vcut_dz_b.size(); dz_b++){
+          for(unsigned int iso_b=0; iso_b < vcut_iso_b.size(); iso_b++){
+
 	    std::vector<snu::KElectron> loose_el;
 	    std::vector<snu::KElectron> tight_el;
-	    for(unsigned int iel=0; iel<tmploose_el.size(); iel++){
-	      float reliso = tmploose_el[iel].PFRelIso(0.3);
-	      bool pass_trigger_emulation=true;
-	      if(tmploose_el[iel].Pt() < 15.){
-		if(!tmploose_el[iel].PassHLTID()) pass_trigger_emulation=false;
-	      }
-	      else{
-		if(!tmploose_el[iel].IsTrigMVAValid()) pass_trigger_emulation=false;
-	      }
-	      if(!pass_trigger_emulation) continue;
-	      if(fabs(tmploose_el[iel].dz()) > vcut_dz_b[dz_b]) continue;	      
+            for(unsigned int iel=0; iel<tmploose_el.size(); iel++){
+              float reliso = tmploose_el[iel].PFRelIso(0.3);
+              bool pass_trigger_emulation=true;
+	      if(tmploose_el[iel].Pt() < 30) continue;
+	      if(!tmploose_el[iel].IsTrigMVAValid()) pass_trigger_emulation=false;
+
+              if(!pass_trigger_emulation) continue;
+              if(fabs(tmploose_el[iel].dz()) > vcut_dz_b[dz_b]) continue;
               if(fabs(tmploose_el[iel].dxy()) > vcut_dxy_b[dxy_b]) continue;
-	      if(fabs(tmploose_el[iel].SCEta())<0.8 ){
-		if(tmploose_el[iel].MVA() < -0.02) continue;
-	      }
-	      else  if(fabs(tmploose_el[iel].SCEta())<1.479 ){
-		if(tmploose_el[iel].MVA() < -0.52) continue;
-	      } 
-	      else {
-		if(tmploose_el[iel].MVA() < -0.52) continue;
-	      }
-	      
-	      /// loose id has
-	      // - trigger emulation
-	      // - loose mva (taken sae as gent group
-	      // - dxy/dz cuts applied
-	      loose_el.push_back(tmploose_el[iel]);
-	      //// tight - loose + 
-	      //// tighter mva
-	      ///  reliso tightened
-	      if(tmploose_el[iel].MVA() < vcut_mva[imva]) continue;
-	      if(reliso > vcut_iso_b[iso_b]) continue;
-	      tight_el.push_back(tmploose_el[iel]);
-	    }
-	    cout << "dijet_"+vcut_mva_s[imva]+"_"+vcut_iso_b_s[iso_b]+"_"+vcut_dxy_b_s[dxy_b]+"_"+vcut_dz_b_s[dz_b] << endl;
-	    GetFakeRateAndPromptRates(loose_el,"dijet_"+vcut_mva_s[imva]+"_"+vcut_iso_b_s[iso_b]+"_"+vcut_dxy_b_s[dxy_b]+"_"+vcut_dz_b_s[dz_b],tight_el,weight,true,  false);
-
-	  }//iso
-	}//dz
-      }//dxy
-    }//mva
+              if(fabs(tmploose_el[iel].SCEta())<0.8 ){
+                if(tmploose_el[iel].MVA() < -0.02) continue;
+              }
+              else  if(fabs(tmploose_el[iel].SCEta())<1.479 ){
+                if(tmploose_el[iel].MVA() < -0.52) continue;
+              }
+              else {
+                if(tmploose_el[iel].MVA() < -0.52) continue;
+              }
+              /// loose id has                                                                                                                                                                                                                             
+              // - trigger emulation                                                                                                                                                                                                                       
+              // - loose mva (taken sae as gent group                                                                                                                                                                                                      
+              // - dxy/dz cuts applied                                                                                                                                                                                                                     
+              loose_el.push_back(tmploose_el[iel]);
+              //// tight - loose +                                                                                                                                                                                                                         
+              //// tighter mva                                                                                                                                                                                                                             
+              ///  reliso tightened                                                                                                                                                                                                                        
+              if(tmploose_el[iel].MVA() < vcut_mva[imva]) continue;
+              if(reliso > vcut_iso_b[iso_b]) continue;
+              tight_el.push_back(tmploose_el[iel]);
+            }
+            GetFakeRateAndPromptRates(loose_el,"singleel_dijet_mva"+vcut_mva_s[imva]+"_iso"+vcut_iso_b_s[iso_b]+"_dxy"+vcut_dxy_b_s[dxy_b]+"_dz"+vcut_dz_b_s[dz_b],tight_el,vcut_iso_b[iso_b],weight,true,  false);
+          }//iso                                                                                                                                                                                                                                           
+        }//dz                                                                                                                                                                                                                                              
+      }//dxy                                                                                                                                                                                                                                               
+    }//mva                                                                                                                                                                                                                                                 
     return;
-    /*
-    GetFakeRateAndPromptRates(loose_el,"dijet_",  "ELECTRON_HN_TIGHT",weight,true,  false);
 
-    ///  ELECTRON16_HN_TIGHT_DXYSIG  = ELECTRON16_HN_TIGHT + dxysig < 3.
-    //    GetFakeRateAndPromptRates("ELECTRON_HN_FAKELOOSE_NOD0","dijet_nod0_dxysig",  "ELECTRON16_HN_TIGHT_DXYSIG",weight,true,  true);
-    //GetFakeRateAndPromptRates("ELECTRON_HN_FAKELOOSE_NOD0","dijet_nod0_dxysig_miniiso",  "ELECTRON16_HN_TIGHT_DXYSIG",weight,true,  true);
-
-    /// Apply D0 cut (in z peak)
-    /// ELECTRON16_HN_FAKELOOSE = 0.5 reliso cut   ;  dxy = safe from https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
-    GetFakeRateAndPromptRates("ELECTRON_HN_FAKELOOSE","dijet_d0", "ELECTRON_HN_TIGHT",weight,true, true);
-    GetFakeRateAndPromptRates("ELECTRON_HN_FAKELOOSEST","dijet_d0", "ELECTRON_HN_TIGHT",weight,true, true);
-    GetFakeRateAndPromptRates("ELECTRON_HN_FAKELOOSE2","dijet_d0", "ELECTRON_HN_TIGHT2",weight,true, false);
-    //GetFakeRateAndPromptRates("ELECTRON16_HN_FAKELOOSE_D0_DXYSIG","dijet_d0_dxysig", "ELECTRON16_HN_TIGHT_DXYSIG",weight,true, true);
-    //GetFakeRateAndPromptRates("ELECTRON16_HN_FAKELOOSE_D0_DXYSIG","dijet_d0_dxysig_miniiso",  "ELECTRON16_HN_TIGHT_DXYSIG",weight,true,  true);
-    
-
-    /// ISO SYSTEMATICS
-    GetFakeRateAndPromptRates("ELECTRON_HN_FAKELOOSE_ISO04","dijet_iso04", "ELECTRON_HN_TIGHT",weight,true, false);
-    GetFakeRateAndPromptRates("ELECTRON_HN_FAKELOOSE_ISO06", "dijet_iso06","ELECTRON_HN_TIGHT",weight, true,false);
-   
-    /// POG FAKERATES  iso and d0 cuts are same for tight and medium, only shower id is changed
-    GetFakeRateAndPromptRates("ELECTRON16_POG_FAKELOOSE","dijet_pog", "ELECTRON16_FR_POG_TIGHT",weight, true,false);
-    GetFakeRateAndPromptRates("ELECTRON16_POG_MEDIUM_FAKELOOSE","dijet_pog", "ELECTRON16_FR_POG_MEDIUM",weight, true,false);
-    GetFakeRateAndPromptRates("ELECTRON16_POG_FAKELOOSE_CC","dijet_pog", "ELECTRON16_FR_POG_TIGHT_CC",weight, true,false);
-    GetFakeRateAndPromptRates("ELECTRON16_POG_MEDIUM_FAKELOOSE_CC","dijet_pog", "ELECTRON16_FR_POG_MEDIUM_CC",weight, true,false);
-    GetFakeRateAndPromptRates("ELECTRON16_MVA_FAKELOOSE_CC","dijet_mva", "ELECTRON16_FR_MVA_TIGHT_CC",weight, true,false);
-
-    GetFakeRateAndPromptRates("ELECTRON16_POG_FAKELOOSE_CC","dijet_pog", "ELECTRON16_FR_POG_TIGHT_DXYCC",weight, true,false);
-    GetFakeRateAndPromptRates("ELECTRON16_POG_MEDIUM_FAKELOOSE_CC","dijet_pog", "ELECTRON16_FR_POG_MEDIUM_DXYCC",weight, true,false);
-    GetFakeRateAndPromptRates("ELECTRON16_MVA_FAKELOOSE_CC","dijet_mva", "ELECTRON16_FR_MVA_TIGHT_DXYCC",weight, true,false);
-    
-
-    GetFakeRateAndPromptRates("ELECTRON16_POG_FAKELOOSE_d0","dijet_pog_d0", "ELECTRON16_FR_POG_TIGHT",weight, true,false);
-    GetFakeRateAndPromptRates("ELECTRON16_POG_MEDIUM_FAKELOOSE_d0","dijet_pog_d0", "ELECTRON16_FR_POG_MEDIUM",weight, true,false);
-    GetFakeRateAndPromptRates("ELECTRON16_POG_FAKELOOSE_CC_d0","dijet_pog_d0", "ELECTRON16_FR_POG_TIGHT_CC",weight, true,false);
-    GetFakeRateAndPromptRates("ELECTRON16_POG_MEDIUM_FAKELOOSE_CC_d0","dijet_pog_d0", "ELECTRON16_FR_POG_MEDIUM_CC",weight, true,false);
-    GetFakeRateAndPromptRates("ELECTRON16_MVA_FAKELOOSE_CC_d0","dijet_mva_d0", "ELECTRON16_FR_MVA_TIGHT_CC",weight, true,false);
-
-    GetFakeRateAndPromptRates("ELECTRON16_POG_FAKELOOSE_CC_d0","dijet_pog_d0", "ELECTRON16_FR_POG_TIGHT_DXYCC",weight, true,false);
-    GetFakeRateAndPromptRates("ELECTRON16_POG_MEDIUM_FAKELOOSE_CC_d0","dijet_pog_d0", "ELECTRON16_FR_POG_MEDIUM_DXYCC",weight, true,false);
-    GetFakeRateAndPromptRates("ELECTRON16_MVA_FAKELOOSE_CC_d0","dijet_mva_d0", "ELECTRON16_FR_MVA_TIGHT_DXYCC",weight, true,false);
-   
-
-    /// use dxy method for systematic
-    GetFakeRateAndPromptRates("ELECTRON_HN_HIGHDXY_FAKELOOSE","dxy2", "ELECTRON_HN_HIGHDXY_TIGHT",weight, true,false);
-    if(!isData)GetFakeRateAndPromptRates("ELECTRON_HN_LOWDXY_FAKELOOSE","dxy", "ELECTRON_HN_LOWDXY_TIGHT",weight, true,false);
-
-    /// GetFakeRateAndPromptRatesPerPeriod fills same fake rate plots as GetFakeRateAndPromptRates but splits MC into 7 data periods
-    GetFakeRateAndPromptRatesPerPeriod("ELECTRON_HN_FAKELOOSE","dijet_d0", "ELECTRON_HN_TIGHT",weight, true,false);
-*/
   }
-  if((isData&&k_channel == "SingleElectron") || !isData){
-    //  MakeSingleElectronCRPlots makes single electron CR plots
-    //GetFakeRateAndPromptRates("ELECTRON_HN_HIGHDXY_FAKELOOSE","dxy", "ELECTRON_HN_HIGHDXY_TIGHT",weight, true,false);
-    //if(!isData)GetFakeRateAndPromptRates("ELECTRON_HN_LOWDXY_FAKELOOSE","dxy", "ELECTRON_HN_LOWDXY_TIGHT",weight, true,false);
-
-    //MakeSingleElectronCRPlots("ELECTRON_HN_FAKELOOSE","dijet_d0",  "ELECTRON_HN_TIGHT",weight,true); 
   }
-}
 void FakeRateCalculator_FinalEl::MakeSingleElectronCRPlots(TString looseid, TString eltag, TString tightid, float w, bool usepujetid){
   std::vector<snu::KElectron> electronLooseColl = GetElectrons(false,false,  looseid);
   std::vector<snu::KElectron> electronTightColl = GetElectrons(false,false,  tightid);
   
-  if (!k_isdata) {
-    w = w * MCweight * eventbase->GetEvent().PileUpWeight();
-    
-  }
 
   float id_weight=1.;
   float reco_weight=1.;
@@ -258,8 +336,9 @@ void FakeRateCalculator_FinalEl::MakeSingleElectronCRPlots(TString looseid, TStr
     w*= reco_weight;
   }
   /// USE HN jets. Add pileup ID? Currently                                                                                                                                     
-  std::vector<snu::KJet> jetCollTight = GetJets("JET_HN");
+
   std::vector<snu::KJet> jetColl           = GetJets("JET_NOLEPTONVETO");
+  std::vector<snu::KJet> jetCollTight = GetJets("JET_HN");
   if(usepujetid){
     jetCollTight = GetJets("JET_HN_PU");
     jetColl           = GetJets("JET_NOLEPTONVETO_PU");
@@ -296,7 +375,7 @@ void FakeRateCalculator_FinalEl::MakeSingleElectronCRPlots(TString looseid, TStr
       
       
       if(eventbase->GetEvent().PFMET() > 30 && (60. < MT)  &&(MT < 100.) &&truth_match)       FillCLHist(sighist_ee, "SingleElectron_prompt_unprescaled", eventbase->GetEvent(), muonColl,electronTightColl,jetCollTight, w*trigger_ps_singlelepweight);
-      if(eventbase->GetEvent().PFMET() > 20 && (70. < MT)  &&(MT < 120.) &&truth_match)       FillCLHist(sighist_ee, "SingleElectron_prompt_unprescaled2", eventbase->GetEvent(), muonColl,electronTightColl,jetCollTight, w*trigger_ps_singlelepweight);
+      if(eventbase->GetEvent().PFMET() > 20 && (70. < MT)  &&(MT < 120.) &&truth_match)       FillCLHist(sighist_ee," SingleElectron_prompt_unprescaled2", eventbase->GetEvent(), muonColl,electronTightColl,jetCollTight, w*trigger_ps_singlelepweight);
       
 
 
@@ -328,16 +407,16 @@ void FakeRateCalculator_FinalEl::GetFakeRateAndPromptRatesPerPeriod(TString loos
   
 }
 
-void FakeRateCalculator_FinalEl::GetFakeRateAndPromptRates(std::vector<snu::KElectron> electronLooseColl, TString eltag, std::vector<snu::KElectron> electronTightColl, float w, bool usepujetid, bool runall){
+void FakeRateCalculator_FinalEl::GetFakeRateAndPromptRates(std::vector<snu::KElectron> electronLooseColl, TString eltag, std::vector<snu::KElectron> electronTightColl, float isocut,float w, bool usepujetid, bool runall){
 
-  // PileUpWeight is period dependant 
-  // MC events are split into 7 data periods and 
-  if (!k_isdata) {
-    w = w * MCweight * eventbase->GetEvent().PeriodPileUpWeight(GetMCPeriodRandom());
-  }
 
+  bool single_lep=false;
+
+  if((isData&&k_channel == "SingleElectron") || !isData) single_lep=true;
+  if(!eltag.Contains("singleel")) single_lep=false;
+  
   /// Four single electron triggers
-
+  
   /// Loose ID has emul. tighter than CaloIdL_TrackIdL_IsoVL for all pt range
   // 10-15 has WPLoose https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#HLT_safe_selection_for_2016_data
   // 15-inf has CaloIdL_TrackIdL_IsoVL_ID  https://twiki.cern.ch/twiki/bin/view/CMS/ChangesEGMHLTAlgo2014
@@ -375,14 +454,22 @@ void FakeRateCalculator_FinalEl::GetFakeRateAndPromptRates(std::vector<snu::KEle
 
   /// remove events with no loose leptons
   if(electronLooseColl.size()<1) return;
-  std::vector<snu::KMuon> muonColl = GetMuons("MUON_HN_LOOSE");  // loose selection
+  std::vector<snu::KMuon> muonColl = GetMuons("MUON_HN_VETO");  // loose selection
   if(muonColl.size() > 0) return;
   
    /// Get prescale for single el event. Returns 1. or 0. for data
+
+  if(electronLooseColl.size()!=1) return;
+
+
   float prescale_trigger =  GetPrescale(electronLooseColl,  PassTrigger(triggerslist_8), PassTrigger(triggerslist_12), PassTrigger(triggerslist_18), PassTrigger( triggerslist_23), PassTrigger(triggerslist_33), TargetLumi); 
+  if(single_lep) prescale_trigger = WeightByTrigger("HLT_Ele27_WPTight_Gsf_v",TargetLumi);
   
-  /// Make standard plots for loose and tight collection dijet                                                                                                                   
-  if(electronLooseColl.size()==1)MakeFakeRatePlots("", eltag, electronTightColl,electronLooseColl,  jetCollTight, jetColl,  prescale_trigger, w, false);
+  bool useevent40 = UseEvent(electronLooseColl , jetColl, 40., prescale_trigger, w);
+  if(!useevent40) return;
+  
+  /// Make standard plots for loose and tight collection dijet                                                                                                                  
+  if(electronLooseColl.size()==1)MakeFakeRatePlots("", eltag, electronTightColl,electronLooseColl,  jetCollTight, jetColl,  prescale_trigger, isocut,w, true);
   
   if(!runall) return;
 
@@ -506,7 +593,8 @@ float FakeRateCalculator_FinalEl::GetPrescale( std::vector<snu::KElectron> elect
       }
       else {
 	if(isData) return 0;
-	prescale_trigger = WeightByTrigger("HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30_v", fake_total_lum)*0.8;
+	return 0;
+	//prescale_trigger = WeightByTrigger("HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30_v", fake_total_lum)*0.8;
       }
     }
     else  if(electrons.at(0).Pt() >= 25.){
@@ -518,7 +606,8 @@ float FakeRateCalculator_FinalEl::GetPrescale( std::vector<snu::KElectron> elect
       }
       else {
 	if(isData) return 0;
-	prescale_trigger =  WeightByTrigger("HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30_v", fake_total_lum) * 0.8; 
+	return 0;
+	//prescale_trigger =  WeightByTrigger("HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30_v", fake_total_lum) * 0.8; 
       }
     }
     else   if(electrons.at(0).Pt() >= 20.){
@@ -529,7 +618,8 @@ float FakeRateCalculator_FinalEl::GetPrescale( std::vector<snu::KElectron> elect
       }
       else {
 	if(isData) return 0;
-	prescale_trigger = WeightByTrigger("HLT_Ele17_CaloIdL_TrackIdL_IsoVL_v", fake_total_lum)*0.8 ;
+	return 0;
+	//prescale_trigger = WeightByTrigger("HLT_Ele17_CaloIdL_TrackIdL_IsoVL_v", fake_total_lum)*0.8 ;
       }
     }
     else   if(electrons.at(0).Pt() >= 15.){
@@ -540,7 +630,8 @@ float FakeRateCalculator_FinalEl::GetPrescale( std::vector<snu::KElectron> elect
       }
       else {
 	if(isData) return 0;
-        prescale_trigger = WeightByTrigger("HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30_v", fake_total_lum)*0.8 ;
+	return 0;
+        //prescale_trigger = WeightByTrigger("HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30_v", fake_total_lum)*0.8 ;
       }
     }
     else   if(electrons.at(0).Pt() >= 8.){
@@ -551,7 +642,8 @@ float FakeRateCalculator_FinalEl::GetPrescale( std::vector<snu::KElectron> elect
       }
       else {
         if(isData) return 0;
-        prescale_trigger = WeightByTrigger("HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30_v", fake_total_lum)*0.8 ;
+	return 0;
+        //prescale_trigger = WeightByTrigger("HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30_v", fake_total_lum)*0.8 ;
       }
     }
     else{
@@ -590,18 +682,12 @@ void FakeRateCalculator_FinalEl::MakeDXYFakeRatePlots(TString label, TString elt
     if(electrons[0].Pt()  < 35) return;
   }
   
-  if(electrons.size()==1 && truth_match)GetFakeRates(electrons, electrons_tight, label, jets, alljets,  label+"_eldxy", (prescale_w * w),true);
-  if(electrons.size()==2 && truth_match)GetFakeRates(electrons, electrons_tight, label, jets, alljets,  label+"_dieldxy", (prescale_dielw * w),true);
-  if(!isData){
-    if(electrons.size()==1 )GetFakeRates(electrons, electrons_tight, label, jets, alljets,  label+"_eldxy_notm", (prescale_w * w),true);
-    if(electrons.size()==2 )GetFakeRates(electrons, electrons_tight, label, jets, alljets,  label+"_dieldxy_notm", (prescale_dielw * w),true);
-  }
   
 }
 
 
 
-void FakeRateCalculator_FinalEl::MakeFakeRatePlots(TString label, TString eltag,   std::vector<snu::KElectron> electrons_tight, std::vector<snu::KElectron> electrons,  std::vector<snu::KJet> jets, std::vector<snu::KJet> alljets, float prescale_w, float w, bool makebasicplots){
+void FakeRateCalculator_FinalEl::MakeFakeRatePlots(TString label, TString eltag,   std::vector<snu::KElectron> electrons_tight, std::vector<snu::KElectron> electrons,  std::vector<snu::KJet> jets, std::vector<snu::KJet> alljets, float prescale_w, float isocut,float w, bool makebasicplots){
   
 
   if(electrons.size() ==2){
@@ -638,17 +724,17 @@ void FakeRateCalculator_FinalEl::MakeFakeRatePlots(TString label, TString eltag,
   else truth_match=true;
   
   label= eltag;
-
   if(truth_match){
     if(jets.size() >= 1){
       if(makebasicplots){
-	if(useevent40)GetFakeRates(electrons, electrons_tight,label, jets, alljets,  label+"_40", (prescale_w * w),makebasicplots);
+
+	if(useevent40)GetFakeRates(electrons, electrons_tight,label, jets, alljets,  label+"_40", isocut,(prescale_w * w),makebasicplots);
       }
       else{
-	if(useevent20)GetFakeRates(electrons, electrons_tight,label, jets, alljets,  label+"_20", (prescale_w * w),makebasicplots);
-	if(useevent30)GetFakeRates(electrons, electrons_tight,label, jets, alljets,  label+"_30", (prescale_w * w),makebasicplots);
-	if(useevent40)GetFakeRates(electrons, electrons_tight,label, jets, alljets,  label+"_40", (prescale_w * w),makebasicplots);
-	if(useevent60)GetFakeRates(electrons, electrons_tight, label,jets, alljets,  label+"_60", (prescale_w * w),makebasicplots);
+	if(useevent20)GetFakeRates(electrons, electrons_tight,label, jets, alljets,  label+"_20", isocut,(prescale_w * w),makebasicplots);
+	if(useevent30)GetFakeRates(electrons, electrons_tight,label, jets, alljets,  label+"_30", isocut,(prescale_w * w),makebasicplots);
+	if(useevent40)GetFakeRates(electrons, electrons_tight,label, jets, alljets,  label+"_40", isocut,(prescale_w * w),makebasicplots);
+	if(useevent60)GetFakeRates(electrons, electrons_tight, label,jets, alljets,  label+"_60", isocut,(prescale_w * w),makebasicplots);
       }
     }
   }
@@ -682,9 +768,8 @@ bool FakeRateCalculator_FinalEl::UseEvent(std::vector<snu::KElectron> electrons,
   return useevent;
 }
 
-void FakeRateCalculator_FinalEl::GetFakeRates(std::vector<snu::KElectron> loose_el, std::vector<snu::KElectron> tight_el, TString tightlabel,  std::vector<snu::KJet> jets,  std::vector<snu::KJet> alljets, TString tag, double w, bool basicplots){
+void FakeRateCalculator_FinalEl::GetFakeRates(std::vector<snu::KElectron> loose_el, std::vector<snu::KElectron> tight_el, TString tightlabel,  std::vector<snu::KJet> jets,  std::vector<snu::KJet> alljets, TString tag,float isocut, double w, bool basicplots){
   
-   
   Float_t ptbins[10] = { 10., 15.,20.,25.,30.,35.,45.,60.,100., 200.};
   Float_t ptbinsb[8] = { 10., 15.,20.,30.,45.,60.,100., 200.};
   Float_t etabin[2] = { 0.,  2.5};
@@ -693,18 +778,20 @@ void FakeRateCalculator_FinalEl::GetFakeRates(std::vector<snu::KElectron> loose_
 
   /// for most cuts just plot pt_eta
   if(basicplots){
-    
+ 
+
+
     if(loose_el.size() == 1 && jets.size() >= 1){
       float el_pt = loose_el.at(0).Pt();
-      float el_pt_corr = loose_el.at(0).Pt()*(1+max(0.,(loose_el.at(0).PFRelIso(0.3)-0.5))) ; /// will need changing for systematics
+      float el_pt_corr = loose_el.at(0).Pt()*(1+max(0.,(loose_el.at(0).PFRelIso(0.3)-isocut))) ; /// will need changing for systematics
       
-      FillHist(("LooseEl" + tag + "_pt_eta").Data(), el_pt, fabs(loose_el.at(0).Eta()),  w, ptbins, 9 , etabins2, 4);
-      FillHist(("LooseEl" + tag + "_ptcorr_eta").Data(), el_pt_corr, fabs(loose_el.at(0).Eta()),  w, ptbins, 9 , etabins2, 4);
+      if(el_pt > 10.)FillHist(("LooseEl" + tag + "_pt_eta").Data(), el_pt, fabs(loose_el.at(0).Eta()),  w, ptbins, 9 , etabins2, 4);
+      if(el_pt_corr > 10.)FillHist(("LooseEl" + tag + "_ptcorr_eta").Data(), el_pt_corr, fabs(loose_el.at(0).Eta()),  w, ptbins, 9 , etabins2, 4);
       
 
       if( tight_el.size() == 1){
-	FillHist(("TightEl" + tag + "_pt_eta").Data(), el_pt, fabs(tight_el.at(0).Eta()),  w, ptbins, 9 , etabins2, 4);
-	FillHist(("TightEl" + tag + "_ptcorr_eta").Data(), el_pt_corr, fabs(tight_el.at(0).Eta()),  w, ptbins, 9 , etabins2, 4);
+	if(el_pt > 10.)FillHist(("TightEl" + tag + "_pt_eta").Data(), el_pt, fabs(tight_el.at(0).Eta()),  w, ptbins, 9 , etabins2, 4);
+	if(el_pt_corr > 10.)FillHist(("TightEl" + tag + "_ptcorr_eta").Data(), el_pt_corr, fabs(tight_el.at(0).Eta()),  w, ptbins, 9 , etabins2, 4);
 	
       }
     }

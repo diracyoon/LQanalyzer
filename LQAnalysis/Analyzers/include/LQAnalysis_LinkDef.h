@@ -17,6 +17,7 @@
 #pragma link C++ class FakeRateCalculator_El+;
 #pragma link C++ class FakeRateCalculator_Mu+;
 #pragma link C++ class FakeRateCalculator_FinalMu+;
+#pragma link C++ class FakeRateMC+;
 #pragma link C++ class HNEMu+;
 #pragma link C++ class GetFakeSF+;
 #pragma link C++ class PileupValidation+;

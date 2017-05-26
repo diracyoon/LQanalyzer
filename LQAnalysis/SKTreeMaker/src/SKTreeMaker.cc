@@ -53,7 +53,7 @@ void SKTreeMaker::ExecuteEvents()throw( LQError ){
   Message("Skimming Muons", DEBUG);
   /// Selection for event skim
   /// Apart from eta/pt muons are required to have a global OR tracker track && be PF
-  eventbase->GetMuonSel()->SetPt(8.);
+  eventbase->GetMuonSel()->SetPt(5.);
   eventbase->GetMuonSel()->SetEta(2.5);
   eventbase->GetMuonSel()->SkimSelection(skim_muons, false);
   SetCorrectedMomentum(skim_muons);
@@ -149,6 +149,7 @@ void SKTreeMaker::BeginCycle() throw( LQError ){
     AddTriggerToList("HLT_Mu1");
     AddTriggerToList("HLT_Mu2");
     AddTriggerToList("HLT_Mu3");
+    AddTriggerToList("HLT_Mu5");
     AddTriggerToList("HLT_DoubleEle2");
     AddTriggerToList("HLT_DoubleEle8");
     AddTriggerToList("HLT_DoubleEle3");
@@ -175,6 +176,7 @@ void SKTreeMaker::BeginCycle() throw( LQError ){
     AddTriggerToList("HLT_Mu1");
     AddTriggerToList("HLT_Mu2");
     AddTriggerToList("HLT_Mu3");
+    AddTriggerToList("HLT_Mu5");
     AddTriggerToList("HLT_DoubleEle2");
     AddTriggerToList("HLT_DoubleEle8");
     AddTriggerToList("HLT_DoubleEle3");

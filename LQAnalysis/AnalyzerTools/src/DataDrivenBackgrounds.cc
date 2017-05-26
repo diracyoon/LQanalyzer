@@ -1,413 +1,429 @@
-#include "DataDrivenBackgrounds.h"
+ #include "DataDrivenBackgrounds.h"
 
-// std includes
-#include <iostream>
-#include <vector>
-#include <string>
+ // std includes
+ #include <iostream>
+ #include <vector>
+ #include <string>
 
-// ROOT includes
-#include <TFile.h>
+ // ROOT includes
+ #include <TFile.h>
 
-/// local includes
-#include "Reweight.h"
-#include "EventBase.h"
+ /// local includes
+ #include "Reweight.h"
+ #include "EventBase.h"
 
 
-using namespace snu;
-using namespace std;
+ using namespace snu;
+ using namespace std;
 
 
-DataDrivenBackgrounds::DataDrivenBackgrounds(){
-  
-  k_mcperiod=-1;
-  corr_isdata=false;
-  string lqdir = getenv("LQANALYZER_DIR");
-  m_fakeobj = new HNCommonLeptonFakes(lqdir+"/LQAnalysis/src/HNCommonLeptonFakes/share/");
-  dd_eventbase= 0;
+ DataDrivenBackgrounds::DataDrivenBackgrounds(){
 
+   k_mcperiod=-1;
+   corr_isdata=false;
+   string lqdir = getenv("LQANALYZER_DIR");
+   m_fakeobj = new HNCommonLeptonFakes(lqdir+"/LQAnalysis/src/HNCommonLeptonFakes/share/");
+   dd_eventbase= 0;
 
-}
 
+ }
 
-DataDrivenBackgrounds::~DataDrivenBackgrounds(){
-  delete m_fakeobj;
 
-}
+ DataDrivenBackgrounds::~DataDrivenBackgrounds(){
+   delete m_fakeobj;
 
-void DataDrivenBackgrounds::SetEventBase(EventBase* ebase){
-  dd_eventbase = ebase;
-}
+ }
 
-void DataDrivenBackgrounds::CheckEventBase(){
-  std::vector<snu::KMuon> muonColl;
-  dd_eventbase->GetMuonSel()->SelectMuons(muonColl,"MUON_POG_TIGHT");
-  cout << "muon size = " << muonColl.size() << endl;
-  if(muonColl.size()  > 0) cout << "new muon size = " << muonColl.size() <<  " " << muonColl.at(0).Pt() << endl;
+ void DataDrivenBackgrounds::SetEventBase(EventBase* ebase){
+   dd_eventbase = ebase;
+ }
 
-}
+ void DataDrivenBackgrounds::CheckEventBase(){
+   std::vector<snu::KMuon> muonColl;
+   dd_eventbase->GetMuonSel()->SelectMuons(muonColl,"MUON_POG_TIGHT");
+   cout << "muon size = " << muonColl.size() << endl;
+   if(muonColl.size()  > 0) cout << "new muon size = " << muonColl.size() <<  " " << muonColl.at(0).Pt() << endl;
 
+ }
 
 
-void DataDrivenBackgrounds::SetMCPeriod(int mcperiod){
-  k_mcperiod=mcperiod;
-}
 
-void DataDrivenBackgrounds::SetIsData(bool isdata){
-  corr_isdata=isdata;
-}
+ void DataDrivenBackgrounds::SetMCPeriod(int mcperiod){
+   k_mcperiod=mcperiod;
+ }
 
-void DataDrivenBackgrounds::PrintSummary(){
-  //// summarize results
+ void DataDrivenBackgrounds::SetIsData(bool isdata){
+   corr_isdata=isdata;
+ }
 
-  cout << "Functions for ChargeFlip include" << endl;
-  cout << "   DataDrivenBackgrounds::SetMCPeriod(int mcperiod) " << endl;
-  cout << "   DataDrivenBackgrounds::SetIsData(bool isdata)  " << endl;
-  cout << "   DataDrivenBackgrounds::PrintSummary() " << endl;
-  cout << "   DataDrivenBackgrounds::WeightCFEvent(std::vector<snu::KElectron> electrons, bool runchargeflip) " << endl;
-  cout << "   DataDrivenBackgrounds::ShiftElectronEnergy(std::vector<snu::KElectron> electrons, bool applyshift) " << endl;
-  cout << "   DataDrivenBackgrounds::CFRate(snu::KElectron el) " << endl;
-  cout << "   DataDrivenBackgrounds::CFRate_Run2(snu::KElectron el, TString el_id) " << endl;
-  cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_EM(vector<snu::KMuon> k_muons, vector<snu::KElectron> k_electrons, vector<bool> istight_e, vector<bool> istight_m, TString cut) " << endl;
-  cout << "Functions for NonPrompt include" << endl;
-  
-  cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_MM(vector<snu::KMuon> k_muons,vector<bool> istight_m, TString cutID) " << endl;
-  cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_MM(bool geterr, vector<snu::KMuon> k_muons) " << endl;
-  cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_MMM(bool geterr, vector<snu::KMuon> k_muons) " << endl;
-  cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_M(vector<snu::KMuon> k_muons, vector<bool> istight_m, TString cutID) " << endl;
-  cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_E(vector<snu::KElectron> k_electrons,  vector<bool> istight_e) " << endl;
-  cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_EE(vector<snu::KElectron> k_electrons ,  vector<bool> istight_e) " << endl;
+ void DataDrivenBackgrounds::PrintSummary(){
+   //// summarize results
 
-  
-}
+   cout << "Functions for ChargeFlip include" << endl;
+   cout << "   DataDrivenBackgrounds::SetMCPeriod(int mcperiod) " << endl;
+   cout << "   DataDrivenBackgrounds::SetIsData(bool isdata)  " << endl;
+   cout << "   DataDrivenBackgrounds::PrintSummary() " << endl;
+   cout << "   DataDrivenBackgrounds::WeightCFEvent(std::vector<snu::KElectron> electrons, bool runchargeflip) " << endl;
+   cout << "   DataDrivenBackgrounds::ShiftElectronEnergy(std::vector<snu::KElectron> electrons, bool applyshift) " << endl;
+   cout << "   DataDrivenBackgrounds::CFRate(snu::KElectron el) " << endl;
+   cout << "   DataDrivenBackgrounds::CFRate_Run2(snu::KElectron el, TString el_id) " << endl;
+   cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_EM(vector<snu::KMuon> k_muons, vector<snu::KElectron> k_electrons, vector<bool> istight_e, vector<bool> istight_m, TString cut) " << endl;
+   cout << "Functions for NonPrompt include" << endl;
 
+   cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_MM(vector<snu::KMuon> k_muons,vector<bool> istight_m, TString cutID) " << endl;
+   cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_MM(bool geterr, vector<snu::KMuon> k_muons) " << endl;
+   cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_MMM(bool geterr, vector<snu::KMuon> k_muons) " << endl;
+   cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_M(vector<snu::KMuon> k_muons, vector<bool> istight_m, TString cutID) " << endl;
+   cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_E(vector<snu::KElectron> k_electrons,  vector<bool> istight_e) " << endl;
+   cout << "   DataDrivenBackgrounds::Get_DataDrivenWeight_EE(vector<snu::KElectron> k_electrons ,  vector<bool> istight_e) " << endl;
 
-//############################################################################################################
-/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@  
-@  CHARGE FLIP FUNCTIONS
-@
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
 
-float DataDrivenBackgrounds::WeightCFEvent(std::vector<snu::KElectron> electrons, bool runchargeflip){
+ }
 
-  if(electrons.size()!=2) return 0.;
-  if(runchargeflip) {
-    if(electrons.at(0).Charge() != electrons.at(1).Charge()) {
-      float cf1=  CFRate(electrons.at(0));
-      float cf2=  CFRate(electrons.at(1));
-      return ((cf1/(1.-cf1)) + (cf2/(1.-cf2)));
-    }// OS requirement                                                                                                                                                                                                    
-    else return 0.;
-  }// cf requirement                                                                                                                                                                                                      
-  else {
-    if(electrons.at(0).Charge() != electrons.at(1).Charge()) return 0.;
-  }
 
-  return 1.;
+ //############################################################################################################
+ /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ @  
+ @  CHARGE FLIP FUNCTIONS
+ @
+ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
 
-}
+ float DataDrivenBackgrounds::WeightCFEvent(std::vector<snu::KElectron> electrons, bool runchargeflip){
 
+   if(electrons.size()!=2) return 0.;
+   if(runchargeflip) {
+     if(electrons.at(0).Charge() != electrons.at(1).Charge()) {
+       float cf1=  CFRate(electrons.at(0));
+       float cf2=  CFRate(electrons.at(1));
+       return ((cf1/(1.-cf1)) + (cf2/(1.-cf2)));
+     }// OS requirement                                                                                                                                                                                                    
+     else return 0.;
+   }// cf requirement                                                                                                                                                                                                      
+   else {
+     if(electrons.at(0).Charge() != electrons.at(1).Charge()) return 0.;
+   }
 
-std::vector<snu::KElectron> DataDrivenBackgrounds::ShiftElectronEnergy(std::vector<snu::KElectron> electrons, bool applyshift){
+   return 1.;
 
-  std::vector<snu::KElectron> shiftedel;
+ }
 
-  for(unsigned int iel=0; iel < electrons.size(); iel++){
-    float scale =0.98;
 
-    if(applyshift)electrons.at(iel).SetPtEtaPhiM(electrons.at(iel).Pt()*scale, electrons.at(iel).Eta(), electrons.at(iel).Phi(), 0.511e-3);
-    shiftedel.push_back(electrons.at(iel));
-  }
-  return shiftedel;
-}
+ std::vector<snu::KElectron> DataDrivenBackgrounds::ShiftElectronEnergy(std::vector<snu::KElectron> electrons, bool applyshift){
 
+   std::vector<snu::KElectron> shiftedel;
 
+   for(unsigned int iel=0; iel < electrons.size(); iel++){
+     float scale =0.98;
 
-float DataDrivenBackgrounds::CFRate(snu::KElectron el){
-  if(el.Pt() < 10.) return 0.;
-  Double_t frac = 0. ;
-  float pt = el.Pt();
-  Double_t p0 = 0. ;
-  Double_t p1 = 0. ;
+     if(applyshift)electrons.at(iel).SetPtEtaPhiM(electrons.at(iel).Pt()*scale, electrons.at(iel).Eta(), electrons.at(iel).Phi(), 0.511e-3);
+     shiftedel.push_back(electrons.at(iel));
+   }
+   return shiftedel;
+ }
 
 
-  Double_t scale_factor_EE = 1. ;
-  Double_t scale_factor_BB = 1. ;
 
-  float eta = el.Eta();
+ float DataDrivenBackgrounds::CFRate(snu::KElectron el){
+   if(el.Pt() < 10.) return 0.;
+   Double_t frac = 0. ;
+   float pt = el.Pt();
+   Double_t p0 = 0. ;
+   Double_t p1 = 0. ;
 
-  //--root fitting                                                                                                                                                                                                        
-  if( fabs(eta) <= 0.9 ) { // inner BB region                                                                                                                                                                             
 
-    scale_factor_BB = 1.22 ; // BB                                                                                                                                                                                        
+   Double_t scale_factor_EE = 1. ;
+   Double_t scale_factor_BB = 1. ;
 
-    p0 = 3.31e-05 ; p1 = -6.5e-04 ; // root fit                                                                                                                                                                           
-    // p0 = 2.8e-05 ; p1 = 0. ;// UK eye fit                                                                                                                                                                              
+   float eta = el.Eta();
 
-    frac = p0 + p1*(1./pt) ;
-    if( 1./pt < 0.017 ){
-      p0 = 1.92e-04 ; p1 = -0.011 ;
-      frac = max(p0 + p1*(1./pt), frac);
-    }
-    frac = max(frac,0.);
-    frac *=scale_factor_BB ;
+   //--root fitting                                                                                                                                                                                                        
+   if( fabs(eta) <= 0.9 ) { // inner BB region                                                                                                                                                                             
 
-  }else if( fabs(eta) > 0.9 && fabs(eta) <= 1.4442 ){ // outer BB region                                                                                                                                                  
-    scale_factor_BB = 1.22 ; // BB                                                                                                                                                                                        
-    p0 = 2.21e-04 ; p1 = -5.1e-03 ; // root fit                                                                                                                                                                           
-    //    p0 = 1.2e-04 ; p1 = 0. ; // UK eye fit                                                                                                                                                                          
-    frac = p0 + p1*(1./pt) ;
-    if( 1./pt < 0.02 ){
-      p0 = 6.35e-04 ; p1 = -0.027 ;
-      frac = max(p0 + p1*(1./pt), frac);
-    }
-    frac = max(frac,0.);
-    frac *=scale_factor_BB ;
+     scale_factor_BB = 1.22 ; // BB                                                                                                                                                                                        
 
-  } else {  // fabs(eta) > 1.4                                                                                                                                                                                            
+     p0 = 3.31e-05 ; p1 = -6.5e-04 ; // root fit                                                                                                                                                                           
+     // p0 = 2.8e-05 ; p1 = 0. ;// UK eye fit                                                                                                                                                                              
 
+     frac = p0 + p1*(1./pt) ;
+     if( 1./pt < 0.017 ){
+       p0 = 1.92e-04 ; p1 = -0.011 ;
+       frac = max(p0 + p1*(1./pt), frac);
+     }
+     frac = max(frac,0.);
+     frac *=scale_factor_BB ;
 
-    scale_factor_EE = 1.40 ; //                                                                                                                                                                                           
+   }else if( fabs(eta) > 0.9 && fabs(eta) <= 1.4442 ){ // outer BB region                                                                                                                                                  
+     scale_factor_BB = 1.22 ; // BB                                                                                                                                                                                        
+     p0 = 2.21e-04 ; p1 = -5.1e-03 ; // root fit                                                                                                                                                                           
+     //    p0 = 1.2e-04 ; p1 = 0. ; // UK eye fit                                                                                                                                                                          
+     frac = p0 + p1*(1./pt) ;
+     if( 1./pt < 0.02 ){
+       p0 = 6.35e-04 ; p1 = -0.027 ;
+       frac = max(p0 + p1*(1./pt), frac);
+     }
+     frac = max(frac,0.);
+     frac *=scale_factor_BB ;
 
-    //--region:  1/pt > 0.02                                                                                                                                                                                              
-    p0 = 4.91e-04 ; p1 = -0.952e-02 ;
-    frac = p0 + p1*(1./pt) ;
+   } else {  // fabs(eta) > 1.4                                                                                                                                                                                            
 
-    if( (1./pt) <= 0.02 ){
-      p0 = 2.70e-03 ;  p1 = -1.21e-01 ;
-      frac = max(p0 + p1*(1./pt), frac) ;
-    }
-    frac *= scale_factor_EE ;
-  }
 
-  return float(frac) ;
+     scale_factor_EE = 1.40 ; //                                                                                                                                                                                           
 
-  return 1. ;
-}
+     //--region:  1/pt > 0.02                                                                                                                                                                                              
+     p0 = 4.91e-04 ; p1 = -0.952e-02 ;
+     frac = p0 + p1*(1./pt) ;
 
-//CFrate for ELECTRON_HN_TIGHT 13 TeV                                                                                                                                                                                     
-float DataDrivenBackgrounds::CFRate_Run2(snu::KElectron el, TString el_id){
-  if(el.Pt() < 20.) return 0.;
+     if( (1./pt) <= 0.02 ){
+       p0 = 2.70e-03 ;  p1 = -1.21e-01 ;
+       frac = max(p0 + p1*(1./pt), frac) ;
+     }
+     frac *= scale_factor_EE ;
+   }
 
-  bool debug(false);
+   return float(frac) ;
 
-
-  Double_t p_B1_1[2]  = {0.0001261, -0.005951};
-  Double_t p_B2_1[2] =  {0.00063, -0.01965};
-  Double_t p_E_1[2] = {0.006827, -0.2198};
-
-  Double_t p_B1_2[2] = {1.584e-05, 5.337e-05};
-  Double_t p_B2_2[2] = {3.946e-05, 0.0008439};
-  Double_t p_E_2[2] =  {0.003153, -0.003891};
-
-  Double_t scale_factor_EE = 1. ;
-  Double_t scale_factor_BB = 1. ;
+   return 1. ;
+ }
 
+ //CFrate for ELECTRON_HN_TIGHT 13 TeV                                                                                                                                                                                     
+ float DataDrivenBackgrounds::CFRate_Run2(snu::KElectron el, TString el_id){
+   if(el.Pt() < 20.) return 0.;
 
-  Double_t frac = 0. ;
-  float pt_inv = 1. / el.Pt();
-  float eta = el.Eta();
+   bool debug(false);
 
-  //--root fitting                                                                                                                                                                                                        
-  if( fabs(eta) <= 0.9 ) { // inner BB region                                                                                                                                                                             
-    //scale_factor_BB = 1.22 ; // BB                                                                                                                                                                                      
-    frac = p_B1_2[0] + p_B1_2[1] * pt_inv;
-    if( pt_inv < 0.02 ){
-      frac = max(p_B1_1[0] + p_B1_1[1] * pt_inv, frac);
-    }
-    frac = max(frac,0.);
-    frac *=scale_factor_BB ;
 
-  }else if( fabs(eta) > 0.9 && fabs(eta) <= 1.4442 ){ // outer BB region                                                                                                                                                  
-    //scale_factor_BB = 1.22 ; // BB                                                                                                                                                                                      
-    frac = p_B2_2[0] + p_B2_2[1] * pt_inv;
-    if( pt_inv < 0.025 ){
-      frac = max(p_B2_1[0] + p_B2_1[1] * pt_inv, frac);
-    }
-    frac = max(frac,0.);
-    frac *=scale_factor_BB ;
+   Double_t p_B1_1[2]  = {0.0001261, -0.005951};
+   Double_t p_B2_1[2] =  {0.00063, -0.01965};
+   Double_t p_E_1[2] = {0.006827, -0.2198};
 
-  } else {  // fabs(eta) > 1.4                                                                                                                                                                                            
-    //scale_factor_EE = 1.40;                                                                                                                                                                                             
-    frac = p_E_2[0] + p_E_2[1] * pt_inv;
-    if( pt_inv <= 0.02 ){
-      frac = max(p_E_1[0] + p_E_1[1] * pt_inv, frac);
-    }
-    frac *= scale_factor_EE ;
-  }
+   Double_t p_B1_2[2] = {1.584e-05, 5.337e-05};
+   Double_t p_B2_2[2] = {3.946e-05, 0.0008439};
+   Double_t p_E_2[2] =  {0.003153, -0.003891};
 
-  if(debug){cout << "ID = " << el_id << " CF rate = " << endl;}
-  return float(frac) ;
-  return 1. ;
-  
-  }
+   Double_t scale_factor_EE = 1. ;
+   Double_t scale_factor_BB = 1. ;
 
 
+   Double_t frac = 0. ;
+   float pt_inv = 1. / el.Pt();
+   float eta = el.Eta();
 
-/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@
-@  Non prompt function                                                                                                                                                              
-@
-@  Get_DataDrivenWeight X will return the weight for channel X using final rates
-@
-@  Get_TempDataDrivenWeightX will return the weight for functions testing/optimising for dilepton
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
+   //--root fitting                                                                                                                                                                                                        
+   if( fabs(eta) <= 0.9 ) { // inner BB region                                                                                                                                                                             
+     //scale_factor_BB = 1.22 ; // BB                                                                                                                                                                                      
+     frac = p_B1_2[0] + p_B1_2[1] * pt_inv;
+     if( pt_inv < 0.02 ){
+       frac = max(p_B1_1[0] + p_B1_1[1] * pt_inv, frac);
+     }
+     frac = max(frac,0.);
+     frac *=scale_factor_BB ;
 
-  
+   }else if( fabs(eta) > 0.9 && fabs(eta) <= 1.4442 ){ // outer BB region                                                                                                                                                  
+     //scale_factor_BB = 1.22 ; // BB                                                                                                                                                                                      
+     frac = p_B2_2[0] + p_B2_2[1] * pt_inv;
+     if( pt_inv < 0.025 ){
+       frac = max(p_B2_1[0] + p_B2_1[1] * pt_inv, frac);
+     }
+     frac = max(frac,0.);
+     frac *=scale_factor_BB ;
 
-float DataDrivenBackgrounds::Get_DataDrivenWeight_EM(bool geterr, vector<snu::KMuon> k_muons, vector<snu::KElectron> k_electrons, TString IDmu, TString IDel, TString method){
-  
-  // geterr = true : function returns error not event weight  
-  // k_electrons are loose electrons defined in analysis code 
-  // k_muons are loose muons defined in analysis code 
-  // ID defines which id is used for tight leptons              (currently only "POGTight" for electrons) 
-  // method defines the techinique used to measure fake rates   (currently only "dijet" for electrons) 
-  // @@@@@ CURRENTLY ONLY  POG ID IS USED HERE                                                                                                                                       
+   } else {  // fabs(eta) > 1.4                                                                                                                                                                                            
+     //scale_factor_EE = 1.40;                                                                                                                                                                                             
+     frac = p_E_2[0] + p_E_2[1] * pt_inv;
+     if( pt_inv <= 0.02 ){
+       frac = max(p_E_1[0] + p_E_1[1] * pt_inv, frac);
+     }
+     frac *= scale_factor_EE ;
+   }
 
-  
-  if (method != "dijet") return 0;
+   if(debug){cout << "ID = " << el_id << " CF rate = " << endl;}
+   return float(frac) ;
+   return 1. ;
 
-  if(k_muons.size()!=1) return 0.;
-  if(k_electrons.size()!=1) return 0.;
+   }
 
-  //// MAKE THIS TAKE IN TSTRING 
-  
-  /// fix later
-  bool is_mu1_tight    =  dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(0),IDmu);
-  bool is_el1_tight    =  dd_eventbase->GetElectronSel()->ElectronPass(k_electrons.at(0),IDel);
-
-  vector<TLorentzVector> muons= MakeTLorentz(k_muons);
-  vector<TLorentzVector> electrons=MakeTLorentz(k_electrons);
-  
-  //// cut filled when em fake rates are 
 
-  /// last input is for systematics 
-  float em_weight = m_fakeobj->get_dilepton_em_eventweight(geterr,muons, electrons, is_mu1_tight, is_el1_tight);
-  
-  return em_weight;
-}
 
-float DataDrivenBackgrounds::Get_DataDrivenWeight_MM(bool geterr, vector<snu::KMuon> k_muons,   TString IDmu, TString method){
-  if(method == "dxy" && IDmu == "MUON_HN_TRI_TIGHT") return Get_DataDrivenWeight_MM(geterr, k_muons);
-  
-  float mm_weight = 0.;
+ /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ @
+ @  Non prompt function                                                                                                                                                              
+ @
+ @  Get_DataDrivenWeight X will return the weight for channel X using final rates
+ @
+ @  Get_TempDataDrivenWeightX will return the weight for functions testing/optimising for dilepton
+ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
 
-  if(k_muons.size()!=2) return 0.;
-  bool is_mu1_tight=dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(0),IDmu);
-  bool is_mu2_tight=dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(1),IDmu);
-  vector<TLorentzVector> muons=MakeTLorentz(k_muons);
-  mm_weight =m_fakeobj->get_dilepton_mm_eventweight("dijet",geterr, muons, is_mu1_tight,is_mu2_tight,IDmu);
 
-  return 1.;
-}
 
-float DataDrivenBackgrounds::Get_DataDrivenWeight_MM(bool geterr, vector<snu::KMuon> k_muons){
+ float DataDrivenBackgrounds::Get_DataDrivenWeight_EM(bool geterr, vector<snu::KMuon> k_muons, vector<snu::KElectron> k_electrons, TString IDmu, TString IDel, TString method){
 
-  float mm_weight = 0.;
+   // geterr = true : function returns error not event weight  
+   // k_electrons are loose electrons defined in analysis code 
+   // k_muons are loose muons defined in analysis code 
+   // ID defines which id is used for tight leptons              (currently only "POGTight" for electrons) 
+   // method defines the techinique used to measure fake rates   (currently only "dijet" for electrons) 
+   // @@@@@ CURRENTLY ONLY  POG ID IS USED HERE                                                                                                                                       
 
-  if(k_muons.size()==2){
-    bool is_mu1_tight = dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(0),"MUON_HN_TRI_TIGHT");
-    bool is_mu2_tight = dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(1),"MUON_HN_TRI_TIGHT");
-    
-    vector<TLorentzVector> muons=MakeTLorentz(k_muons);
-    
-    mm_weight =m_fakeobj->get_dilepton_mm_eventweight(geterr, muons, is_mu1_tight,is_mu2_tight);
 
-  }
-  return mm_weight;
+   if (method != "dijet") return 0;
 
-}
+   if(k_muons.size()!=1) return 0.;
+   if(k_electrons.size()!=1) return 0.;
 
-float DataDrivenBackgrounds::Get_DataDrivenWeight_MMM(bool geterr, vector<snu::KMuon> k_muons){
+   //// MAKE THIS TAKE IN TSTRING 
 
-  float mmm_weight = 0.;
+   /// fix later
+   bool is_mu1_tight    =  dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(0),IDmu);
+   bool is_el1_tight    =  dd_eventbase->GetElectronSel()->ElectronPass(k_electrons.at(0),IDel);
 
-  if(k_muons.size()==3){
+   vector<TLorentzVector> muons= MakeTLorentz(k_muons);
+   vector<TLorentzVector> electrons=MakeTLorentz(k_electrons);
 
-    bool is_mu1_tight = dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(0),"MUON_HN_TRI_TIGHT");
-    bool is_mu2_tight = dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(1),"MUON_HN_TRI_TIGHT");
-    bool is_mu3_tight = dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(2),"MUON_HN_TRI_TIGHT");
+   //// cut filled when em fake rates are 
 
-    vector<TLorentzVector> muons=MakeTLorentz(k_muons);
+   /// last input is for systematics 
+   float em_weight = m_fakeobj->get_dilepton_em_eventweight(geterr,muons, electrons, is_mu1_tight, is_el1_tight);
 
-    mmm_weight =m_fakeobj->get_trilepton_mmm_eventweight(geterr, muons, is_mu1_tight,is_mu2_tight, is_mu3_tight);
+   return em_weight;
+ }
 
-  }
-  return mmm_weight;
-}
+ float DataDrivenBackgrounds::Get_DataDrivenWeight_MM(bool geterr, vector<snu::KMuon> k_muons,   TString IDmu, TString method){
+   if(method == "dxy" && IDmu == "MUON_HN_TRI_TIGHT") return Get_DataDrivenWeight_MM(geterr, k_muons);
 
-float DataDrivenBackgrounds::Get_DataDrivenWeight(bool geterr, std::vector<snu::KMuon> k_muons, TString muid, int n_muons, std::vector<snu::KElectron> k_electrons, TString elid, int n_electrons, TString elidloose, TString elmethod){
+   float mm_weight = 0.;
 
-  float this_weight = 0.;
+   if(k_muons.size()!=2) return 0.;
+   bool is_mu1_tight=dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(0),IDmu);
+   bool is_mu2_tight=dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(1),IDmu);
+   vector<TLorentzVector> muons=MakeTLorentz(k_muons);
+   mm_weight =m_fakeobj->get_dilepton_mm_eventweight("dijet",geterr, muons, is_mu1_tight,is_mu2_tight,IDmu);
 
-  if( int(k_muons.size()) != n_muons || int(k_electrons.size()) != n_electrons ){
-    //Message("[Get_DataDrivenWeight] number of lepton is wrong..", ERROR);
-    return 0.;
-  }
+   return 1.;
+ }
 
-  std::vector<bool> isT;
-  bool AllTight = true;
+ float DataDrivenBackgrounds::Get_DataDrivenWeight_MM(bool geterr, vector<snu::KMuon> k_muons){
 
-  for(unsigned int i=0; i<k_muons.size(); i++){
-    if( dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(i), muid) ){
-      isT.push_back(true);
-    }
-    else{
-      isT.push_back(false);
-      AllTight = false;
-    }
-  }
-  for(unsigned int i=0; i<k_electrons.size(); i++){
-    if(dd_eventbase->GetElectronSel()->ElectronPass(k_electrons.at(i), elid)){
-      isT.push_back(true);
-    }
-    else{
-      isT.push_back(false);
-      AllTight = false;
-    }
-  }
+   float mm_weight = 0.;
 
-  if(AllTight){
-    //Message("[Get_DataDrivenWeight] All leptons pass Tight. Return 0. weight..", DEBUG);
-    return 0.;
-  }
+   if(k_muons.size()==2){
+     bool is_mu1_tight = dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(0),"MUON_HN_TRI_TIGHT");
+     bool is_mu2_tight = dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(1),"MUON_HN_TRI_TIGHT");
 
-  std::vector<TLorentzVector> muons=MakeTLorentz(k_muons);
-  std::vector<TLorentzVector> electrons=MakeTLorentz(k_electrons);
-  TString elkey = GetElFRKey(elidloose, elid, elmethod);
-  this_weight =m_fakeobj->get_eventweight(geterr, muons, muid, electrons, elkey , isT);
+     vector<TLorentzVector> muons=MakeTLorentz(k_muons);
 
-  return this_weight;
-}
+     mm_weight =m_fakeobj->get_dilepton_mm_eventweight(geterr, muons, is_mu1_tight,is_mu2_tight);
 
-float DataDrivenBackgrounds::Get_DataDrivenWeight_M(bool geterr, vector<snu::KMuon> k_muons, TString IDmu, TString method){
+   }
+   return mm_weight;
 
-  /// two IDs possible  : 
+ }
 
-  // HN          : id = "MUON_HN_TIGHT"
-  // POG Tight   : id = "MUON_POG_TIGHT
+ float DataDrivenBackgrounds::Get_DataDrivenWeight_MMM(bool geterr, vector<snu::KMuon> k_muons){
 
-  if(k_muons.size()!=1) return 0.;
-  
-  bool is_mu1_tight =false;
+   float mmm_weight = 0.;
 
-  TString s_id="fake_Eff_muon_pog"; /// used to select FR Histogram from Map
-  if(IDmu == "MUON_HN_TIGHT")    s_id="fake_Eff_muon_hn";
+   if(k_muons.size()==3){
 
-  is_mu1_tight=dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(0),IDmu);
+     bool is_mu1_tight = dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(0),"MUON_HN_TRI_TIGHT");
+     bool is_mu2_tight = dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(1),"MUON_HN_TRI_TIGHT");
+     bool is_mu3_tight = dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(2),"MUON_HN_TRI_TIGHT");
 
+     vector<TLorentzVector> muons=MakeTLorentz(k_muons);
 
-  vector<TLorentzVector> muons=MakeTLorentz(k_muons);
+     mmm_weight =m_fakeobj->get_trilepton_mmm_eventweight(geterr, muons, is_mu1_tight,is_mu2_tight, is_mu3_tight);
 
-  float f=  m_fakeobj->getFakeRate_muon(geterr,fabs(k_muons.at(0).Eta()), k_muons.at(0).Pt(), s_id);
-  float r=  1.;//m_fakeobj->getPromptRate_muon(geterr,fabs(k_muons.at(0).Eta()), k_muons.at(0).Pt(), s_id);
+   }
+   return mmm_weight;
+ }
 
-  bool debug(false);
-  if(debug) cout << "Metho = " << method <<  endl;
+ float DataDrivenBackgrounds::Get_DataDrivenWeight(bool geterr, std::vector<snu::KMuon> k_muons, TString muid, int n_muons, std::vector<snu::KElectron> k_electrons, TString elid, int n_electrons, TString elidloose, TString elmethod){
 
-  float w = m_fakeobj->lepton_weight(!is_mu1_tight, r,f);
-  return w;
+   float this_weight = 0.;
 
+   if( int(k_muons.size()) != n_muons || int(k_electrons.size()) != n_electrons ){
+     //Message("[Get_DataDrivenWeight] number of lepton is wrong..", ERROR);
+     return 0.;
+   }
+
+   std::vector<bool> isT;
+   bool AllTight = true;
+
+   for(unsigned int i=0; i<k_muons.size(); i++){
+     if( dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(i), muid) ){
+       isT.push_back(true);
+     }
+     else{
+       isT.push_back(false);
+       AllTight = false;
+     }
+   }
+   for(unsigned int i=0; i<k_electrons.size(); i++){
+     if(dd_eventbase->GetElectronSel()->ElectronPass(k_electrons.at(i), elid)){
+       isT.push_back(true);
+     }
+     else{
+       isT.push_back(false);
+       AllTight = false;
+     }
+   }
+
+   if(AllTight){
+     //Message("[Get_DataDrivenWeight] All leptons pass Tight. Return 0. weight..", DEBUG);
+     return 0.;
+   }
+
+   std::vector<TLorentzVector> muons=MakeTLorentz(k_muons);
+   std::vector<TLorentzVector> electrons=MakeTLorentz(k_electrons);
+   std::vector<TString> vkeys;
+   for(unsigned int ikey=0; ikey < electrons.size(); ikey++){
+     TString regel1="reg1";
+     if(k_electrons.at(ikey).Pt() > 50.) {
+     if(k_electrons.at(ikey).IsEB1()) regel1="reg2";
+     if(k_electrons.at(ikey).IsEB2()) regel1="reg3";
+     if(k_electrons.at(ikey).IsEE()) regel1="reg4";
+     }
+     vkeys.push_back(regel1);
+   }
+
+
+   std::vector<TString> elkeys = GetElFRKey(elidloose, elid, elmethod, vkeys);
+   this_weight =m_fakeobj->get_eventweight(geterr, muons, muid, electrons,  elkeys , isT);
+
+   return this_weight;
+ }
+
+ float DataDrivenBackgrounds::Get_DataDrivenWeight_M(bool geterr, vector<snu::KMuon> k_muons, TString IDmu, TString method){
+
+   /// two IDs possible  : 
+
+   // HN          : id = "MUON_HN_TIGHT"
+   // POG Tight   : id = "MUON_POG_TIGHT
+
+   if(k_muons.size()!=1) return 0.;
+
+   bool is_mu1_tight =false;
+
+   TString s_id="fake_Eff_muon_pog"; /// used to select FR Histogram from Map
+   if(IDmu == "MUON_HN_TIGHT")    s_id="fake_Eff_muon_hn";
+
+   is_mu1_tight=dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(0),IDmu);
+
+
+   vector<TLorentzVector> muons=MakeTLorentz(k_muons);
+
+   float f=  m_fakeobj->getFakeRate_muon(geterr,fabs(k_muons.at(0).Eta()), k_muons.at(0).Pt(), s_id);
+   float r=  1.;//m_fakeobj->getPromptRate_muon(geterr,fabs(k_muons.at(0).Eta()), k_muons.at(0).Pt(), s_id);
+
+   bool debug(false);
+   if(debug) cout << "Metho = " << method <<  endl;
+
+   float w = m_fakeobj->lepton_weight(!is_mu1_tight, r,f);
+   return w;
+
+ }
+
+float DataDrivenBackgrounds::GetFakeRateEl(float pt, float eta, TString cut){
+   return m_fakeobj->getFakeRate_electronEta(0, pt, eta, cut);
 }
 
 float DataDrivenBackgrounds::Get_DataDrivenWeight_E(bool geterr,vector<snu::KElectron> k_electrons,  TString IDe, TString method){
@@ -479,13 +495,55 @@ float DataDrivenBackgrounds::Get_DataDrivenWeight_EE(bool geterr,vector<snu::KEl
     bool is_el2_tight    = dd_eventbase->GetElectronSel()->ElectronPass(k_electrons.at(1),IDtight);
     vector<TLorentzVector> electrons=MakeTLorentz(k_electrons);
 
-    TString elkey = GetElFRKey(IDloose, IDtight,  method);
 
-    return  m_fakeobj->get_dilepton_ee_eventweight(geterr,electrons, is_el1_tight, is_el2_tight, elkey );
+
+    std::vector<TString> vkeys;
+    for(unsigned int ikey=0; ikey < electrons.size(); ikey++){
+      TString regel1="reg1";
+      if(k_electrons.at(ikey).Pt() > 50.) {
+	if(k_electrons.at(ikey).IsEB1()) regel1="reg2";
+	if(k_electrons.at(ikey).IsEB2()) regel1="reg3";
+	if(k_electrons.at(ikey).IsEE()) regel1="reg4";
+      }
+      vkeys.push_back(regel1);
+    }
+
+
+    std::vector<TString> elkeys = GetElFRKey(IDloose, IDtight, method, vkeys);
+
+    return  m_fakeobj->get_dilepton_ee_eventweight(geterr,electrons, is_el1_tight, is_el2_tight, elkeys);
       
     /// "" loose ID needs filling here
   }
   return 1.;
+}
+
+vector<TString> DataDrivenBackgrounds::GetElFRKey( TString IDloose,TString IDtight, TString method, std::vector<TString> regs1){
+  
+  if(!method.Contains("mva")) {
+    vector<TString> tmpkeys;
+    tmpkeys.push_back( GetElFRKey(IDloose, IDtight, method));
+    return tmpkeys;
+  }
+
+  vector<TString> keys_forfakes;
+  TString cut = "";
+
+  for(unsigned int i=0; i < regs1.size(); i++){
+    int reg=0;
+    if(regs1[i].Contains("reg1"))reg=1;
+    if(regs1[i].Contains("reg2"))reg=2;
+    if(regs1[i].Contains("reg3"))reg=3;
+    if(regs1[i].Contains("reg4"))reg=4;
+
+    if(IDtight == "ELECTRON_HN_TIGHT" &&  IDloose=="ELECTRON_HN_FAKELOOSE"&&reg==1) cut="0.95_iso0.05_dxy0.01_dz0.04";
+    if(IDtight == "ELECTRON_HN_TIGHT" &&  IDloose=="ELECTRON_HN_FAKELOOSE"&&reg==2) cut="0.76_iso0.05_dxy0.01_dz0.04";
+    if(IDtight == "ELECTRON_HN_TIGHT" &&  IDloose=="ELECTRON_HN_FAKELOOSE"&&reg==3) cut="0.72_iso0.05_dxy0.01_dz0.04";
+    if(IDtight == "ELECTRON_HN_TIGHT" &&  IDloose=="ELECTRON_HN_FAKELOOSE"&&reg==4) cut="0.7_iso0.05_dxy0.01_dz0.04";
+  
+    keys_forfakes.push_back(cut);
+  }
+  return keys_forfakes;
 }
 
 TString DataDrivenBackgrounds::GetElFRKey( TString IDloose,TString IDtight, TString method){
@@ -543,34 +601,12 @@ TString DataDrivenBackgrounds::GetElFRKey( TString IDloose,TString IDtight, TStr
       
       TString tag="";
 
-      if(IDtight == "ELECTRON16_HN_TIGHT" && IDloose=="ELECTRON16_HN_FAKELOOSE_NOD0")  cut+=sjpt+IDtight + "_dijet_nod0";
-      if(IDtight == "ELECTRON16_HN_TIGHT_DXYSIG" && IDloose=="ELECTRON16_HN_FAKELOOSE_NOD0"&& (method.Contains("miniiso")))  cut+=sjpt+IDtight + "_dijet_nod0_dxysig_miniiso";
-      else if(IDtight == "ELECTRON16_HN_TIGHT_DXYSIG" && IDloose=="ELECTRON16_HN_FAKELOOSE_NOD0")  cut+=sjpt+IDtight + "_dijet_nod0_dxysig";
       
-      if(IDtight == "ELECTRON16_HN_TIGHT" && IDloose=="ELECTRON16_HN_FAKELOOSE")  cut+=sjpt+IDtight + "_dijet_d0";
-      if(IDtight == "ELECTRON16_HN_TIGHT_DXYSIG" && IDloose=="ELECTRON16_HN_FAKELOOSE"&& (method.Contains("miniiso")))  cut+=sjpt+IDtight + "_dijet_d0_dxysig_miniiso";
-      else if(IDtight == "ELECTRON16_HN_TIGHT_DXYSIG" && IDloose=="ELECTRON16_HN_FAKELOOSE")  cut+=sjpt+IDtight + "_dijet_d0_dxysig";
+      /// tmp
+      if(IDtight == "ELECTRON_POG_TIGHT" && IDloose=="ELECTRON_POG_FAKELOOSE")  cut+=sjpt+"ELECTRON16_FR_POG_TIGHT_CC_dijet_pog_d0"; /// NEW from .10 tag POG Tight ID == 
 
-
-      if(IDtight == "ELECTRON16_HN_TIGHT" && IDloose=="ELECTRON16_HN_FAKELOOSE_ISO04")  cut+=sjpt+IDtight + "_dijet_iso04";
-      if(IDtight == "ELECTRON16_HN_TIGHT" && IDloose=="ELECTRON16_HN_FAKELOOSE_ISO06")  cut+=sjpt+IDtight + "_dijet_iso06";
-      if(IDtight == "ELECTRON16_FR_POG_TIGHT" && IDloose=="ELECTRON16_POG_FAKELOOSE")  cut+=sjpt+IDtight + "_dijet_pog";
-      if(IDtight == "ELECTRON16_FR_POG_MEDIUM" && IDloose=="ELECTRON16_POG_MEDIUM_FAKELOOSE")  cut+=sjpt+IDtight + "_dijet_pog";
-      if(IDtight == "ELECTRON16_FR_POG_TIGHT_CC" && IDloose=="ELECTRON16_POG_FAKELOOSE_CC")  cut+=sjpt+IDtight + "_dijet_pog";
-      if(IDtight == "ELECTRON16_FR_POG_MEDIUM_CC" && IDloose=="ELECTRON16_POG_MEDIUM_FAKELOOSE_CC")  cut+=sjpt+IDtight + "_dijet_pog";
-      if(IDtight == "ELECTRON16_FR_MVA_TIGHT_CC" && IDloose=="ELECTRON16_MVA_FAKELOOSE_CC")  cut+=sjpt+IDtight + "_dijet_mva";
-      if(IDtight == "ELECTRON16_FR_POG_TIGHT_DXYCC" && IDloose=="ELECTRON16_POG_FAKELOOSE_CC")  cut+=sjpt+IDtight + "_dijet_pog";
-      if(IDtight == "ELECTRON16_FR_POG_MEDIUM_DXYCC" && IDloose=="ELECTRON16_POG_MEDIUM_FAKELOOSE_CC")  cut+=sjpt+IDtight + "_dijet_pog";
-      if(IDtight == "ELECTRON16_FR_MVA_TIGHT_DXYCC" && IDloose=="ELECTRON16_MVA_FAKELOOSE_CC")  cut+=sjpt+IDtight + "_dijet_mva";
-
-      if(IDtight == "ELECTRON16_FR_POG_TIGHT_CC" && IDloose=="ELECTRON16_POG_FAKELOOSE_CC_d0")  cut+=sjpt+IDtight + "_dijet_pog_d0";
-      if(IDtight == "ELECTRON16_FR_POG_MEDIUM_CC" && IDloose=="ELECTRON16_POG_MEDIUM_FAKELOOSE_CC_d0")  cut+=sjpt+IDtight + "_dijet_pog_d0";
-      if(IDtight == "ELECTRON16_FR_MVA_TIGHT_CC" && IDloose=="ELECTRON16_MVA_FAKELOOSE_CC_d0")  cut+=sjpt+IDtight + "_dijet_mva_d0";
-      if(IDtight == "ELECTRON16_FR_POG_TIGHT_DXYCC" && IDloose=="ELECTRON16_POG_FAKELOOSE_CC_d0")  cut+=sjpt+IDtight + "_dijet_pog_d0";
-      if(IDtight == "ELECTRON16_FR_POG_MEDIUM_DXYCC" && IDloose=="ELECTRON16_POG_MEDIUM_FAKELOOSE_CC_d0")  cut+=sjpt+IDtight + "_dijet_pog_d0";
-      if(IDtight == "ELECTRON16_FR_MVA_TIGHT_DXYCC" && IDloose=="ELECTRON16_MVA_FAKELOOSE_CC_d0")  cut+=sjpt+IDtight + "_dijet_mva_d0";
-
-
+      if(IDtight == "ELECTRON_MVA_TIGHT" && IDloose=="ELECTRON_MVA_FAKELOOSE")  cut+=sjpt+"ELECTRON16_FR_MVA_TIGHT_CC_dijet_mva_d0";
+      
       return cut;
       
   }

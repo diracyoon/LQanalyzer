@@ -1,0 +1,92 @@
+####      MakeCleverHistograms(sighist_mm,"ZMuon"+dimuonIDs.at(i));
+####    MakeCleverHistograms(sighist_mm,"DiMuon"+dimuonIDs.at(i));
+#### MakeCleverHistograms(sighist_mm,"DiMuon_puW"+dimuonIDs.at(i));
+###      MakeCleverHistograms(sighist_mm,"DiMuon_Trigger"+dimuonIDs.at(i));
+###      MakeCleverHistograms(sighist_mm, "DiMuon_dijet"+dimuonIDs.at(i));
+###      MakeCleverHistograms(sighist_mm, "DiMuon_SSPreselection"+dimuonIDs.at(i));
+#######################################################################################
+#**************************************************************************************
+# cut DiMuon_puWPOGTightroch_corrected
+# samples skvalidation_config_allmc_noqcd.txt
+# skim SKTree_DiLepSkim
+# stream DoubleMuon
+# analyzer SKTreeValidation
+# periodtag periodBtoG
+#
+#
+#  histname          rebin minx maxx xtitle
+#____________________________________________________________________
+## h_llmass           5 20. 200. "ll invariant mass (GeV/c^{2})"
+## h_leadingLeptonPt  2 10. 200. "Leading lepton p_{T} (GeV/c)"
+## h_secondLeptonPt   2 10. 200. "Second lepton p_{T} (GeV/c)"
+## h_LeptonEta        2 -2.5 2.5 "Lepton  #eta"
+## h_Njets            1 0 6      "Number of jets"
+## h_PFMET            2 0. 300.  "E^{miss}_{T} (GeV)"
+## h_nVertices        1 0. 30.   "Number of vertices"
+## h_Nelectrons       1 0 5      "Number of electrons"
+## h_Nmuons           1 0 5      "Number of muons"
+## h_Nbjets           1 0 3      "Number of b-jets"
+## h_bTag             2 -1. 1.   "CSVInclV2"
+## h_jets_pt          2 0. 105.  "Jet p_{T} (GeV)"
+## h_dijetsmass       5 0. 200.  "m(j_{1}j_{2}) (GeV/c^{2})"
+## h_l1jjmass         2 50. 400. "l_{1}jj invariant mass (GeV/c^{2})"
+## h_l2jjmass         2 50. 400. "l_{2}jj invariant mass (GeV/c^{2})"
+## h_lljjmass         2 50. 500. "l^{#pm}l^{#pm}jj invariant mass (GeV/c^{2})"
+#######################################################################################
+#**************************************************************************************
+# cut OSDiMuon_dijetPOGTightroch_corrected
+# samples skvalidation_config_allmc_noqcd.txt
+# skim SKTree_DiLepSkim
+# stream DoubleMuon
+# analyzer SKTreeValidation
+# periodtag periodBtoG
+#
+#
+#  histname          rebin minx maxx xtitle
+#____________________________________________________________________
+## h_llmass           5 20. 200. "ll invariant mass (GeV/c^{2})"
+## h_leadingLeptonPt  2 10. 200. "Leading lepton p_{T} (GeV/c)"
+## h_secondLeptonPt   2 10. 200. "Second lepton p_{T} (GeV/c)"
+## h_LeptonEta        2 -2.5 2.5 "Lepton  #eta"
+## h_Njets            1 0 6      "Number of jets"
+## h_PFMET            2 0. 300.  "E^{miss}_{T} (GeV)"
+## h_nVertices        1 0. 30.   "Number of vertices"
+## h_Nelectrons       1 0 5      "Number of electrons"
+## h_Nmuons           1 0 5      "Number of muons"
+## h_Nbjets           1 0 3      "Number of b-jets"
+## h_bTag             2 -1. 1.   "CSVInclV2"
+## h_jets_pt          2 0. 105.  "Jet p_{T} (GeV)"
+## h_dijetsmass       5 0. 200.  "m(j_{1}j_{2}) (GeV/c^{2})"
+## h_l1jjmass         2 50. 400. "l_{1}jj invariant mass (GeV/c^{2})"
+## h_l2jjmass         2 50. 400. "l_{2}jj invariant mass (GeV/c^{2})"
+## h_lljjmass         2 50. 500. "l^{#pm}l^{#pm}jj invariant mass (GeV/c^{2})"
+#######################################################################################
+#**************************************************************************************
+# cut DiMuon_dibjetPOGTightroch_corrected
+# samples skvalidation_config_allmc_noqcd.txt
+# skim SKTree_DiLepSkim
+# stream DoubleMuon
+# analyzer SKTreeValidation
+# periodtag periodBtoG
+#
+#
+#  histname          rebin minx maxx xtitle
+#____________________________________________________________________
+## h_llmass           5 20. 200. "ll invariant mass (GeV/c^{2})"
+## h_leadingLeptonPt  2 10. 200. "Leading lepton p_{T} (GeV/c)"
+## h_secondLeptonPt   2 10. 200. "Second lepton p_{T} (GeV/c)"
+## h_LeptonEta        2 -2.5 2.5 "Lepton  #eta"
+## h_Njets            1 0 6      "Number of jets"
+## h_PFMET            2 0. 300.  "E^{miss}_{T} (GeV)"
+## h_nVertices        1 0. 30.   "Number of vertices"
+## h_Nelectrons       1 0 5      "Number of electrons"
+## h_Nmuons           1 0 5      "Number of muons"
+## h_Nbjets           1 0 3      "Number of b-jets"
+## h_bTag             2 -1. 1.   "CSVInclV2"
+## h_jets_pt          2 0. 105.  "Jet p_{T} (GeV)"
+## h_dijetsmass       5 0. 200.  "m(j_{1}j_{2}) (GeV/c^{2})"
+## h_l1jjmass         2 50. 400. "l_{1}jj invariant mass (GeV/c^{2})"
+## h_l2jjmass         2 50. 400. "l_{2}jj invariant mass (GeV/c^{2})"
+## h_lljjmass         2 50. 500. "l^{#pm}l^{#pm}jj invariant mass (GeV/c^{2})"
+#######################################################################################
+END

@@ -8,6 +8,8 @@
 
 #pragma link C++ class SKTreeMaker+;
 #pragma link C++ class SKTreeMakerDiLep+;
+#pragma link C++ class SKTreeMakerHNDiLep+;
+#pragma link C++ class SKTreeMakerFakeHN+;
 #pragma link C++ class SKTreeMakerTriLep+;
 #pragma link C++ class SKTreeMakerNoCut+;
 

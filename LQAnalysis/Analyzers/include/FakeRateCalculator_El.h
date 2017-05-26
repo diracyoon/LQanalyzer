@@ -22,7 +22,7 @@ class FakeRateCalculator_El : public AnalyzerCore {
   void MakeHistograms();
 
 
-  void GetFakeRates(std::vector<snu::KElectron> loose_el, std::vector<snu::KElectron> tight_el,TString tightlabel,  std::vector<snu::KJet> jets,std::vector<snu::KJet> alljets, TString tag, double w, bool makebasicplots);
+  void GetFakeRates(std::vector<snu::KElectron> loose_el, std::vector<snu::KElectron> tight_el,TString tightlabel,  std::vector<snu::KJet> jets,std::vector<snu::KJet> alljets, TString tag, float isocut,double w, bool makebasicplots);
   void GetHSTRates(std::vector<snu::KElectron> loose_el, std::vector<snu::KElectron> tight_el, std::vector<snu::KJet> jets, TString tag);
   
   void MakeMCFakeratePlots(TString label, bool pass_single_trigger, std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, std::vector<snu::KJet> alljets, double w);
@@ -36,14 +36,14 @@ class FakeRateCalculator_El : public AnalyzerCore {
 
 
 
-  void MakeFakeRatePlots(TString label, TString eltag,   std::vector<snu::KElectron> tightelectrons,std::vector<snu::KElectron> electrons,   std::vector <snu::KJet> jets, std::vector<snu::KJet> alljets,  float precale_w, float w, bool makebasicplots);
+  void MakeFakeRatePlots(TString label, TString eltag,   std::vector<snu::KElectron> tightelectrons,std::vector<snu::KElectron> electrons,   std::vector <snu::KJet> jets, std::vector<snu::KJet> alljets,  float precale_w, float isocut,float w, bool makebasicplots);
   void MakeDXYFakeRatePlots(TString label, TString eltag,  std::vector<snu::KElectron> electrons,   std::vector <snu::KJet> jets, std::vector<snu::KJet> alljets,  float precale_w, float prescale_diel, float w);
 
 
 
   void MakeSingleElectronCRPlots(TString looseid, TString eltag, TString tightid, float w, bool usepujetid);
 
-  void GetFakeRateAndPromptRates(std::vector<snu::KElectron> electrons, TString eltag, std::vector<snu::KElectron> tightelectrons, float w, bool usepujetid, bool runall);
+  void GetFakeRateAndPromptRates(std::vector<snu::KElectron> electrons, TString eltag, std::vector<snu::KElectron> tightelectrons, float isocut,float w, bool usepujetid, bool runall);
 
   void GetFakeRateAndPromptRatesPerPeriod(TString looseid, TString eltag, TString tightid, float w, bool usepujetid, bool runall);
 private:

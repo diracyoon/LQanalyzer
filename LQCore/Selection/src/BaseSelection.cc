@@ -38,6 +38,7 @@ BaseSelection::BaseSelection() {
   apply_BETrRegIncl = false;
   apply_BESepCut    = false;
   apply_relisocut   = false;
+  apply_HLTSafeCut  = false;     HLTSafeLevel     = "CaloIdL_TrackIdL_IsoVL";
   apply_dxysigmin   = false;     apply_dxysigmax  = false;
   relIsoBarrel_max  = 100000.;   relIsoEndcap_max = 100000.;
   relIsoBarrel_min  = 0.     ;   relIsoEndcap_min = 0.     ;
@@ -66,6 +67,8 @@ TString BaseSelection::GetString(ID id){
   if ( id == MUON_POG_LOOSE) return "MUON_POG_LOOSE";
   if ( id == MUON_POG_MEDIUM) return "MUON_POG_MEDIUM";
   if ( id == MUON_POG_TIGHT) return  "MUON_POG_TIGHT";
+  if ( id == ELECTRON_POG_MVA_WP80 ) return "ELECTRON_POG_MVA_WP80";
+  if ( id == ELECTRON_POG_MVA_WP90 ) return "ELECTRON_POG_MVA_WP90"; 
 
 
   if ( id == MUON_TOP_VETO) return  "MUON_TOP_VETO";
@@ -74,6 +77,8 @@ TString BaseSelection::GetString(ID id){
   if ( id == ELECTRON_HN_VETO) return "ELECTRON_HN_VETO";
   if ( id == ELECTRON_HN_FAKELOOSE) return "ELECTRON_HN_FAKELOOSE";
   if ( id == ELECTRON_HN_FAKELOOSE_NOD0) return "ELECTRON_HN_FAKELOOSE_NODO";
+  if ( id == ELECTRON_HN_MVA_LOOSE) return "ELECTRON_HN_MVA_LOOSE";
+  if ( id == ELECTRON_HN_MVA_TIGHT) return "ELECTRON_HN_MVA_TIGHT";
   if ( id == ELECTRON_HN_TIGHT) return  "ELECTRON_HN_TIGHT";
   if ( id == ELECTRON_TOP_VETO) return  "ELECTRON_TOP_VETO";
   if ( id == ELECTRON_TOP_LOOSE) return  "ELECTRON_TOP_LOOSE";
@@ -242,6 +247,7 @@ BaseSelection& BaseSelection::operator= (const BaseSelection& bs)
     apply_BETrRegIncl = bs.apply_BETrRegIncl;
     apply_BESepCut    = bs.apply_BESepCut;
     apply_relisocut   = bs.apply_relisocut;
+    apply_HLTSafeCut  = bs.apply_HLTSafeCut; HLTSafeLevel     = bs.HLTSafeLevel;
     apply_dxysigmin   = bs.apply_dxysigmin;  apply_dxysigmax  = bs.apply_dxysigmax;
     relIsoBarrel_max  = bs.relIsoBarrel_max; relIsoEndcap_max = bs.relIsoEndcap_max;
     relIsoBarrel_min  = bs.relIsoBarrel_min; relIsoEndcap_min = bs.relIsoEndcap_min;
@@ -294,6 +300,7 @@ BaseSelection::BaseSelection(const BaseSelection& bs) {
   apply_BETrRegIncl = bs.apply_BETrRegIncl;
   apply_BESepCut    = bs.apply_BESepCut;
   apply_relisocut   = bs.apply_relisocut;
+  apply_HLTSafeCut  = bs.apply_HLTSafeCut; HLTSafeLevel     = bs.HLTSafeLevel;
   apply_dxysigmin   = bs.apply_dxysigmin;  apply_dxysigmax  = bs.apply_dxysigmax;
   relIsoBarrel_max  = bs.relIsoBarrel_max; relIsoEndcap_max = bs.relIsoEndcap_max;
   relIsoBarrel_min  = bs.relIsoBarrel_min; relIsoEndcap_min = bs.relIsoEndcap_min;
@@ -342,6 +349,7 @@ void BaseSelection::reset(){
   apply_BETrRegIncl = false;
   apply_BESepCut    = false;
   apply_relisocut   = false;
+  apply_HLTSafeCut  = false;     HLTSafeLevel     = "CaloIdL_TrackIdL_IsoVL";
   apply_dxysigmin   = false;     apply_dxysigmax  = false;
   relIsoBarrel_max  = 100000.;   relIsoEndcap_max = 100000.;
   relIsoBarrel_min  = 0.;        relIsoEndcap_min = 0.;
@@ -387,6 +395,10 @@ void BaseSelection::SetPileUpJetID(bool use, TString pujetidwp){
 
 void BaseSelection::SetApplyConvVeto(bool apply){
   apply_convcut=apply;
+}
+
+void BaseSelection::SetHLTSafeCut(TString level){
+  apply_HLTSafeCut = true;  HLTSafeLevel = level; 
 }
 
 void BaseSelection::SetJetPt(Double_t minPt) {

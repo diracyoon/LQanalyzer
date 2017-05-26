@@ -1,0 +1,43 @@
+### alias                 |   Legend                                            |  Legend alias     |  Color  | uncert. |
+DoubleEG_SKnonprompt     |   Misid. Lepton Background                          |  DoubleEG_SKnonprompt | 870  | 0.3 |	   
+TTTT                      |   Top             					|  top              |  kYellow     |       0.3     |
+ttZToLL_M-1to10           |   Top           					|  top              |  kYellow     |	0.2     |
+ttZToLL_M-10              |   Top           					|  top              |  kYellow     |	0.2     |
+ttbb                      |   Top           					|  top              |  kYellow     |	0.2     |
+tZq                       |   Top              					|  top              |  kYellow     |   0.2     |
+ggHtoZZ			  |   Higgs						|  Higgs	    |  kPink	   | 0.2 |
+ggHtoWW			  |   Higgs						|  Higgs	    |  kPink	   | 0.2 |
+WZto2L2Q_amcatnlo         |   WZ						|  wz               |  kGreen     | 0.20     |
+WZTo3LNu_powheg           |   WZ						|  wz               |  kGreen     | 0.20     |
+ZZTo2L2Nu_Powheg          |   ZZ						|  zz               |  kRed-3     | 0.20     |
+ZZTo2L2Q_Powheg           |   ZZ						| zz               |  kRed-3     | 0.20     |
+ZZTo4L_powheg             |   ZZ						|  zz               |  kRed-3     | 0.20     |
+ggZZto2e2mu               |   ZZ						|  zz               |  kRed-3     | 0.20     |
+ggZZto2e2nu               |   ZZ						|  zz               |  kRed-3     | 0.20     |
+ggZZto2e2tau              |   ZZ						|  zz               |  kRed-3     | 0.20     |
+ggZZto2mu2nu              |   ZZ						|  zz               |  kRed-3     | 0.20     |
+ggZZto2mu2tau             |   ZZ						|  zz               |  kRed-3     | 0.20     |
+ggZZto4e                  |   ZZ						|  zz               |  kRed-3     | 0.20     |
+ggZZto4mu                 |   ZZ						|  zz               |  kRed-3     | 0.20     |
+WWTo2L2Nu                 |   WW						|  ww               |  kOrange     | 0.15     |
+ggWWto2L2Nu               |   WW						|  ww               |  kOrange     | 0.15     |
+WpWpQCD			  |   WW						|  ww               |  kOrange     | 0.15     |
+WpWpEWK			  |   WW						|  ww               |  kOrange     | 0.15     |
+ww_ds                     |   WW                                           |  ww               |  kOrange    | 0.15     |
+TTTT                      |   Top                                               |  top              |  kYellow     |       0.3     |
+ttZToLL_M-1to10           |   Top                                               |  top              |  kYellow     |       0.2     |
+ttZToLL_M-10              |   Top                                               |  top              |  kYellow     |       0.2     |
+ttbb                      |   Top                                               |  top              |  kYellow     |       0.2     |
+tZq                       |   Top                                               |  top              |  kYellow     |   0.2     |
+WWW                       |   Triboson                                          |  triv              |  kSpring+2    |      0.3     |
+ZZZ                       |   Triboson                                          |  triv              |  kSpring+2   |      0.3     |
+#WWZ                       |   Triboson                                         |  triv              |  kSpring+2    |      0.3     |
+WZZ                       |   Triboson                                          |  triv               |  kSpring+2    | 0.3     |
+WWG                       |   Triboson                                          |  triv               |  kSpring+2   | 0.3     |
+WZG                       |   Triboson                                          |  triv               |  kSpring+2    | 0.3     |
+ZGto2LG                   |   Z#gamma                                           |  zg               |  kCyan     | 0.15     |
+WGtoLNuG                  |   W#gamma                                           |  wg               |  kRed+4     | 0.15     |
+#DYJets_MG_10to50          |   DY #rightarrow ll                                 |  DY            |  kCyan     | 0.15    |
+DYJets                    |   DY #rightarrow ee                                 |  DY           |  kCyan     | 0.15    |
+END
+

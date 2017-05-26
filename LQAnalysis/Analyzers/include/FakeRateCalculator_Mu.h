@@ -22,7 +22,7 @@ class FakeRateCalculator_Mu : public AnalyzerCore {
   void MakeHistograms();
 
 
-  void GetFakeRates(std::vector<snu::KMuon> loose_el, std::vector<snu::KMuon> tight_el,TString tightlabel,  std::vector<snu::KJet> jets,std::vector<snu::KJet> alljets, TString tag, double w, bool makebasicplots);
+  void GetFakeRates(std::vector<snu::KMuon> loose_el, std::vector<snu::KMuon> tight_el,TString tightlabel,  std::vector<snu::KJet> jets,std::vector<snu::KJet> alljets, TString tag, double w, float isocut,bool makebasicplots);
   
   void MakeMCFakeratePlots(TString label, bool pass_single_trigger, std::vector<snu::KMuon> muons, std::vector<snu::KJet> jets, std::vector<snu::KJet> alljets, double w);
   void MakePlotsMCAwaJetPt(TString label,float awayjetptcut, std::vector<snu::KMuon>, std::vector<snu::KJet> jets , std::vector<snu::KJet> alljets, double w);
@@ -35,13 +35,13 @@ class FakeRateCalculator_Mu : public AnalyzerCore {
 
 
 
-  void MakeFakeRatePlots(TString label, TString eltag,   std::vector<snu::KMuon> tightmuons,std::vector<snu::KMuon> muons,   std::vector <snu::KJet> jets, std::vector<snu::KJet> alljets,  float precale_w, float w, bool makebasicplots);
+  void MakeFakeRatePlots(TString label, TString eltag,   std::vector<snu::KMuon> tightmuons,std::vector<snu::KMuon> muons,   std::vector <snu::KJet> jets, std::vector<snu::KJet> alljets,  float precale_w, float w, float isocut, bool makebasicplots);
 
 
 
   void MakeSingleMuonCRPlots(TString looseid, TString eltag, TString tightid, float w, bool usepujetid);
 
-  void GetFakeRateAndPromptRates(std::vector<snu::KMuon> muons, TString eltag, std::vector<snu::KMuon> tightmuons, float w, bool usepujetid, bool runall);
+  void GetFakeRateAndPromptRates(std::vector<snu::KMuon> muons, TString eltag, std::vector<snu::KMuon> tightmuons, float w, float isocut,bool usepujetid, bool runall);
 
   void GetFakeRateAndPromptRatesPerPeriod(TString looseid, TString eltag, TString tightid, float w, bool usepujetid, bool runall);
 private:

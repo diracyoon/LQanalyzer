@@ -60,7 +60,8 @@ if not LQANALYZER_DIR == "None" :
 	os.system("cp " + localfiledir + "/Luminosity/lumi_catversion_"+str(os.getenv("CATVERSION"))+".txt "  + lumifiledir)
 	os.system("cp " + datasetfiledir + "/list_all_mc_"+str(os.getenv("CATVERSION"))+".sh " + txtfiledir)
         if os.getenv("HOSTNAME") == "cms.snu.ac.kr":
-            os.system("cp " + localfiledir + "/Selection/*.sel " + seldir)
+            if not os.getenv("USER") == "jalmond":
+                os.system("cp " + localfiledir + "/Selection/*.sel " + seldir)
         else:
             os.system("rm " + seldir  +"/electrons.sel") 
             while not os.path.exists(seldir  +"/electrons.sel"):

@@ -114,7 +114,7 @@ def make_batch_script(workdir, jname, lqdir, macroname, cluster):
     return config
 
 
-def makeConfigFile(log,sample, input, tree, cycle, ver, output_tmp, output, nevents, outstep, skipev, datatype, channel, period, totalmcevents, xsec, tar_lumi, eff_lumi, useSKinput, runevent, libraries, runnp, runcf, runtau, skflag,tmplibdir):
+def makeConfigFile(log,sample, input, tree, cycle, ver, output_tmp, output, nevents, outstep, skipev, datatype, channel, period, totalmcevents, xsec, tar_lumi, eff_lumi, useSKinput, runevent, libraries, runnp, runcf, runtau, skflag,tmplibdir, nskim):
 
     if not os.path.exists(os.getenv("LQANALYZER_BATCHLIB_PATH")+"/"+tmplibdir):
         os.system("mkdir " + os.getenv("LQANALYZER_BATCHLIB_PATH")+"/"+tmplibdir)
@@ -156,6 +156,7 @@ def makeConfigFile(log,sample, input, tree, cycle, ver, output_tmp, output, neve
     config+='   analysis.SetInputList(TString(filename));\n'
     config+='   analysis.SetTreeName("'+ tree +'");\n'
     config+='   analysis.SetCycleName("' + cycle + '");\n'
+    config+='   analysis.SetSkimName("' + nskim + '");\n'
     config+='   analysis.SetLogLevel("'+ log +'");\n'
     if not datatype =="mc" :
         config+='   analysis.SetChannel("'+ channel +'");\n'

@@ -159,12 +159,12 @@ void ElectronSelection::Selection(std::vector<KElectron>& leptonColl , bool m_de
 
   for (std::vector<KElectron>::iterator el = allelectrons.begin(); el!=allelectrons.end(); el++){
 
-    /// DEFAULT cuts
     bool pass_selection = true;
 
-    /// ID cut : need to optimise cuts
+    // ID cut
     if(apply_ID){
-      if(GetString(k_id).Contains("POG")) ElectronID = PassID(*el, k_id);
+      if     (GetString(k_id).Contains("POG"))             ElectronID = PassID(*el, k_id);
+      else if(GetString(k_id).Contains("ELECTRON_HN_MVA")) ElectronID = PassID(*el, k_id);
       else ElectronID = PassUserID( *el,GetString(k_id) , GetString(k_id), apply_chargeconst, apply_convcut,relIsoBarrel_max,relIsoEndcap_max,dxyBarrel_max,dxyEndcap_max,dzBarrel_max,dzEndcap_max, 999.,999.);
 
       if(!ElectronID) {
@@ -173,7 +173,13 @@ void ElectronSelection::Selection(std::vector<KElectron>& leptonColl , bool m_de
       }
     }
 
-    //SetRelIso. Default: PFRelIso03
+    // HLT Emulation Cuts 
+    if(apply_HLTSafeCut){
+      if     ( HLTSafeLevel.Contains("CaloIdL_TrackIdL_IsoVL") && (!el->IsTrigMVAValid()) ) pass_selection=false;
+      else if( HLTSafeLevel.Contains("WPLoose")                && (!el->PassHLTID())      ) pass_selection=false;
+    }
+
+    // SetRelIso. Default: PFRelIso03
     float reliso(0.);
     if     (apply_relisocut && RelIsoType.Contains("Default"))    reliso=el->PFRelIso(0.3); 
     else if(apply_relisocut && RelIsoType.Contains("PFRelIso04")) reliso=el->PFRelIso(0.4); 
@@ -192,17 +198,21 @@ void ElectronSelection::Selection(std::vector<KElectron>& leptonColl , bool m_de
     if(!apply_BETrRegIncl){
       if(fabs(el->SCEta())>1.4442 && fabs(el->SCEta())<1.566) pass_selection = false;
     }
-    //// Check charge consistancy between different detectors
+    // Check charge consistancy between different detectors
     if(apply_chargeconst && !el->GsfCtfScPixChargeConsistency()){
       pass_selection = false;
       if(m_debug)cout << "Selection: Fail charge Cut" << endl;
     }
-    /// extra cut to reduce conversions
-    /// https://twiki.cern.ch/twiki/bin/view/CMS/ConversionTools
+    // extra cut to reduce conversions
+    // https://twiki.cern.ch/twiki/bin/view/CMS/ConversionTools
     if(apply_convcut && (!el->PassesConvVeto()) ) {
       pass_selection = false;
       if(m_debug)cout << "Selection: Fail Conversion Cut" << endl;
     }
+
+    //d0 Significance
+    if(apply_dxysigmin && !(fabs(el->dxySig()) >= dxySig_min)) pass_selection = false;
+    if(apply_dxysigmax && !(fabs(el->dxySig()) <  dxySig_max)) pass_selection = false;
 
 
     if(apply_BESepCut){
@@ -291,19 +301,15 @@ bool ElectronSelection::PassUserID(TString id, snu::KElectron el, vector<pair<TS
     if(vids[idel].second == "false") continue;
 
     if(vids[idel].first == "IsTight(POG)")  { 
-      if(!pass_trigger_emulation) {if(debug){ cout << "Fail HLT" << endl;} return false;}
       if(!pass_tight_noiso) {if(debug){ cout << "Fail tight" << endl;} return false;}
     }
     if(vids[idel].first == "IsMedium(POG)"){
-      if(!pass_trigger_emulation) {if(debug){ cout << "Fail HLT" << endl;} return false;}
       if(!pass_medium_noiso)  {if(debug){ cout << "Fail medium" << endl;} return false;}
     }
     if(vids[idel].first == "IsLoose(POG)"){
-      if(!pass_trigger_emulation) {if(debug){ cout << "Fail HLT" << endl;} return false;}
       if(!pass_loose_noiso) {if(debug){ cout << "Fail loose" << endl;} return false;}
     }
     if(vids[idel].first == "IsVeto(POG)"){
-      if(!pass_trigger_emulation) {if(debug){ cout << "Fail HLT" << endl;} return false;}
       if(!pass_veto_noiso)   {if(debug){ cout << "Fail veto" << endl;} return false;}
     }
     if(vids[idel].first == "GsfCtfScPix") {
@@ -321,13 +327,25 @@ bool ElectronSelection::PassUserID(TString id, snu::KElectron el, vector<pair<TS
       if(!pass_trigger_emulation)  {if(debug){ cout << "Fail MVA medium" << endl;} return false;}
       if(!el.PassTrigMVAMedium()) {if(debug){ cout << "Fail MVA medium" << endl;} return false;}
     }
+    if(vids[idel].first == "IsHNLoose(MVA)"){
+      if(!pass_trigger_emulation)  {if(debug){ cout << "Fail MVA medium" << endl;} return false;}
+      if(!el.PassTrigMVAHNLoose()){if(debug){ cout << "Fail MVA tight" << endl;} return false;}
+    }
+    if(vids[idel].first == "IsHNTight(MVA)"){
+      if(!pass_trigger_emulation)  {if(debug){ cout << "Fail MVA medium" << endl;} return false;}
+      if(!el.PassTrigMVAHNTight()){if(debug){ cout << "Fail MVA tight" << endl;} return false;}
+    }
+    if(vids[idel].first == "IsGENTTight"){
+      if(!pass_trigger_emulation)  {if(debug){ cout << "Fail MVA medium" << endl;} return false;}
+      if(!el.PassTrigMVAGENTTight()){if(debug){ cout << "Fail MVA tight" << endl;} return false;}
+    }
     
     if(vids[idel].first == "IsZZ(MVA)"){
       //if(!el.IsTrigMVAValid())  {if(debug){ cout << "Fail MVA medium" << endl;} return false;}
       if(!el.PassMVAZZ()) {if(debug){ cout << "Fail MVA medium" << endl;} return false;}
     }
-    
   }
+
   
 
   LeptonRelIso = el.PFRelIso(0.3);
@@ -398,7 +416,9 @@ bool ElectronSelection::PassUserID(TString id, snu::KElectron el){
   bool checkisveto = (CheckCutString("IsVeto(POG)",id));
   bool checkismedium = (CheckCutString("IsMedium(POG)",id));
   bool checkistight  = (CheckCutString("IsTight(POG)",id));
-  bool checkisMVAmedium = (CheckCutString("IsMedium(MVA)",id));
+  bool checkisMVAHNLoose = (CheckCutString("IsHNLoose(MVA)",id));
+  bool checkisMVAHNTight = (CheckCutString("IsHNTight(MVA)",id));
+  bool checkisMVAGENTTight = (CheckCutString("IsGENTTight",id));
   bool checkisMVAtight  = (CheckCutString("IsTight(MVA)",id));
 
 
@@ -440,16 +460,35 @@ bool ElectronSelection::PassUserID(TString id, snu::KElectron el){
 
   bool debug=false;
 
+  bool pass_trigger_emulation=true;
+  if(el.Pt() < 15.){
+    /// special case that mva id not used as 15 GeV cut                                                                                                         
+    /// use single electron HLT cuts which are tighter than mva for 10-15 GeV bin                                                                               
+    if(!el.PassHLTID()) pass_trigger_emulation=false;
+  }
+  else {
+    /// safe for DoubleEG triggers with CaloIdL_TrackIdL_IsoVL                                                                                                  
+    //https://twiki.cern.ch/twiki/bin/view/CMS/ChangesEGMHLTAlgo2014                                                                                            
+    if(!el.IsTrigMVAValid()) pass_trigger_emulation=false;
+  }
+
+
   if(checkisveto && !pass_veto_noiso)  {pass_selection = false;if(debug){ cout << "Failveto " << endl;}}
   if(checkisloose && !pass_loose_noiso)  {pass_selection = false;if(debug){ cout << "Failloose " << endl;}}
   if(checkismedium && !pass_medium_noiso)  {pass_selection = false;if(debug){ cout << "Fail medium" << endl;}}
   if(checkistight && !pass_tight_noiso)  {pass_selection = false;if(debug){ cout << "Fail tight" << endl;}}
 
-  if(checkisMVAtight && !el.IsTrigMVAValid())  {pass_selection = false;if(debug){ cout << "Fail MVA tight" << endl;}}
+  if(checkisMVAtight && !pass_trigger_emulation)  {pass_selection = false;if(debug){ cout << "Fail MVA tight" << endl;}}
   if(checkisMVAtight && !el.PassTrigMVATight()){pass_selection = false;if(debug){ cout << "Fail MVA tight" << endl;}}
-  if(checkisMVAmedium && !el.IsTrigMVAValid())  {pass_selection = false;if(debug){ cout << "Fail MVA medium" << endl;}}
-  if(checkisMVAmedium && !el.PassTrigMVAMedium()){pass_selection = false;if(debug){ cout << "Fail MVA medium" << endl;}}
+  if(checkisMVAHNLoose && !pass_trigger_emulation)  {pass_selection = false;if(debug){ cout << "Fail MVA medium" << endl;}}
+  if(checkisMVAHNLoose && !el.PassTrigMVAHNLoose()){pass_selection = false;if(debug){ cout << "Fail MVA medium" << endl;}}
+  if(checkisMVAHNTight && !pass_trigger_emulation)  {pass_selection = false;if(debug){ cout << "Fail MVA medium" << endl;}}
+  if(checkisMVAHNTight && !el.PassTrigMVAHNTight()){pass_selection = false;if(debug){ cout << "Fail MVA medium" << endl;}}
+  if(checkisMVAGENTTight && !pass_trigger_emulation)  {pass_selection = false;if(debug){ cout << "Fail MVA medium" << endl;}}
+  if(checkisMVAGENTTight && !el.PassTrigMVAGENTTight()){pass_selection = false;if(debug){ cout << "Fail MVA medium" << endl;}}
   
+
+
   if(convveto&& (!el.PassesConvVeto()) ){pass_selection = false;if(debug){ cout << "Fail convveto" << endl;}}
   if(checkchargeconsy &&  !el.GsfCtfScPixChargeConsistency()) {pass_selection = false;if(debug){ cout << "Fail charge" << endl;}}
 
@@ -506,18 +545,49 @@ bool ElectronSelection::PassUserID(snu::KElectron el, TString id, TString el_id,
 
   bool debug=false;
   
+
+
+  bool pass_trigger_emulation=true;
+  if(el.Pt() < 15.){
+    /// special case that mva id not used as 15 GeV cut                                                                                                         
+    /// use single electron HLT cuts which are tighter than mva for 10-15 GeV bin                                                                               
+    if(!el.PassHLTID()) pass_trigger_emulation=false;
+  }
+  else {
+    /// safe for DoubleEG triggers with CaloIdL_TrackIdL_IsoVL                                                                                                  
+    //https://twiki.cern.ch/twiki/bin/view/CMS/ChangesEGMHLTAlgo2014                                                                                            
+    if(!el.IsTrigMVAValid()) pass_trigger_emulation=false;
+  }
+
+
+
+
   if((el_id ==	"IsTight(POG)") &&  !pass_tight_noiso)  {if(debug){ cout << "Fail tight" << endl;}return false;}
   if((el_id ==	"IsMedium(POG)") && !pass_medium_noiso)  {if(debug){ cout << "Fail medium" << endl;}return false;}
   if((el_id ==	"IsLoose(POG)") && !pass_loose_noiso)  {if(debug){ cout << "Failloose " << endl;}return false;}
   if((el_id ==	"IsVeto(POG)") && !pass_veto_noiso)  {if(debug){ cout << "Failveto " << endl;}return false;}
   if((el_id ==	"IsMedium(MVA)")){
-    if(!el.IsTrigMVAValid())  {if(debug){cout << "Fail MVA medium" << endl;} return false;}
+    if(!pass_trigger_emulation)  {if(debug){cout << "Fail MVA medium" << endl;} return false;}
     if(!el.PassTrigMVAMedium()) {if(debug){cout << "Fail MVA medium" << endl;} return false;}
   }
   if(el_id == "IsTight(MVA)") {
-    if(!el.IsTrigMVAValid())  {if(debug){cout << "Fail MVA tight" << endl;} return false;}
+    if(!pass_trigger_emulation)  {if(debug){cout << "Fail MVA tight" << endl;} return false;}
     if(!el.PassTrigMVATight()) {if(debug){cout << "Fail MVA tight" << endl;} return false;}
   }
+  if(el_id == "IsHNTight(MVA)") {
+    if(!pass_trigger_emulation)  {if(debug){cout << "Fail MVA tight" << endl;} return false;}
+    if(!el.PassTrigMVAHNTight()) {if(debug){cout << "Fail MVA tight" << endl;} return false;}
+  }
+  if(el_id == "IsHNLoose(MVA)") {
+    if(!pass_trigger_emulation)  {if(debug){cout << "Fail MVA tight" << endl;} return false;}
+    if(!el.PassTrigMVAHNLoose()) {if(debug){cout << "Fail MVA tight" << endl;} return false;}
+  }
+  if(el_id == "IsGENTTight") {
+    if(!pass_trigger_emulation)  {if(debug){cout << "Fail MVA tight" << endl;} return false;}
+    if(!el.PassTrigMVAGENTTight()) {if(debug){cout << "Fail MVA tight" << endl;} return false;}
+  }
+
+  
   if( check_cc &&  !el.GsfCtfScPixChargeConsistency()) { if(debug){ cout << "Fail charge" << endl;} return false;}
   if( check_cv &&  (!el.PassesConvVeto()) ){ if(debug){ cout << "Fail convveto" << endl;}return false;}
 
@@ -583,22 +653,17 @@ bool ElectronSelection::PassID(snu::KElectron el, ID id){
 
   bool pass_selection=true;  bool debug=false;
 
-  int  snuid = el.SNUID();
-  bool pass_tight_noiso  = false;
-  bool pass_medium_noiso = false;
-  bool pass_loose_noiso  = false;
-  bool pass_veto_noiso   = false;
+  //SNUID : CutbasedPOGID without Isolation requirements
 
-  if(snuid >= 1000) pass_tight_noiso  = true;
-  if(snuid >= 100 ) pass_medium_noiso = true;
-  if(snuid >= 10  ) pass_loose_noiso  = true;
-  if(snuid >= 1   ) pass_veto_noiso   = true;
-
-
-  if(id == ELECTRON_POG_VETO   && !pass_veto_noiso)   {pass_selection = false; if(debug){ cout << "Failveto " << endl;}}
-  if(id == ELECTRON_POG_LOOSE  && !pass_loose_noiso)  {pass_selection = false; if(debug){ cout << "Failloose " << endl;}}
-  if(id == ELECTRON_POG_MEDIUM && !pass_medium_noiso) {pass_selection = false; if(debug){ cout << "Fail medium" << endl;}}
-  if(id == ELECTRON_POG_TIGHT  && !pass_tight_noiso)  {pass_selection = false; if(debug){ cout << "Fail tight" << endl;}}
+  if     ( id == ELECTRON_POG_VETO   && el.SNUID()<1    ){pass_selection = false; if(debug){ cout << "Failveto "  << endl;}}
+  else if( id == ELECTRON_POG_LOOSE  && el.SNUID()<10   ){pass_selection = false; if(debug){ cout << "Failloose " << endl;}}
+  else if( id == ELECTRON_POG_MEDIUM && el.SNUID()<100  ){pass_selection = false; if(debug){ cout << "Fail medium"<< endl;}}
+  else if( id == ELECTRON_POG_TIGHT  && el.SNUID()<1000 ){pass_selection = false; if(debug){ cout << "Fail tight" << endl;}}
+  else if( id == ELECTRON_POG_MVA_WP90 && (!el.PassNotrigMVAMedium()) ){ pass_selection = false; }
+  else if( id == ELECTRON_POG_MVA_WP80 && (!el.PassNotrigMVATight())  ){ pass_selection = false; }
+  else if( id == ELECTRON_HN_MVA_LOOSE && (!el.PassTrigMVAHNLoose())  ){ pass_selection = false; }
+  else if( id == ELECTRON_HN_MVA_TIGHT && (!el.PassTrigMVAHNTight())  ){ pass_selection = false; }
 
   return pass_selection;
+
 }

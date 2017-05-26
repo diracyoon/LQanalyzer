@@ -763,7 +763,8 @@ double MCDataCorrections::ElectronScaleFactor( TString elid, vector<snu::KElectr
   //http://fcouderc.web.cern.ch/fcouderc/EGamma/scaleFactors/Moriond17/approval/EleID/passingVeto80X/egammaEffi.txt_egammaPlots.pdf
   std::string sid= "";
   
-  if(elid.Contains("HN")) elid = "ELECTRON_MVA_90";
+  if(elid.Contains("HN")) elid = "ELECTRON_MVA_80";
+  if(elid.Contains("ELECTRON_MVA_90")) elid = "ELECTRON_MVA_80";
 
   for(vector<KElectron>::iterator itel=el.begin(); itel!=el.end(); ++itel) {
     float elpt=itel->Pt();

@@ -43,6 +43,7 @@ class HNCommonLeptonFakes {
   float get_dilepton_em_eventweight(bool geterr,std::vector<TLorentzVector> muons, std::vector<TLorentzVector> electron, bool ismu1tight, bool isel1tight);
 
   float get_dilepton_ee_eventweight(bool geterr, std::vector<TLorentzVector> electrons, bool isel1tight, bool isel2tight, TString cut);
+  float get_dilepton_ee_eventweight(bool geterr, std::vector<TLorentzVector> electrons, bool isel1tight, bool isel2tight, std::vector<TString> cut);
   float get_dilepton_ee_eventweight(bool geterr, std::vector<TLorentzVector> electrons, bool isel1tight, bool isel2tight, TString cut1, TString cut2);
   
 
@@ -128,7 +129,7 @@ class HNCommonLeptonFakes {
   //==== get weight
   float get_dilepton_mm_eventweight(bool geterr, std::vector<TLorentzVector> muons, bool isT1, bool isT2);
   float get_trilepton_mmm_eventweight(bool geterr, std::vector<TLorentzVector> muons, bool isT1, bool isT2, bool isT3);
-  float get_eventweight(bool geterr, std::vector<TLorentzVector> muons, TString muid, std::vector<TLorentzVector> electrons, TString elid, std::vector<bool> isT);
+  float get_eventweight(bool geterr, std::vector<TLorentzVector> muons, TString muid, std::vector<TLorentzVector> electrons, std::vector<TString> elid, std::vector<bool> isT);
 
   //==== Large dXYSig working poins
   std::vector<double> GetdXYMins();

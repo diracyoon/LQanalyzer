@@ -30,39 +30,43 @@ class BaseSelection {
     ELECTRON_POG_TIGHT             = 3,
     ELECTRON_POG_MVATrig           = 4,
     ELECTRON_POG_MVANonTrig        = 5,
-    ELECTRON_ECAL_FIDUCIAL         = 6,
-    ELECTRON_HN_VETO               = 7,
-    ELECTRON_HN_TIGHT              = 8,
-    ELECTRON_HN_FAKELOOSE           = 9,
-    ELECTRON_HN_FAKELOOSE_NOD0      = 10,
-    ELECTRON_TOP_VETO              = 11,
-    ELECTRON_TOP_LOOSE             = 12,
-    ELECTRON_TOP_TIGHT             = 13,
-    ELECTRON_PTETA                 = 14,
-    ELECTRON_NOCUT                 = 15,
-    MUON_POG_LOOSE                 = 16,
-    MUON_POG_MEDIUM                = 17,
-    MUON_POG_TIGHT                 = 18,
-    MUON_HN_VETO                   = 19,
-    MUON_HN_FAKELOOSE              = 20,
-    MUON_HN_TIGHT                  = 21,
-    MUON_FAKELOOSE                 = 22,
-    MUON_TOP_VETO                  = 23,
-    MUON_TOP_LOOSE                 = 24,
-    MUON_TOP_TIGHT                 = 25,
-    MUON_PTETA                     = 26,
-    MUON_NOCUT                     = 27,
-    PFJET_LOOSE                    = 28,
-    PFJET_MEDIUM                   = 29,
-    PFJET_TIGHT                    = 30,
-    JET_HN                         = 31,
-    JET_HN_TChannel                = 32,
-    JET_NOLEPTONVETO               = 33,
-    JET_LOOSE                      = 34,
-    JET_TIGHT                      = 35,
-    PHOTON_POG_LOOSE               = 36, 
-    PHOTON_POG_MEDIUM              = 37, 
-    PHOTON_POG_TIGHT               = 38, 
+    ELECTRON_POG_MVA_WP80          = 6,
+    ELECTRON_POG_MVA_WP90          = 7,
+    ELECTRON_ECAL_FIDUCIAL         = 8,
+    ELECTRON_HN_VETO               = 9,
+    ELECTRON_HN_TIGHT              = 10,
+    ELECTRON_HN_FAKELOOSE          = 11,
+    ELECTRON_HN_FAKELOOSE_NOD0     = 12,
+    ELECTRON_HN_MVA_LOOSE          = 13,
+    ELECTRON_HN_MVA_TIGHT          = 14,
+    ELECTRON_TOP_VETO              = 15,
+    ELECTRON_TOP_LOOSE             = 16,
+    ELECTRON_TOP_TIGHT             = 17,
+    ELECTRON_PTETA                 = 18,
+    ELECTRON_NOCUT                 = 19,
+    MUON_POG_LOOSE                 = 20,
+    MUON_POG_MEDIUM                = 21,
+    MUON_POG_TIGHT                 = 22,
+    MUON_HN_VETO                   = 23,
+    MUON_HN_FAKELOOSE              = 24,
+    MUON_HN_TIGHT                  = 25,
+    MUON_FAKELOOSE                 = 26,
+    MUON_TOP_VETO                  = 27,
+    MUON_TOP_LOOSE                 = 28,
+    MUON_TOP_TIGHT                 = 29,
+    MUON_PTETA                     = 30,
+    MUON_NOCUT                     = 31,
+    PFJET_LOOSE                    = 32,
+    PFJET_MEDIUM                   = 33,
+    PFJET_TIGHT                    = 34,
+    JET_HN                         = 35,
+    JET_HN_TChannel                = 36,
+    JET_NOLEPTONVETO               = 37,
+    JET_LOOSE                      = 38,
+    JET_TIGHT                      = 39,
+    PHOTON_POG_LOOSE               = 40, 
+    PHOTON_POG_MEDIUM              = 41, 
+    PHOTON_POG_TIGHT               = 42,
   };
 
   Int_t ifid;
@@ -85,7 +89,7 @@ class BaseSelection {
   Double_t relIsoBarrel_max, relIsoBarrel_min, dxyBarrel_max, dzBarrel_max,
            relIsoEndcap_max, relIsoEndcap_min, dxyEndcap_max, dzEndcap_max;
 
-  TString  RelIsoType, PUJetIDWP;
+  TString  RelIsoType, HLTSafeLevel, PUJetIDWP;
 
   Int_t casediscriminator,simpleselection;
 
@@ -122,7 +126,7 @@ class BaseSelection {
 
   /// bools to tell selector to apply cuts
   Bool_t apply_ptcut,apply_etacut, apply_jptcut,apply_jetacut, apply_relisocut, apply_chi2cut, apply_dxycut, apply_dzcut, apply_general, apply_deposit;
-  Bool_t apply_ID, apply_convcut, apply_chargeconst, applypileuptool;
+  Bool_t apply_ID, apply_convcut, apply_chargeconst, apply_HLTSafeCut, applypileuptool;
   Bool_t apply_dxysigmin, apply_dxysigmax;
   Bool_t apply_BESepCut, apply_BETrRegIncl;
 
@@ -147,6 +151,7 @@ class BaseSelection {
   void SetBSdxy(Double_t dxyMIN, Double_t dxy);
   void SetBSdz(Double_t dz);
   void SetID(ID  id);
+  void SetHLTSafeCut(TString level);
   void SetCheckCharge(bool check);
   void SetApplyConvVeto(bool apply);
 

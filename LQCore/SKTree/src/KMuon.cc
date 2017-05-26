@@ -57,7 +57,8 @@ KMuon::KMuon() :
   
   k_trig_match(""),
   k_corrected_rc(false),
-  k_mctype(-999)
+  k_mctype(-999),
+  k_isprompt(false)
 
 {
   //Reset();
@@ -117,7 +118,8 @@ KMuon::KMuon(const KMuon& muon) :
 
   k_trig_match(muon.k_trig_match),
   k_corrected_rc(muon.k_corrected_rc),
-  k_mctype(muon.k_mctype)
+  k_mctype(muon.k_mctype),
+  k_isprompt(muon.k_isprompt)
 {
 }
   
@@ -181,6 +183,7 @@ void KMuon::Reset()
   k_trig_match= "";
   k_corrected_rc=false;
   k_mctype=-999;
+  k_isprompt=false;
 }
 
 
@@ -238,6 +241,7 @@ KMuon& KMuon::operator= (const KMuon& p)
 	k_trig_match= p.TrigMatch();
 	k_corrected_rc=p.IsRochesterCorrected();
 	k_mctype = p.GetType();
+	k_isprompt=p.IsPromptFlag();
     }
     
     return *this;
@@ -250,6 +254,11 @@ KMuon& KMuon::operator= (const KMuon& p)
 std::string KMuon::Type() const
 {
     return "KMuon";
+}
+
+void KMuon::SetIsPromptFlag(bool pflag){
+
+  k_isprompt=pflag;
 }
 
 bool KMuon::TriggerMatched(TString path){

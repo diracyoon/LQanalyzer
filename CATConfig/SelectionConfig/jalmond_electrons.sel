@@ -1,0 +1,3 @@
+ncuts 21
+webpage https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
+| ID                                   |  ptmin  | |etamax| |  isomax03_b   | isomax03_e | IsTight(POG)  | IsMedium(POG)  | IsLoose(POG) | IsVeto(POG)   | |dxymax_b|  | |dxymax_e| |  |dzmax_b| |  |dzmax_e| | GsfCtfScPix | convveto | |dxysigmin|  |  |dxysigmax| | UseMiniIso |  IsTight(MVA)  |  IsMedium(MVA)  |  IsHNTight(MVA)  | IsHNLoose(MVA) |

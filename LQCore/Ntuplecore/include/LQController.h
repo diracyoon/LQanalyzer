@@ -51,6 +51,7 @@ class LQController  {
   /// List of functions to configure job
   void SetTreeName(TString treename);
   void SetCycleName(TString cyclename);
+  void SetSkimName(TString skimname);
   void AddLibraries(TString libname);  
   void SetJobName(TString name);
   void SetInputList(TString list) throw( LQError );
@@ -93,6 +94,7 @@ class LQController  {
   dataType inputType;
   TString outputLevelString;
   TString CycleName;
+  TString skimName;
   TString jobName;
   TString treeName;
   TString filelist;

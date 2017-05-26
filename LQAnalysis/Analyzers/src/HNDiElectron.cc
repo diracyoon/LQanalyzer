@@ -81,8 +81,10 @@ void HNDiElectron::InitialiseAnalysis() throw( LQError ) {
    else if(functionality == HNDiElectron::VALIDATION){
 
      vector<TString> labels;
-     labels.push_back("");
-     labels.push_back("truthmatched_");
+     labels.push_back("POGTIGHT");
+     labels.push_back("MVATIGHT");
+     labels.push_back("HNTIGHT");
+     //labels.push_back("truthmatched_");
 
      for(unsigned int il = 0; il < labels.size(); il++){
        TString label = labels.at(il);
@@ -92,7 +94,7 @@ void HNDiElectron::InitialiseAnalysis() throw( LQError ) {
        MakeCleverHistograms(sighist_ee,label+"OSDiElectronw2");
        MakeCleverHistograms(sighist_ee,label+"OSDiElectronw3");
        MakeCleverHistograms(sighist_ee,label+"OSDiElectronw4");
-       MakeCleverHistograms(sighist_ee,label+"OSHNDiElectron");
+       MakeCleverHistograms(sighist_ee,label+"OSDiElectronw5");
        
        MakeCleverHistograms(sighist_ee,label+"OSDiElectronDiJet");
        MakeCleverHistograms(sighist_ee,label+"OSDiElectronDiJet1bw1");
@@ -104,6 +106,7 @@ void HNDiElectron::InitialiseAnalysis() throw( LQError ) {
        MakeCleverHistograms(sighist_ee,label+"SSZDiElectron");
        MakeCleverHistograms(sighist_ee,label+"SSnoZDiElectron");
        MakeCleverHistograms(sighist_ee,label+"SSDiElJet");
+       MakeCleverHistograms(sighist_ee,label+"SS1Jet");
        MakeCleverHistograms(sighist_e,label+"SingleElectron_Wregion");
        MakeCleverHistograms(sighist_eeee,label+"ZZElectron1");
        MakeCleverHistograms(sighist_eeee,label+"ZZElectron2");
@@ -135,15 +138,20 @@ void HNDiElectron::ExecuteEvents()throw( LQError ){
   
   /// Interested to see effect of MET filters on tail of met
   if(isData) FillHist("MET_PFMet_uncleaned" , eventbase->GetEvent().PFMET(), weight,  0. , 10000., 1000);
-  
+  counter("NoCut",weight);
+
   if (!eventbase->GetEvent().HasGoodPrimaryVertex()) return;
+  counter("Vertex",weight);
+
   if(!PassMETFilter()) return;     /// Initial event cuts :                                 
+  counter("METFiltert",weight);
+
   if(isData) FillHist("MET_PFMet_cleaned" , eventbase->GetEvent().PFMET(), weight,  0. , 10000., 1000);                                                                                                                                                                          
-  MakeValidationPlots(weight);
+  //MakeValidationPlots(weight);
   
   if(functionality == HNDiElectron::VALIDATION) {
     MakeControlPlots(1,"",weight); /// Uses all MC events (no truth matching)
-    MakeControlPlots(2,"truthmatched_",weight); //// removes fake leptons but keeps
+    //MakeControlPlots(2,"truthmatched_",weight); //// removes fake leptons but keeps
     
   }
 }
@@ -595,65 +603,156 @@ void HNDiElectron::MakeValidationPlots(float w){
 void HNDiElectron::MakeControlPlots(int method, TString methodtag, float w)throw( LQError ){
 
   
-  /// This is for CR / checks
+  /// e+e-                                                                                                                                                     
+  FillByTriggerTrigger(2, "POGTIGHT", method,methodtag,w);
+  //FillByTriggerTrigger(2, "MVATIGHT", method,methodtag,w);
+  //FillByTriggerTrigger(2, "HNTIGHT", method,methodtag,w);
+  //if(PassTrigger("HLT_Ele27_WPTight_Gsf_v")) FillByTriggerTrigger(1,method,methodtag,w);
   
-  
-  std::vector<snu::KElectron> electronVetoColl=GetElectrons(true, false,   "ELECTRON_HN_VETO", 10., 2.5);
+}
 
-  TString pog_elid = "ELECTRON_POG_TIGHT"; // POG ID + loose dxy/dz cuts  (no cc or dxysig)
-  if(k_running_nonprompt) pog_elid = "ELECTRON16_POG_FAKELOOSE"; // POG ID -> relaxed iso + dxy cuts
+void HNDiElectron::FillByTriggerTrigger(int iel_trig, TString ID,int method, TString methodtag, double evw){
+
+  TString elid_veto="";
+  TString elid_tight="";
+  TString elid_tight_fixed="";
+  TString elid_loose="";
+  methodtag+=ID;
+
+  int id=0;
+  TString method_fake="";
+  if(ID.Contains("POG")){
+    elid_veto="ELECTRON_POG_VETO";
+    //elid_tight="ELECTRON_POG_TIGHT";
+    elid_tight="ELECTRON_POG_FAKELOOSE";
+    elid_tight_fixed="ELECTRON_POG_TIGHT";
+    elid_loose="ELECTRON_POG_FAKELOOSE";
+
+    id=1;
+    method_fake="dijet_ajet40";
+  }
+  if(ID.Contains("MVA")){
+    elid_veto="ELECTRON_POG_VETO";
+    elid_tight="ELECTRON_MVA_TIGHT";
+    elid_tight_fixed="ELECTRON_MVA_TIGHT";
+    elid_loose="ELECTRON_MVA_FAKELOOSE";
+    method_fake="dijet_ajet40";
+    id=2;
+  }
+  if(ID.Contains("HN")){
+    elid_veto="ELECTRON_HN_VETO";
+    elid_tight="ELECTRON_HN_TIGHT";
+    elid_tight_fixed="ELECTRON_HN_TIGHT";
+    elid_loose="ELECTRON_HN_FAKELOOSE";
+    method_fake="mva";
+    id=3;
+  }
+
+  
+
+
+  std::vector<snu::KElectron> electronVetoColl=GetElectrons(true, true,   elid_veto, 10., 2.5);
+  
+  TString el_elid = elid_tight;
+
+  if(k_running_nonprompt) el_elid =elid_loose;
   bool keepcf=true;
   bool keepnp=false;
   if(method==1){
-    keepcf=true;
-    keepnp=true;
+    keepcf=false;
+    keepnp=false;
   }
   else if(method==2){
-    // if sample is QCD sample then no events with have prompt electrons so always keep fakes in this case
-    if(k_sample_name.Contains("QCD")) keepnp=true; 
-    if(k_sample_name.Contains("qcd")) keepnp=true; 
+    // if sample is QCD sample then no events with have prompt electrons so always keep fakes in this case                                                                                                                                                                                                                                                                  
+    if(k_sample_name.Contains("QCD")) keepnp=true;
+    if(k_sample_name.Contains("qcd")) keepnp=true;
     
   }
   else if(method==3){
-    // if sample is QCD sample then no events with have prompt electrons so always keep fakes in this case                                                                   
+    // if sample is QCD sample then no events with have prompt electrons so always keep fakes in this case                                                                                                                                                                                                                                                                  
     if(k_sample_name.Contains("QCD")) keepnp=true;
     if(k_sample_name.Contains("qcd")) keepnp=true;
-    /// electronTightColl = POG ID unless k_running_nonprompt is true                                                                                                      
+    /// electronTightColl = POG ID unless k_running_nonprompt is true                                                                                                                                                                                                                                                                                                       
+  }
+  
+  
+  std::vector<snu::KElectron> electronTightColl=GetElectrons(keepcf, keepnp,  el_elid,10., 2.5);  /// IF k_running_nonprompt loose id                                    
+      
+  if(electronTightColl.size() > 1){
+    for(int ix=0; ix < 3; ix++){
+      
+      float val=0.;
+      TString labelval="";
+      if(ix==0){
+	val=GetDiLepMass(electronTightColl);
+	labelval="llmass";
+      }
+      if(ix>1){
+	val=electronTightColl[1].Pt();
+	labelval="l2pt";
+      }
+
+      
+      int pass1=false;
+      int pass2=false;
+      if(PassID(electronTightColl[0],"ELECTRON_POG_TIGHT")) pass1=true;
+      if(PassID(electronTightColl[1],"ELECTRON_POG_TIGHT")) pass2=true;
+      if(ix==2&&!pass1&&!pass2) continue;
+      if(electronTightColl[0].GetType() >  22  || electronTightColl[1].GetType() >  22) FillHist(labelval+"_check1",val,1.,0, 200., 100);
+      else{
+	
+	if(electronTightColl[0].GetType()  < 6  && electronTightColl[1].GetType()  < 6  ){
+	  FillHist(labelval+"_check2",val,1.,0, 200., 100);
+	}
+	else{
+	  
+	  FillHist("pt1_isloose",electronTightColl[0].GetType(),1., 0, 30., 30.);
+	  FillHist("pt2_isloose",electronTightColl[1].GetType(),1., 0,30., 30.);
+	  if(pass1)FillHist("pt1_isltight",electronTightColl[0].GetType(),1., 0,30., 30.);
+	  if(pass2)FillHist("pt2_isltight",electronTightColl[1].GetType(),1., 0,30., 30.);
+	  
+	  if(electronTightColl[0].GetType() == 7 || electronTightColl[1].GetType() == 7 )                FillHist(labelval+"_check3",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 8 || electronTightColl[1].GetType() == 8 )                FillHist(labelval+"_check4",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 9 || electronTightColl[1].GetType() == 9 )                FillHist(labelval+"_check5",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 10 || electronTightColl[1].GetType() == 10 )                FillHist(labelval+"_check6",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 11 || electronTightColl[1].GetType() == 11 )                FillHist(labelval+"_check7",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 12 || electronTightColl[1].GetType() == 12 )                FillHist(labelval+"_check8",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 13 || electronTightColl[1].GetType() == 13 )                FillHist(labelval+"_check9",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 14 || electronTightColl[1].GetType() == 14 )                FillHist(labelval+"_check10",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 15 || electronTightColl[1].GetType() ==15)                FillHist(labelval+"_check11",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 16 || electronTightColl[1].GetType() == 16 )                FillHist(labelval+"_check12",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 17 || electronTightColl[1].GetType() == 17 )                FillHist(labelval+"_check13",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 18 || electronTightColl[1].GetType() == 18 )                FillHist(labelval+"_check14",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 19 || electronTightColl[1].GetType() == 19 )                FillHist(labelval+"_check15",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 20 || electronTightColl[1].GetType() == 20 )                FillHist(labelval+"_check16",val,1.,0, 200., 100);
+	  if(electronTightColl[0].GetType() == 21 || electronTightColl[1].GetType() == 21 )                FillHist(labelval+"_check17",val,1.,0, 200., 100);
+	}
+      }
+    }
   }
 
-  std::vector<snu::KElectron> electronTightColl=GetElectrons(keepcf, keepnp,  pog_elid,15., 2.5);  /// IF k_running_nonprompt loose id
 
-  
-  std::vector<snu::KElectron> electronTightColl_all=GetElectrons(true, true, pog_elid,15., 2.5);  
-  
-  
-  /// Drop the pt of the lepton to 7 GeV so that ZZ CR has more stats
-  std::vector<snu::KElectron> electronZZColl=GetElectrons(keepcf, keepnp, pog_elid,7., 2.5);  /// IF k_running_nonprompt loose id
 
+  std::vector<snu::KElectron> electronTightColl_all=GetElectrons(false, false, "ELECTRON_POG_TIGHT",10., 2.5);
  
+  if
+    (electronTightColl.size() > 1)
+    cout<< electronTightColl[0].PFRelIso(0.3) << endl;
 
-  /// HN analysis objects
-  TString hn_elid = "ELECTRON_HN_TIGHT";
-  if(k_running_nonprompt) hn_elid = "ELECTRON16_HN_FAKELOOSE";
-  std::vector<snu::KElectron> electronHNTightColl=GetElectrons(keepcf,keepnp , hn_elid);
-  std::vector<snu::KMuon> muonVetoColl=GetMuons("MUON_HN_VETO");
+  /// Drop the pt of the lepton to 7 GeV so that ZZ CR has more stats                                                                                                                                                                                                                                                                                                       
+
+  std::vector<snu::KElectron> electronZZColl=GetElectrons(keepcf, keepnp, el_elid,7., 2.5);  /// IF k_running_nonprompt loose id                                                                                                                                            
+
+  std::vector<snu::KElectron> electronNCColl=GetElectrons(keepcf, keepnp, "ELECTRON_NOCUT",0., 2.5);                                                                                                  
+
+
+  /// GetKFactor returns k factor for any sample. If no k-fact is found returns 1. IF data event returns 1.;                                                                                                                                                                                                                                                                
+  evw *= GetKFactor();
   
-  /// Simply fill nymber of leptons in samples
-  FillHist(methodtag+"_nelectron_v", electronVetoColl.size() , weight*WeightByTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v", TargetLumi),0., 5.,5);
-  FillHist(methodtag+"_nelectron_tm_v", electronTightColl_all.size() , weight*WeightByTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v", TargetLumi),0., 5.,5);
-  FillHist(methodtag+"_nelectron_v", electronTightColl.size() , weight*WeightByTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v", TargetLumi),0., 5.,5);
-  FillHist(methodtag+"_muon_v", muonVetoColl.size() , weight*WeightByTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v", TargetLumi),0., 5.,5);
-
-  std::vector<snu::KJet> jets =  GetJets("JET_HN");
-  std::vector<snu::KJet> jets_pu =  GetJets("JET_HN_PU");
-  FillHist(methodtag+"_njets_v", jets.size() , weight*WeightByTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v", TargetLumi),0., 5.,5);
-  FillHist(methodtag+"_njets_withpuid_v", jets_pu.size() , weight*WeightByTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v", TargetLumi),0., 5.,5);
+  /// Function NBJet returns #jets tagged with csv medium wp tagger with SF applied per jet                                                                                                                                                                                                                                                                                
 
 
-  /// Function NBJet returns #jets tagged with csv medium wp tagger with SF applied per jet
-  int nbjet = NBJet(jets);
-  
-  /// make validation plots for dielectron events + WZ/ZZ CRs
+  /// make validation plots for dielectron events + WZ/ZZ CRs                                                                                                                                                                                                                                                                                                               
   
   float trigger_sf(1.);
   float id_iso_sf(1.);
@@ -667,437 +766,425 @@ void HNDiElectron::MakeControlPlots(int method, TString methodtag, float w)throw
   float ev_weight2(1.);
   float ev_weight3(1.);
   float ev_weight4(1.);
+
+
+  std::vector<snu::KJet> jets =  GetJets("JET_HN");
+  std::vector<snu::KJet> jets_pu =  GetJets("JET_HN_PU");
+
+  int nbjet = NBJet(jets);
+
+
+  std::vector<snu::KMuon> muonVetoColl=GetMuons("MUON_HN_VETO");
+  counter("Control",weight);
+
+  if(muonVetoColl.size() > 0) return;
+  counter("MuonVeto",weight);
+
+  /// Simply fill nymber of leptons in samples                                                                                                                                                                                                                                                                                                                              
+  FillHist(methodtag+"_nelectron_v", electronVetoColl.size() , evw*WeightByTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v", TargetLumi),0., 5.,5);
+  FillHist(methodtag+"_nelectron_tm_v", electronTightColl_all.size() , evw*WeightByTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v", TargetLumi),0., 5.,5);
+  FillHist(methodtag+"_nelectron_v", electronTightColl.size() , evw*WeightByTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v", TargetLumi),0., 5.,5);
+  FillHist(methodtag+"_muon_v", muonVetoColl.size() , evw*WeightByTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v", TargetLumi),0., 5.,5);
+
+  FillHist(methodtag+"_njets_v", jets.size() , evw*WeightByTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v", TargetLumi),0., 5.,5);
+  FillHist(methodtag+"_njets_withpuid_v", jets_pu.size() , evw*WeightByTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v", TargetLumi),0., 5.,5);
+
+  TString  analysis_trigger = "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v";
+
   
-  bool _diel =   isData ?  (k_channel.Contains("DoubleEG")) : true ;
-  bool _singleel =   isData ?  (k_channel.Contains("SingleElectron")) : true ;
-  
-  
-  /// GetKFactor returns k factor for any sample. If no k-fact is found returns 1. IF data event returns 1.;
-  weight *= GetKFactor();
-  
-  
-  if(_diel){
-    /// e+e-
-    TString analysis_trigger="HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v";
-    
-    std::vector<TString> triggerslist;
-    triggerslist.push_back(analysis_trigger);
-      
-    if(electronTightColl.size() < 2 ) return;
-    /// make it safer for trigger turn on
+  if(electronTightColl.size() < 2 ) return;
+  counter("2Tight",weight);
+
+  /// make it safer for trigger turn on
+  if(iel_trig==2){
     if(electronTightColl[0].Pt() < 25) return;
     if(electronTightColl[1].Pt() < 12) return;
+  }
+  else if(iel_trig==1){
+    if(electronTightColl[0].Pt() < 30) return;
+    if(electronTightColl[1].Pt() < 10) return;
+  }
+  counter("2TightPt",weight);
+
+  if(!isData ||  (isData&&PassTrigger(analysis_trigger))  ){
+  
+    /// apply trigger eff to MC instead of trigger bit * SF
+
+    if(!isData) evw*=  mcdata_correction->GetDoubleEGTriggerEff(electronTightColl);
+
+
+    
+    counter("Trigger_diel",evw);
     
     
-    if(!isData ||  (isData&&PassTrigger(analysis_trigger))  ){
+    
+    // 4 PU weights are checked
+    /// Method 1 uses nvtx reweightg for ALL MC events 
+    puweight= mcdata_correction->UserPileupWeight(eventbase->GetEvent());
+    /// Method 2 uses NVtx reweighting to periods G+H and standard PU weights to B-F
+    if(GetMCPeriodRandom() < 6) puweight2=eventbase->GetEvent().PileUpWeight(snu::KEvent::down);
+    else puweight2= mcdata_correction->UserPileupWeight(eventbase->GetEvent(), jets.size());
+    /// Method 3 uses standard PU weights to B-H
+    puweight3= eventbase->GetEvent().PileUpWeight();
+    /// Method 4 uses PU weightes using lower xsec for minbias events
+    puweight4 = eventbase->GetEvent().PileUpWeight(snu::KEvent::down);
+    
+    
+    if(electronZZColl.size() >= 4){
       
-      /// apply trigger eff to MC instead of trigger bit * SF
-      if(!isData) weight*=  mcdata_correction->GetDoubleEGTriggerEff(electronTightColl);
+      /// 4 lepton events 
       
-      counter("Trigger_diel",weight);
+      snu::KParticle ZZpart = electronZZColl[0] + electronZZColl[1] + electronZZColl[2] + electronZZColl[3];
       
-      
-      // 4 PU weights are checked
-      /// Method 1 uses nvtx reweightg for ALL MC events 
-      puweight= mcdata_correction->UserPileupWeight(eventbase->GetEvent());
-      /// Method 2 uses NVtx reweighting to periods G+H and standard PU weights to B-F
-      if(GetMCPeriodRandom() < 6) puweight2=eventbase->GetEvent().PileUpWeight(snu::KEvent::down);
-      else puweight2= mcdata_correction->UserPileupWeight(eventbase->GetEvent(), jets.size());
-      /// Method 3 uses standard PU weights to B-H
-      puweight3= eventbase->GetEvent().PileUpWeight();
-      /// Method 4 uses PU weightes using lower xsec for minbias events
-      puweight4 = eventbase->GetEvent().PileUpWeight(snu::KEvent::down);
+      //// set ev_weight OF running fake bkg prediction
+      if(k_running_nonprompt){
+	ev_weight     = m_datadriven_bkg->Get_DataDrivenWeight(false, muonVetoColl, "MUON_HN_TRI_TIGHT", muonVetoColl.size(), electronZZColl, elid_tight_fixed, electronZZColl.size(), elid_loose, method_fake);
+      }
       
       
-      if(electronZZColl.size() >= 4){
+      FillHist(methodtag+"_zz_mass_cut0", ZZpart.M() , WeightByTrigger(analysis_trigger, TargetLumi)*evw/mcdata_correction->GetDoubleEGTriggerEff(electronZZColl), 0., 800.,32);
+      FillHist(methodtag+"_zz_mass_cut1", ZZpart.M() , WeightByTrigger(analysis_trigger, TargetLumi)*evw, 0., 800.,32);
+      
+      /// file:///Users/John/Downloads/AN2016_359_v11.pdf selection
+      
+      if(!(muonVetoColl.size() > 0 )){
 	
-	/// 4 lepton events 
+	FillHist(methodtag+"_zz_mass_cut2", ZZpart.M() , WeightByTrigger(analysis_trigger, TargetLumi)*evw, 0., 800.,32);	    
 	
-	snu::KParticle ZZpart = electronZZColl[0] + electronZZColl[1] + electronZZColl[2] + electronZZColl[3];
-	
-	//// set ev_weight OF running fake bkg prediction
-	if(k_running_nonprompt){
-	  //ev_weight =  m_datadriven_bkg->Get_DataDrivenWeight_EE( false,electronZZColl, "ELECTRON16_POG_FAKELOOSE","ELECTRON16_FR_POG_TIGHT","dijet_ajet40");          
-	  ev_weight     = m_datadriven_bkg->Get_DataDrivenWeight(false, muonVetoColl, "MUON_HN_TRI_TIGHT", muonVetoColl.size(), electronZZColl, "ELECTRON16_FR_POG_TIGHT", electronZZColl.size(), "ELECTRON16_POG_FAKELOOSE", "dijet_ajet40");
+	// IF MC apply corrections to event weight 
+	if(!isData){
+	  if(id==1)id_iso_sf=   mcdata_correction->ElectronScaleFactor("ELECTRON_POG_TIGHT", electronZZColl,0);
+	  if(id>1)id_iso_sf=   mcdata_correction->ElectronScaleFactor("ELECTRON_MVA_90", electronZZColl,0);
+	  trigger_ps= WeightByTrigger(analysis_trigger, TargetLumi)  ;
+	  reco_weight = mcdata_correction->ElectronRecoScaleFactor(electronZZColl);
+	  FillHist(methodtag+"_zz_mass_cut3", ZZpart.M() , id_iso_sf*evw*trigger_ps, 0., 800.,32);	    
+	  FillHist(methodtag+"_zz_mass_cut4", ZZpart.M() , id_iso_sf*evw*trigger_ps*reco_weight, 0., 800.,32);	    
+	  FillHist(methodtag+"_zz_mass_cut5", ZZpart.M() , id_iso_sf*evw*trigger_ps*reco_weight*puweight, 0., 800.,32);	    
+	  ev_weight = evw * id_iso_sf * reco_weight * puweight*trigger_ps;
 	}
 	
-	
-	FillHist(methodtag+"_zz_mass_cut0", ZZpart.M() , WeightByTrigger(analysis_trigger, TargetLumi)*weight/mcdata_correction->GetDoubleEGTriggerEff(electronZZColl), 0., 800.,32);
-	FillHist(methodtag+"_zz_mass_cut1", ZZpart.M() , WeightByTrigger(analysis_trigger, TargetLumi)*weight, 0., 800.,32);
-	
-	/// file:///Users/John/Downloads/AN2016_359_v11.pdf selection
-	
-	if(!(muonVetoColl.size() > 0 )){
-	  
-	  FillHist(methodtag+"_zz_mass_cut2", ZZpart.M() , WeightByTrigger(analysis_trigger, TargetLumi)*weight, 0., 800.,32);	    
-	  
-	  // IF MC apply corrections to event weight 
-	  if(!isData){
-	    id_iso_sf=   mcdata_correction->ElectronScaleFactor("ELECTRON_POG_TIGHT", electronZZColl,0);
-	    trigger_ps= WeightByTrigger(analysis_trigger, TargetLumi)  ;
-	    reco_weight = mcdata_correction->ElectronRecoScaleFactor(electronZZColl);
-	    FillHist(methodtag+"_zz_mass_cut3", ZZpart.M() , id_iso_sf*weight*trigger_ps, 0., 800.,32);	    
-	    FillHist(methodtag+"_zz_mass_cut4", ZZpart.M() , id_iso_sf*weight*trigger_ps*reco_weight, 0., 800.,32);	    
-	    FillHist(methodtag+"_zz_mass_cut5", ZZpart.M() , id_iso_sf*weight*trigger_ps*reco_weight*puweight, 0., 800.,32);	    
-	    ev_weight = weight * id_iso_sf * reco_weight * puweight*trigger_ps;
-	  }
-	  
-	  /// Check no OS pairs have m(ll) < 4. geV OR dR(l,l) < 0.02
-	  bool pass_zz_sel1=true;
-	  for(unsigned int iel=0; iel < electronZZColl.size() -1; iel++){
-	    for(unsigned int iel2= iel+1; iel2 < electronZZColl.size(); iel2++){
-	      if( electronZZColl[iel].DeltaR(electronZZColl[iel2]) < 0.02) pass_zz_sel1=false;
-	      snu::KParticle zee = electronZZColl[iel] + electronZZColl[iel2];
-	      if((zee.Charge() == 0) && (zee.M() < 4.)) pass_zz_sel1=false;
-	    }
-	  }
-	  if(pass_zz_sel1)       FillHist(methodtag+"_zz_mass_cut6", ZZpart.M() , ev_weight, 0., 800.,32);
-	  
-	  
-	  int ich(0);
-	  /// fill index of vector that has e+ and e- used for finding os pairs
-	  vector<int> plus_i;
-	  vector<int> minus_i;
-	  for(unsigned int iel=0; iel < electronZZColl.size(); iel++){
-	    ich += electronZZColl[iel].Charge();
-	    if(electronZZColl[iel].Charge() > 0) plus_i.push_back(iel);
-	    else minus_i.push_back(iel);
-	  }
-	  
-	  bool pass_zz_sel2(false);
-	  bool pass_zz_sel3(false); /// jaesungs 2 Z in Z peak (pt Zmu1 > 20. )
-	  
-	  /// ich = sum of charge and must be 0
-	  /// then require 2e+ and 2e-
-	  if(ich == 0 && plus_i.size() == 2 && minus_i.size()==2){
-	    
-	    for(int izp = 0 ; izp< 1;izp++){
-	      for(int izm = 0 ; izm < 2;izm++){
-		
-		/// loop finds Z e+e- pairs
-		snu::KParticle Z1 = electronZZColl[plus_i[izp]] + electronZZColl[minus_i[izm]];
-		
-		if(fabs(Z1.M() - 91.19) < 10.) {
-		  /// Z1 is Zcandidate
-		  /// now get second Z candidate indices
-		  int izp2 = izp;
-		  if(izp2 ==1)izp2=0;
-		  else izp2=1;
-		  int izm2 = izm;
-		  if(izm2 ==1)izm2=0;
-		  else izm2=1;
-		  // Z2 uses non z1 electrons
-		  snu::KParticle Z2= electronZZColl[plus_i[izp2]] + electronZZColl[minus_i[izm2]];
-		  if(fabs(Z2.M() - 91.19) <10.) {
-		    // this event has 2 Z candidates
-		    pass_zz_sel3=true;
-		    if( !( (electronZZColl[plus_i[izp]].Pt() > 20 ) || (electronZZColl[minus_i[izm]].Pt() > 20)) ) pass_zz_sel3=false;
-		    if( !( (electronZZColl[plus_i[izp2]].Pt() > 20 ) || (electronZZColl[minus_i[izm2]].Pt() > 20)) ) pass_zz_sel3=false;
-		    if(pass_zz_sel3) break;
-		  }
-		}
-	      }
-	    }
-	    
-	    snu::KParticle Z1cand1 = electronZZColl[plus_i[0]] + electronZZColl[minus_i[0]];
-	    snu::KParticle Z2cand1 = electronZZColl[plus_i[1]] + electronZZColl[minus_i[1]];
-	    
-	    bool cand_found=false;
-	    bool cand1=true;
-	    if(!(Z1cand1.M() > 4 && Z1cand1.M() < 120) ) cand1=false;
-	    if(!(Z2cand1.M() > 4 && Z2cand1.M() < 120) ) cand1=false;
-	    
-	    snu::KParticle Z1cand2 = electronZZColl[plus_i[0]] + electronZZColl[minus_i[1]];
-	    snu::KParticle Z2cand2 = electronZZColl[plus_i[1]] + electronZZColl[minus_i[0]];
-	    bool cand2=true;
-	    if(!(Z1cand2.M() > 4 && Z1cand2.M() < 120) ) cand2=false;
-	    if(!(Z2cand2.M() > 4 && Z2cand2.M() < 120) ) cand2=false;
-	    
-	    if(cand1 || cand1) cand_found=true;
-	    
-	    snu::KParticle Z1, Z2;
-	    float Zdiff_ev(0.);
-	    if(cand1){
-	      float zcand1diff1 = fabs(Z1cand1.M() - 91.1);
-	      float zcand1diff2 = fabs(Z2cand1.M() - 91.1);
-	      if(zcand1diff1 < zcand1diff2) {Z1= Z1cand1; Z2=Z2cand1; Zdiff_ev = zcand1diff1;}
-	      else  {Z1= Z2cand1; Z2=Z1cand1; Zdiff_ev = zcand1diff2;}
-	    }
-	    if(cand2){
-	      float zcand2diff1 = fabs(Z1cand2.M() - 91.1);
-	      float zcand2diff2 = fabs(Z2cand2.M() - 91.1);
-	      if(zcand2diff1 < zcand2diff2) {
-		if(zcand2diff1 < Zdiff_ev) {Z1 = Z1cand2; Z2 = Z2cand2;}
-	      }
-	      else{
-		if(zcand2diff2 < Zdiff_ev) {Z1 = Z2cand2; Z1 = Z1cand2;}
-	      }
-	    }
-	    
-	    // Z1 is closest to Z mass
-	    // Z2 is other os pair
-	    if(cand_found&& Z1.M() > 40.) pass_zz_sel2=true;
-	    
-	    if(pass_zz_sel1&&pass_zz_sel3){
-	      FillHist(methodtag+"_zz_mass_cut7", ZZpart.M() , id_iso_sf*weight*trigger_ps*reco_weight*puweight, 0., 800.,32);
-	      
-	      FillCLHist(sighist_eeee, methodtag+"ZZElectron1", eventbase->GetEvent(), muonVetoColl,electronZZColl,jets, ev_weight);
-	      
-	    }
-	    if(pass_zz_sel1&&pass_zz_sel2){
-	      FillHist(methodtag+"_zz_mass_cut8", ZZpart.M() , id_iso_sf*weight*trigger_ps*reco_weight*puweight, 0., 800.,32);
-	      
-	      FillCLHist(sighist_eeee, methodtag+"ZZElectron2", eventbase->GetEvent(), muonVetoColl,electronZZColl,jets, ev_weight);
-	      //if(Z1.M() > 60 && Z2.M() > 60) FillCLHist(sighist_eeee, "ZZElectron3", eventbase->GetEvent(), muonVetoColl,electronZZColl,jets, ev_weight);
-	    }
-	    
+	/// Check no OS pairs have m(ll) < 4. geV OR dR(l,l) < 0.02
+	bool pass_zz_sel1=true;
+	for(unsigned int iel=0; iel < electronZZColl.size() -1; iel++){
+	  for(unsigned int iel2= iel+1; iel2 < electronZZColl.size(); iel2++){
+	    if( electronZZColl[iel].DeltaR(electronZZColl[iel2]) < 0.02) pass_zz_sel1=false;
+	    snu::KParticle zee = electronZZColl[iel] + electronZZColl[iel2];
+	    if((zee.Charge() == 0) && (zee.M() < 4.)) pass_zz_sel1=false;
 	  }
 	}
-      }// END ZZ CR
-      
-      /// WZ CR / Zg
-      if(electronTightColl.size() == 3 && (nbjet == 0) && (electronTightColl[2].Pt() > 10.)){
+	if(pass_zz_sel1)       FillHist(methodtag+"_zz_mass_cut6", ZZpart.M() , ev_weight, 0., 800.,32);
 	
 	
-	// pt el 1 and 2 are set earlier to comply with trigger (25,12)
-	if(k_running_nonprompt){
-	  ev_weight     = m_datadriven_bkg->Get_DataDrivenWeight(false, muonVetoColl, "MUON_HN_TRI_TIGHT", muonVetoColl.size(), electronTightColl, "ELECTRON16_FR_POG_TIGHT", electronTightColl.size(), "ELECTRON16_POG_FAKELOOSE", "dijet_ajet40");
+	int ich(0);
+	/// fill index of vector that has e+ and e- used for finding os pairs
+	vector<int> plus_i;
+	vector<int> minus_i;
+	for(unsigned int iel=0; iel < electronZZColl.size(); iel++){
+	  ich += electronZZColl[iel].Charge();
+	  if(electronZZColl[iel].Charge() > 0) plus_i.push_back(iel);
+	  else minus_i.push_back(iel);
 	}
-	if(!(muonVetoColl.size() > 0 ||  electronVetoColl.size() > 3)){
-	  if(!isData){
-	    id_iso_sf=   mcdata_correction->ElectronScaleFactor("ELECTRON_POG_TIGHT", electronTightColl,0);
-	    trigger_ps= WeightByTrigger(analysis_trigger, TargetLumi)  ;
-	    reco_weight = mcdata_correction->ElectronRecoScaleFactor(electronTightColl);
-	    ev_weight = weight * id_iso_sf * reco_weight * puweight*trigger_ps;
-	  }
-	  snu::KParticle Z1 = electronTightColl[0] + electronTightColl[1];
-	  snu::KParticle Z2 = electronTightColl[0] + electronTightColl[2];
-	  snu::KParticle Z3 = electronTightColl[1] + electronTightColl[2];
-	  float diff1 = fabs(Z1.M() - 91.19) ;
-	  float diff2 = fabs(Z2.M() - 91.19) ;
-	  float diff3 = fabs(Z3.M() - 91.19) ;
+	
+	bool pass_zz_sel2(false);
+	bool pass_zz_sel3(false); /// jaesungs 2 Z in Z peak (pt Zmu1 > 20. )
+	
+	/// ich = sum of charge and must be 0
+	/// then require 2e+ and 2e-
+	if(ich == 0 && plus_i.size() == 2 && minus_i.size()==2){
 	  
-	  bool m_ll4=true;
-	  
-	  float diff = 999999999.;
-	  float el_zpt = 0.;
-	  float el_wpt = 0.;
-	  int iZ1(0);
-	  int iZ2(0);
-	  if(Z1.Charge() == 0){
-	    diff = diff1;
-	    el_zpt = electronTightColl[0].Pt();
-	    el_wpt = electronTightColl[2].Pt();
-	    iZ1=0;
-	    iZ1=1;
-	    if(Z1.M() < 4.) m_ll4=false;
-	  }
-	  if( (diff2 < diff) && (Z2.Charge() == 0)){
-	    diff= diff2;
-	    el_zpt= electronTightColl[0].Pt();
-	    el_wpt = electronTightColl[1].Pt();
-	    iZ1=0;
-	    iZ1=2;
-	    if(Z2.M() < 4.) m_ll4=false;
-	  }
-	  if( (diff3 < diff) && (Z3.Charge() == 0)){
-	    diff= diff3;
-	    el_zpt= electronTightColl[1].Pt();
-	    el_wpt = electronTightColl[0].Pt();
-	    iZ1=1;
-	    iZ1=2;
-	    if(Z3.M() < 4.) m_ll4=false;
-	  }
-	  TString tightid = "ELECTRON_POG_TIGHT";
-	  
-	  if(diff < 10.){
-	    if(el_zpt > 20.){
-	      if(eventbase->GetEvent().MET(snu::KEvent::pfmet) > 30.){
-		if(el_wpt > 20.){
-		  snu::KParticle WZ = electronTightColl[0] + electronTightColl[1]+ electronTightColl[2];
-		  if(WZ.M() > 100){
-		    FillCLHist(sighist_eee, methodtag+"WZElectron", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
-		    FillCLHist(sighist_eee, methodtag+"WZElectron_pu", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight*(puweight3/puweight));
-		  }
+	  for(int izp = 0 ; izp< 1;izp++){
+	    for(int izm = 0 ; izm < 2;izm++){
+	      
+	      /// loop finds Z e+e- pairs
+	      snu::KParticle Z1 = electronZZColl[plus_i[izp]] + electronZZColl[minus_i[izm]];
+	      
+	      if(fabs(Z1.M() - 91.19) < 10.) {
+		/// Z1 is Zcandidate
+		/// now get second Z candidate indices
+		int izp2 = izp;
+		if(izp2 ==1)izp2=0;
+		else izp2=1;
+		int izm2 = izm;
+		if(izm2 ==1)izm2=0;
+		else izm2=1;
+		// Z2 uses non z1 electrons
+		snu::KParticle Z2= electronZZColl[plus_i[izp2]] + electronZZColl[minus_i[izm2]];
+		if(fabs(Z2.M() - 91.19) <10.) {
+		  // this event has 2 Z candidates
+		  pass_zz_sel3=true;
+		  if( !( (electronZZColl[plus_i[izp]].Pt() > 20 ) || (electronZZColl[minus_i[izm]].Pt() > 20)) ) pass_zz_sel3=false;
+		  if( !( (electronZZColl[plus_i[izp2]].Pt() > 20 ) || (electronZZColl[minus_i[izm2]].Pt() > 20)) ) pass_zz_sel3=false;
+		  if(pass_zz_sel3) break;
 		}
 	      }
 	    }
 	  }
-	  else if(diff > 15.){
+	  
+	  snu::KParticle Z1cand1 = electronZZColl[plus_i[0]] + electronZZColl[minus_i[0]];
+	  snu::KParticle Z2cand1 = electronZZColl[plus_i[1]] + electronZZColl[minus_i[1]];
+	  
+	  bool cand_found=false;
+	  bool cand1=true;
+	  if(!(Z1cand1.M() > 4 && Z1cand1.M() < 120) ) cand1=false;
+	  if(!(Z2cand1.M() > 4 && Z2cand1.M() < 120) ) cand1=false;
+	  
+	  snu::KParticle Z1cand2 = electronZZColl[plus_i[0]] + electronZZColl[minus_i[1]];
+	  snu::KParticle Z2cand2 = electronZZColl[plus_i[1]] + electronZZColl[minus_i[0]];
+	  bool cand2=true;
+	  if(!(Z1cand2.M() > 4 && Z1cand2.M() < 120) ) cand2=false;
+	  if(!(Z2cand2.M() > 4 && Z2cand2.M() < 120) ) cand2=false;
+	  
+	  if(cand1 || cand1) cand_found=true;
+	  
+	  snu::KParticle Z1, Z2;
+	  float Zdiff_ev(0.);
+	  if(cand1){
+	    float zcand1diff1 = fabs(Z1cand1.M() - 91.1);
+	    float zcand1diff2 = fabs(Z2cand1.M() - 91.1);
+	    if(zcand1diff1 < zcand1diff2) {Z1= Z1cand1; Z2=Z2cand1; Zdiff_ev = zcand1diff1;}
+	    else  {Z1= Z2cand1; Z2=Z1cand1; Zdiff_ev = zcand1diff2;}
+	  }
+	  if(cand2){
+	    float zcand2diff1 = fabs(Z1cand2.M() - 91.1);
+	    float zcand2diff2 = fabs(Z2cand2.M() - 91.1);
+	    if(zcand2diff1 < zcand2diff2) {
+	      if(zcand2diff1 < Zdiff_ev) {Z1 = Z1cand2; Z2 = Z2cand2;}
+	    }
+	    else{
+	      if(zcand2diff2 < Zdiff_ev) {Z1 = Z2cand2; Z1 = Z1cand2;}
+	    }
+	  }
+	  
+	  // Z1 is closest to Z mass
+	  // Z2 is other os pair
+	  if(cand_found&& Z1.M() > 40.) pass_zz_sel2=true;
+	  
+	  if(pass_zz_sel1&&pass_zz_sel3){
+	    FillHist(methodtag+"_zz_mass_cut7", ZZpart.M() , id_iso_sf*evw*trigger_ps*reco_weight*puweight, 0., 800.,32);
 	    
-	    if(el_zpt > 20.&&m_ll4){
-	      if(eventbase->GetEvent().MET(snu::KEvent::pfmet) < 50.){
+	    FillCLHist(sighist_eeee, methodtag+"ZZElectron1", eventbase->GetEvent(), muonVetoColl,electronZZColl,jets, ev_weight);
+	    
+	  }
+	  if(pass_zz_sel1&&pass_zz_sel2){
+	    FillHist(methodtag+"_zz_mass_cut8", ZZpart.M() , id_iso_sf*evw*trigger_ps*reco_weight*puweight, 0., 800.,32);
+	    
+	    FillCLHist(sighist_eeee, methodtag+"ZZElectron2", eventbase->GetEvent(), muonVetoColl,electronZZColl,jets, ev_weight);
+	    //if(Z1.M() > 60 && Z2.M() > 60) FillCLHist(sighist_eeee, "ZZElectron3", eventbase->GetEvent(), muonVetoColl,electronZZColl,jets, ev_weight);
+	  }
+	  
+	}
+      }
+    }// END ZZ CR
+  
+    /// WZ CR / Zg
+    if(electronTightColl.size() == 3 && (nbjet == 0) && (electronTightColl[2].Pt() > 10.)){
+      
+      
+      // pt el 1 and 2 are set earlier to comply with trigger (25,12)
+      if(k_running_nonprompt){
+	ev_weight     = m_datadriven_bkg->Get_DataDrivenWeight(false, muonVetoColl, "MUON_HN_TRI_TIGHT", muonVetoColl.size(), electronTightColl,elid_tight_fixed, electronTightColl.size(),elid_loose, method_fake);
+	
+      }
+      if(!(muonVetoColl.size() > 0 ||  electronVetoColl.size() > 3)){
+	if(!isData){
+	  if(id==1)id_iso_sf=   mcdata_correction->ElectronScaleFactor("ELECTRON_POG_TIGHT", electronTightColl,0);
+          if(id>1)id_iso_sf=   mcdata_correction->ElectronScaleFactor("ELECTRON_MVA_90", electronTightColl,0);
+
+	  trigger_ps= WeightByTrigger(analysis_trigger, TargetLumi)  ;
+	  reco_weight = mcdata_correction->ElectronRecoScaleFactor(electronTightColl);
+	  ev_weight = evw * id_iso_sf * reco_weight * puweight*trigger_ps;
+	}
+	snu::KParticle Z1 = electronTightColl[0] + electronTightColl[1];
+	snu::KParticle Z2 = electronTightColl[0] + electronTightColl[2];
+	snu::KParticle Z3 = electronTightColl[1] + electronTightColl[2];
+	float diff1 = fabs(Z1.M() - 91.19) ;
+	float diff2 = fabs(Z2.M() - 91.19) ;
+	float diff3 = fabs(Z3.M() - 91.19) ;
+	
+	bool m_ll4=true;
+	
+	float diff = 999999999.;
+	float el_zpt = 0.;
+	float el_wpt = 0.;
+	int iZ1(0);
+	int iZ2(0);
+	if(Z1.Charge() == 0){
+	  diff = diff1;
+	  el_zpt = electronTightColl[0].Pt();
+	  el_wpt = electronTightColl[2].Pt();
+	  iZ1=0;
+	  iZ1=1;
+	  if(Z1.M() < 4.) m_ll4=false;
+	}
+	if( (diff2 < diff) && (Z2.Charge() == 0)){
+	  diff= diff2;
+	  el_zpt= electronTightColl[0].Pt();
+	  el_wpt = electronTightColl[1].Pt();
+	  iZ1=0;
+	  iZ1=2;
+	  if(Z2.M() < 4.) m_ll4=false;
+	}
+	if( (diff3 < diff) && (Z3.Charge() == 0)){
+	  diff= diff3;
+	  el_zpt= electronTightColl[1].Pt();
+	  el_wpt = electronTightColl[0].Pt();
+	  iZ1=1;
+	  iZ1=2;
+	  if(Z3.M() < 4.) m_ll4=false;
+	}
+	
+	if(diff < 10.){
+	  if(el_zpt > 20.){
+	    if(eventbase->GetEvent().MET(snu::KEvent::pfmet) > 30.){
+	      if(el_wpt > 20.){
 		snu::KParticle WZ = electronTightColl[0] + electronTightColl[1]+ electronTightColl[2];
-		snu::KParticle Z = electronTightColl[iZ1] + electronTightColl[iZ2];
-		
-		if(fabs(WZ.M() - 91.1) < 10.){
-		  FillCLHist(sighist_eee, methodtag+"ZgElectron", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
-		  if(jets.size() > 0)    FillCLHist(sighist_eee, methodtag+"ZgElectron2", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+		if(WZ.M() > 100){
+		  FillCLHist(sighist_eee, methodtag+"WZElectron", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+		  FillCLHist(sighist_eee, methodtag+"WZElectron_pu", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight*(puweight3/puweight));
 		}
+	      }
+	    }
+	  }
+	}
+	else if(diff > 15.){
+	  
+	  if(el_zpt > 20.&&m_ll4){
+	    if(eventbase->GetEvent().MET(snu::KEvent::pfmet) < 50.){
+	      snu::KParticle WZ = electronTightColl[0] + electronTightColl[1]+ electronTightColl[2];
+	      snu::KParticle Z = electronTightColl[iZ1] + electronTightColl[iZ2];
+	      
+	      if(fabs(WZ.M() - 91.1) < 10.){
+		FillCLHist(sighist_eee, methodtag+"ZgElectron", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+		if(jets.size() > 0)    FillCLHist(sighist_eee, methodtag+"ZgElectron2", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
 	      }
 	    }
 	  }
 	}
       }
-      
-      
-      if(electronTightColl.size() == 2){
-	
-	snu::KParticle Zpart = electronTightColl[0] + electronTightColl[1];
-	counter("pog_diel",weight);
-	if(Zpart.M() < 10.) goto endDiElLoop;
-	counter("pog_diel_mll10",weight);
-	
-	if(!(muonVetoColl.size() > 0 ||  electronVetoColl.size() > 2)){
-	  counter("vetolepton_diel",weight);
-	  
-	  if(!isData){
-	    id_iso_sf=   mcdata_correction->ElectronScaleFactor("ELECTRON_POG_TIGHT", electronTightColl,0);
-	    trigger_ps= WeightByTrigger(analysis_trigger, TargetLumi)  ;
-	    reco_weight = mcdata_correction->ElectronRecoScaleFactor(electronTightColl);
-	    ev_weight = weight * id_iso_sf * reco_weight * puweight*trigger_ps;
-	    ev_weight2 = weight  * id_iso_sf * reco_weight * puweight2*trigger_ps;
-	    ev_weight3 = weight  * id_iso_sf * reco_weight * puweight3*trigger_ps;
-	    ev_weight4 = weight * id_iso_sf * reco_weight * puweight4*trigger_ps;
-	  }
-	  
-	  
-	  if(k_running_nonprompt){
-	    //ev_weight =  m_datadriven_bkg->Get_DataDrivenWeight_EE( false,electronTightColl, "ELECTRON16_POG_FAKELOOSE","ELECTRON16_FR_POG_TIGHT","dijet_ajet40");     
-	    ev_weight     = m_datadriven_bkg->Get_DataDrivenWeight(false, muonVetoColl, "MUON_HN_TRI_TIGHT", muonVetoColl.size(), electronTightColl, "ELECTRON16_FR_POG_TIGHT", electronTightColl.size(), "ELECTRON16_POG_FAKELOOSE", "dijet_ajet40");	   
-	    
-	    
-	    ev_weight2 = ev_weight;
-	    ev_weight3 = ev_weight;
-	      ev_weight4 = ev_weight;
-	  }
-	  
-	  //// Dileton [top + DY CR]
-	  if(OppositeCharge(electronTightColl)){
-	    counter("os_diel",weight);
-	    if(electronTightColl.at(0).Pt() > 25. && electronTightColl.at(1).Pt() > 20.){
-	      TString tightid = "ELECTRON_POG_TIGHT";
-	      if(k_running_nonprompt){
-		if(!PassID(electronTightColl.at(0), tightid) && !PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_os_ee_ll_pt2", electronTightColl.at(1).Pt() , ev_weight, 0., 100.,100);
-		if(PassID(electronTightColl.at(0), tightid) && !PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_os_ee_tl_pt2", electronTightColl.at(1).Pt() , ev_weight, 0., 100.,100);
-		if(!PassID(electronTightColl.at(0), tightid) && PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_os_ee_lt_pt2", electronTightColl.at(1).Pt() , ev_weight, 0., 100.,100);
-		if(PassID(electronTightColl.at(0), tightid) && PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_os_ee_tt_pt2", electronTightColl.at(1).Pt() , ev_weight, 0., 100.,100);
-		
-		if(!PassID(electronTightColl.at(0), tightid) && !PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_osnw_ee_ll_pt2", electronTightColl.at(1).Pt() ,1., 0., 100.,100);
-		if(PassID(electronTightColl.at(0), tightid) && !PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_osnw_ee_tl_pt2", electronTightColl.at(1).Pt() , 1., 0., 100.,100);
-		
-		if(PassID(electronTightColl.at(0), tightid) && PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_osnw_ee_lt_pt2", electronTightColl.at(1).Pt() , 1., 0., 100.,100);
-		if(PassID(electronTightColl.at(0), tightid) && PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_osnw_ee_tt_pt2", electronTightColl.at(1).Pt() , 1., 0., 100.,100);
-		
-		
-	      }
-	      
-	      if(GetDiLepMass(electronTightColl) < 101. && GetDiLepMass(electronTightColl)  > 81.){
-		if((nbjet==0)){
-		  FillHist(methodtag+"_zpeak_ee_w1", GetDiLepMass(electronTightColl), weight*trigger_ps, 0., 200.,400);
-		  FillHist(methodtag+"_zpeak_ee_w2", GetDiLepMass(electronTightColl), weight*trigger_sf*trigger_ps, 0., 200.,400);
-		  FillHist(methodtag+"_zpeak_ee_w3", GetDiLepMass(electronTightColl),    weight*id_iso_sf*trigger_sf*trigger_ps, 0., 200.,400);
-		  FillHist(methodtag+"_zpeak_ee_w4", GetDiLepMass(electronTightColl),    weight*id_iso_sf*trigger_sf*puweight*trigger_ps, 0., 200.,400);
-		  FillHist(methodtag+"_zpeak_ee_w5a", GetDiLepMass(electronTightColl),    weight*id_iso_sf*trigger_sf*puweight*trigger_ps*reco_weight, 0., 200.,400);
-		  FillHist(methodtag+"_zpeak_ee_w5b", GetDiLepMass(electronTightColl),    weight*id_iso_sf*trigger_sf*puweight2*trigger_ps*reco_weight, 0., 200.,400);
-		  FillHist(methodtag+"_zpeak_ee_w5c", GetDiLepMass(electronTightColl),    weight*id_iso_sf*trigger_sf*puweight3*trigger_ps*reco_weight, 0., 200.,400);
-		  FillHist(methodtag+"_zpeak_ee_w5d", GetDiLepMass(electronTightColl),    weight*id_iso_sf*trigger_sf*puweight4*trigger_ps*reco_weight, 0., 200.,400);
-		}
-	      }
-	      else   FillCLHist(sighist_ee, methodtag+"OSNoZDiElectron", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
-	      
-	      
-	      if(electronTightColl[1].Pt() > 30.)FillCLHist(sighist_ee,methodtag+ "OSDiElectronw0", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, 1.);
-	      
-	      
-	      FillCLHist(sighist_ee, methodtag+"OSDiElectronw1", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
-	      FillCLHist(sighist_ee, methodtag+"OSDiElectronw2", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight2);
-	      FillCLHist(sighist_ee, methodtag+"OSDiElectronw3", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight3);
-	      FillCLHist(sighist_ee, methodtag+"OSDiElectronw4", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight4);
-	      	      
-	      float hnweight= ev_weight;
-	      if(k_running_nonprompt){
-		hnweight =  m_datadriven_bkg->Get_DataDrivenWeight_EE( false,electronTightColl, "ELECTRON16_HN_FAKELOOSE","ELECTRON16_HN_TIGHT_DXYSIG","dijet_ajet40");
-	      }
-	      
-	      if(electronHNTightColl.size() ==2) FillCLHist(sighist_ee, methodtag+"OSHNDiElectron", eventbase->GetEvent(), muonVetoColl,electronHNTightColl,jets, hnweight);
-	      
-	      if(jets.size() > 1) {
-		FillCLHist(sighist_ee, methodtag+"OSDiElectronDiJet", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
-		if(eventbase->GetEvent().MET(snu::KEvent::pfmet) > 70.){
-		  if(nbjet ==1) FillCLHist(sighist_ee, methodtag+"OSDiElectronDiJet1bw1", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
-		  if(nbjet ==1) FillCLHist(sighist_ee, methodtag+"OSDiElectronDiJet1bw2", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight2);
-		  if(nbjet ==1) FillCLHist(sighist_ee, methodtag+"OSDiElectronDiJet1bw3", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight3);
-		  if(nbjet ==1) FillCLHist(sighist_ee, methodtag+"OSDiElectronDiJet1bw4", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight4);
-		  if(nbjet > 1) FillCLHist(sighist_ee, methodtag+"OSDiElectronDiJet2b", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
-		}
-	      }
-	    } // pt cuts
-	  }// e+e-
-	    else{
-	      counter("ss_diel",weight);
-              if(electronTightColl.at(0).Pt() > 25. && electronTightColl.at(1).Pt() > 15.){
-		if(GetDiLepMass(electronTightColl) < 101.&& GetDiLepMass(electronTightColl) > 81.)FillCLHist(sighist_ee, methodtag+"SSZDiElectron", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
-		else {
-		  FillCLHist(sighist_ee, methodtag+"SSnoZDiElectron", eventbase->GetEvent(),muonVetoColl,electronTightColl,jets, ev_weight);
+    }
+    
+    bool externconv=false;
+    for(unsigned int x=0; x <  electronVetoColl.size(); x++){
+      if( electronVetoColl[x].MCIsExternalConversion())externconv=true;
+    }
 
-		}
-		FillCLHist(sighist_ee, methodtag+"SSDiElectron", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
-		
-		if(jets.size() > 1)FillCLHist(sighist_ee, methodtag+"SSDiElJet", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+    if(electronTightColl.size() == 2){
+      
+      snu::KParticle Zpart = electronTightColl[0] + electronTightColl[1];
+      counter("pog_diel",evw);
+      if(Zpart.M() < 10.) goto endDiElLoop;
+      counter("pog_diel_mll10",evw);
+      
+      if(!(muonVetoColl.size() > 0 ||  electronVetoColl.size() > 2)){
+	counter("vetolepton_diel",evw);
+	
+	if(!isData){
+	  if(id==1)id_iso_sf=   mcdata_correction->ElectronScaleFactor("ELECTRON_POG_TIGHT", electronTightColl,0);
+	  if(id>1)id_iso_sf=   mcdata_correction->ElectronScaleFactor("ELECTRON_MVA_90", electronTightColl,0);
+
+	  trigger_ps= WeightByTrigger(analysis_trigger, TargetLumi)  ;
+	  reco_weight = mcdata_correction->ElectronRecoScaleFactor(electronTightColl);
+	  ev_weight = evw * id_iso_sf * reco_weight * puweight*trigger_ps;
+	  ev_weight2 = evw *trigger_ps ;
+	  ev_weight3 = evw  * id_iso_sf*trigger_ps;
+	  ev_weight4 = evw * id_iso_sf * reco_weight *trigger_ps;
+	}
+	
+	
+	if(k_running_nonprompt){
+	  //ev_weight =  m_datadriven_bkg->Get_DataDrivenWeight_EE( false,electronTightColl, "ELECTRON16_POG_FAKELOOSE","ELECTRON16_FR_POG_TIGHT","dijet_ajet40");     
+	  ev_weight     = m_datadriven_bkg->Get_DataDrivenWeight(false, muonVetoColl, "MUON_HN_TRI_TIGHT", muonVetoColl.size(), electronTightColl,elid_tight_fixed, electronTightColl.size(),elid_loose, method_fake);
+	
+	  ev_weight2 = ev_weight;
+	  ev_weight3 = ev_weight;
+	  ev_weight4 = ev_weight;
+	}
+	
+	//// Dileton [top + DY CR]
+	if(OppositeCharge(electronTightColl)){
+	  counter("os_diel",evw);
+	  if(electronTightColl.at(0).Pt() > 25. && electronTightColl.at(1).Pt() > 20.){
+	    TString tightid = el_elid;
+	    if(k_running_nonprompt){
+	      if(!PassID(electronTightColl.at(0), tightid) && !PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_os_ee_ll_pt2", electronTightColl.at(1).Pt() , ev_weight, 0., 100.,100);
+	      if(PassID(electronTightColl.at(0), tightid) && !PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_os_ee_tl_pt2", electronTightColl.at(1).Pt() , ev_weight, 0., 100.,100);
+	      if(!PassID(electronTightColl.at(0), tightid) && PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_os_ee_lt_pt2", electronTightColl.at(1).Pt() , ev_weight, 0., 100.,100);
+	      if(PassID(electronTightColl.at(0), tightid) && PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_os_ee_tt_pt2", electronTightColl.at(1).Pt() , ev_weight, 0., 100.,100);
+	      
+	      if(!PassID(electronTightColl.at(0), tightid) && !PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_osnw_ee_ll_pt2", electronTightColl.at(1).Pt() ,1., 0., 100.,100);
+	      if(PassID(electronTightColl.at(0), tightid) && !PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_osnw_ee_tl_pt2", electronTightColl.at(1).Pt() , 1., 0., 100.,100);
+	      
+	      if(PassID(electronTightColl.at(0), tightid) && PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_osnw_ee_lt_pt2", electronTightColl.at(1).Pt() , 1., 0., 100.,100);
+	      if(PassID(electronTightColl.at(0), tightid) && PassID(electronTightColl.at(1), tightid) )FillHist(methodtag+"_osnw_ee_tt_pt2", electronTightColl.at(1).Pt() , 1., 0., 100.,100);
+	      
+	      
+	    }
+	    
+	    if(GetDiLepMass(electronTightColl) < 101. && GetDiLepMass(electronTightColl)  > 81.){
+	      if((nbjet==0)){
+		FillHist(methodtag+"_zpeak_ee_w1", GetDiLepMass(electronTightColl), evw*trigger_ps, 0., 200.,400);
+		FillHist(methodtag+"_zpeak_ee_w2", GetDiLepMass(electronTightColl), evw*trigger_sf*trigger_ps, 0., 200.,400);
+		FillHist(methodtag+"_zpeak_ee_w3", GetDiLepMass(electronTightColl),    evw*id_iso_sf*trigger_sf*trigger_ps, 0., 200.,400);
+		FillHist(methodtag+"_zpeak_ee_w4", GetDiLepMass(electronTightColl),    evw*id_iso_sf*trigger_sf*puweight*trigger_ps, 0., 200.,400);
+		FillHist(methodtag+"_zpeak_ee_w5a", GetDiLepMass(electronTightColl),    evw*id_iso_sf*trigger_sf*puweight*trigger_ps*reco_weight, 0., 200.,400);
+		FillHist(methodtag+"_zpeak_ee_w5b", GetDiLepMass(electronTightColl),    evw*id_iso_sf*trigger_sf*puweight2*trigger_ps*reco_weight, 0., 200.,400);
+		FillHist(methodtag+"_zpeak_ee_w5c", GetDiLepMass(electronTightColl),    evw*id_iso_sf*trigger_sf*puweight3*trigger_ps*reco_weight, 0., 200.,400);
+		FillHist(methodtag+"_zpeak_ee_w5d", GetDiLepMass(electronTightColl),    evw*id_iso_sf*trigger_sf*puweight4*trigger_ps*reco_weight, 0., 200.,400);
 	      }
 	    }
-	} // veto leptons 
-      }// 2 el
-    } /// DiEl Trigger
-    return;
-  }
-  
- endDiElLoop:
-  return;
-  
-  if(_singleel){
-    /// e+e-                                                                                                                                                                                                                                                               
-    TString analysis_trigger="HLT_Ele27_WPTight_Gsf_v";
-    /// Trigger List (unprescaled)                                                                                                                                                                                                                                         
-    std::vector<TString> triggerslist;
-    triggerslist.push_back(analysis_trigger);
-    
-    if(PassTrigger(analysis_trigger)){
-      counter("Trigger_singleel",weight);
-      puweight=mcdata_correction->PileupWeightByPeriod(eventbase->GetEvent());
-      
-      if(electronTightColl.size() == 1){
-	counter("pog_singleel",weight);
-	
-	if(!(muonVetoColl.size() > 0 && electronVetoColl.size() > 1)){
-	  counter("vetolepton_singleel",weight);
-	  
-	  if(!isData){
-	    id_iso_sf=   mcdata_correction->ElectronScaleFactor("ELECTRON_POG_TIGHT", electronTightColl,0);
-	    trigger_ps= WeightByTrigger(analysis_trigger, TargetLumi)  ;
-	    reco_weight = mcdata_correction->ElectronRecoScaleFactor(electronTightColl);
-	    ev_weight = weight * trigger_sf * id_iso_sf * reco_weight * puweight*trigger_ps;
+	    else   FillCLHist(sighist_ee, methodtag+"OSNoZDiElectron", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+	    
+	    
+	    if(electronTightColl[1].Pt() > 30.)FillCLHist(sighist_ee,methodtag+ "OSDiElectronw0", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, 1.);
+	    
+	    counter("os_dielw1",ev_weight);
+	    //m_logger << INFO << "RunNumber/Event Number = "  << eventbase->GetEvent().RunNumber() << " : " << eventbase->GetEvent().EventNumber() << LQLogger::endmsg;
+	    //cout << electronTightColl[0].Pt() << " " << electronTightColl[1].Pt() << endl;
+	    //cout << electronTightColl[0].Pt()*electronTightColl[0].SmearFactor() << " " << electronTightColl[1].Pt()*electronTightColl[0].SmearFactor() << endl;
+
+	    FillCLHist(sighist_ee, methodtag+"OSDiElectronw1", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+	    FillHist("llmass_check",GetDiLepMass(electronTightColl),ev_weight,0, 200., 100);
+
+	    FillCLHist(sighist_ee, methodtag+"OSDiElectronw2", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight2);
+	    FillCLHist(sighist_ee, methodtag+"OSDiElectronw3", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight3);
+	    FillCLHist(sighist_ee, methodtag+"OSDiElectronw4", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight4);
+	    if(electronTightColl[0].GetType() ==1 && electronTightColl[1].GetType()==1){
+	      FillCLHist(sighist_ee, methodtag+"OSDiElectronw5", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+	      if(!externconv)FillCLHist(sighist_ee, methodtag+"OSDiElectronw6", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+	    }
+	    if(jets.size() > 1) {
+	      FillCLHist(sighist_ee, methodtag+"OSDiElectronDiJet", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+	      if(eventbase->GetEvent().MET(snu::KEvent::pfmet) > 70.){
+		if(nbjet ==1) FillCLHist(sighist_ee, methodtag+"OSDiElectronDiJet1bw1", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+		if(nbjet ==1) FillCLHist(sighist_ee, methodtag+"OSDiElectronDiJet1bw2", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight2);
+		if(nbjet ==1) FillCLHist(sighist_ee, methodtag+"OSDiElectronDiJet1bw3", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight3);
+		if(nbjet ==1) FillCLHist(sighist_ee, methodtag+"OSDiElectronDiJet1bw4", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight4);
+		if(nbjet > 1) FillCLHist(sighist_ee, methodtag+"OSDiElectronDiJet2b", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+	      }
+	    }
+	  } // pt cuts
+	}// e+e-
+	else{
+	  counter("ss_diel",evw);
+	  if(GetDiLepMass(electronTightColl) < 101.&& GetDiLepMass(electronTightColl) > 81.)FillCLHist(sighist_ee, methodtag+"SSZDiElectron", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+	  else {
+	    FillCLHist(sighist_ee, methodtag+"SSnoZDiElectron", eventbase->GetEvent(),muonVetoColl,electronTightColl,jets, ev_weight);
 	    
 	  }
+	  FillCLHist(sighist_ee, methodtag+"SSDiElectron", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
 	  
-	  if(electronTightColl.at(0).Pt() > 30.){
-	    
-	    float METdphi = TVector2::Phi_mpi_pi(electronTightColl.at(0).Phi()- eventbase->GetEvent().METPhi(snu::KEvent::pfmet));
-	    float MT=(2.* electronTightColl.at(0).Et()*eventbase->GetEvent().MET(snu::KEvent::pfmet) * (1 - cos( METdphi)));
-	    
-	    if(MT > 40. && eventbase->GetEvent().MET(snu::KEvent::pfmet) > 30.) FillCLHist(sighist_ee, "SingleElectron_Wregion", eventbase->GetEvent(),  muonVetoColl,electronTightColl,jets, ev_weight);
-	    
-	  } // pt cuts                                                                                                                                                                                                                                                   
-	} // veto leptons                                                                                                                                                                                                                                                  
-      }// 2 el                                                                                                                                                                                                                                                             
-    } /// El Trigger                                                                                                                                                                                                                                                     
+
+	  if(jets.size() > 1)FillCLHist(sighist_ee, methodtag+"SSDiElJet", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+	  if(jets.size()== 1 && GetDiLepMass(electronTightColl) > 100.)FillCLHist(sighist_ee, methodtag+"SS1Jet", eventbase->GetEvent(), muonVetoColl,electronTightColl,jets, ev_weight);
+	}
+      } // veto leptons 
+    }// 2 el
   }
-  
-  
-  
-  
+
+
+ endDiElLoop:
   return;
+  /// e+e-                                                                                                                                                                                                                                                               
 }
 
 
@@ -1830,6 +1917,55 @@ bool HNDiElectron::CheckSignalRegion( bool isss,  std::vector<snu::KElectron> el
 
   if((ee.M() > 80.) && (ee.M() < 100.) ) return false;
   float ST = electrons[0].Pt() + electrons[1].Pt();
+
+  float HT=0.;
+  for(unsigned int ij=0; ij <jets.size(); ij++){
+    ST+= jets[ij].Pt();
+    HT+= jets[ij].Pt();
+  }
+  if(HT >  300.) return false;
+  
+  if(ST > 350.)  return false;
+  
+  
+  if((eventbase->GetEvent().PFMET()/pow(2., ST))  > 15.) return false;
+
+  int nbjet=0;
+  for(unsigned int ij=0; ij <jets.size(); ij++){
+    if(IsBTagged(jets.at(ij), snu::KJet::CSVv2, snu::KJet::Medium, GetPeriod())) nbjet++;
+  }
+  if(nbjet > 0) return false;
+  
+  
+
+  return true;
+
+}
+
+/*
+bool HNDiElectron::CheckSignalRegion( bool isss,  std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, TString name, float w){
+
+  if(electrons.size() != 2 ) return false ;
+  // Set by trigger                                                                                                                                                             
+  if(electrons.at(0).Pt() < 25.) return false;
+  if(electrons.at(1).Pt() < 15.) return false;
+  if(isss&&!SameCharge(electrons)) return false;
+
+  return true;
+  if(!isss&&SameCharge(electrons)) return false;
+  if(jets.size() < 2) return false;
+  snu::KParticle ee = electrons.at(0) + electrons.at(1);
+  if(ee.M()  < 10.) return false;
+
+  snu::KParticle jj = jets.at(0) + jets.at(1) ;
+  if(jj.M() > 120.) return false;
+  if(jj.M() < 40.) return false;
+
+  if(electrons.at(0).DeltaR(electrons.at(1)) > 3.5) return false;
+  if(eventbase->GetEvent().SumET() < 200.) return false;;
+
+  if((ee.M() > 80.) && (ee.M() < 100.) ) return false;
+  float ST = electrons[0].Pt() + electrons[1].Pt();
   for(unsigned int ij=0; ij <jets.size(); ij++){
     ST+= jets[ij].Pt();
   }
@@ -1840,11 +1976,13 @@ bool HNDiElectron::CheckSignalRegion( bool isss,  std::vector<snu::KElectron> el
     if(IsBTagged(jets.at(ij), snu::KJet::CSVv2, snu::KJet::Medium, GetPeriod())) nbjet++;
   }
   if(nbjet > 0) return false;
-  
-  
+
+
   return true;
 
 }
+
+ */
 
 
 
@@ -2136,7 +2274,8 @@ bool HNDiElectron::HighMassCheckSignalRegion(  std::vector<snu::KElectron> elect
 
 
 void HNDiElectron::counter(TString cut, float w){
-  w=1.;
+
+  w=1;
   map<TString,float>::iterator itmapcounter = mapcounter.find(cut) ;
   if (itmapcounter == mapcounter.end()){
     mapcounter[cut] = w;

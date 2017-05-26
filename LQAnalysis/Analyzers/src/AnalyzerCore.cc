@@ -275,6 +275,7 @@ void AnalyzerCore::setTDRStyle() {
 }
 
 void AnalyzerCore::SetupLuminosityMap(bool initialsetup, TString forceperiod){
+  if(isData) return ;
 
   TString lumitriggerpath="";
   TString singleperiod = getenv("CATAnalyzerPeriod");
@@ -284,7 +285,7 @@ void AnalyzerCore::SetupLuminosityMap(bool initialsetup, TString forceperiod){
     trigger_lumi_map_cat2016.clear();
   }
   string lqdir = getenv("LQANALYZER_DIR");
-
+  
   cout << "CATAnalyzerPeriod = " << singleperiod << endl;
   if(singleperiod.Contains("None")){
     lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+".txt";
@@ -913,6 +914,17 @@ void AnalyzerCore::SetupSelectionJet(std::string path_sel){
         }
       }
     }
+    std::map<TString, vector<pair<TString,float> > >::iterator fit = selectionIDMapfJet.find(idlabel);
+
+    if(idlabel!=""){
+      
+      if(fit != selectionIDMapfJet.end()){
+	cerr << "Repeated ID " <<idlabel<< endl;
+	exit(EXIT_FAILURE);
+	
+      }
+    }
+
     selectionIDMapsJet[idlabel] = string_jetsel;
     selectionIDMapfJet[idlabel] = float_jetsel;
   }
@@ -977,6 +989,17 @@ void AnalyzerCore::SetupSelectionFatJet(std::string path_sel){
         }
       }
     }
+
+    std::map<TString, vector<pair<TString,float> > >::iterator fit = selectionIDMapfFatJet.find(idlabel);
+
+    if(idlabel!=""){
+      if(fit != selectionIDMapfFatJet.end()){
+	cerr << "Repeated ID " <<idlabel<< endl;
+	exit(EXIT_FAILURE);
+	
+      }
+    }
+
     selectionIDMapsFatJet[idlabel] = string_jetsel;
     selectionIDMapfFatJet[idlabel] = float_jetsel;
   }
@@ -1046,6 +1069,16 @@ void AnalyzerCore::SetupSelectionMuon(std::string path_sel){
 	}
       }
     }
+    
+    std::map<TString, vector<pair<TString,float> > >::iterator fit = selectionIDMapfMuon.find(idlabel);
+
+    if(idlabel!=""){
+      if(fit != selectionIDMapfMuon.end()){
+	cerr << "Repeated ID " << idlabel << endl;
+	exit(EXIT_FAILURE);
+	
+      }
+    }
     selectionIDMapsMuon[idlabel] = string_muonsel;
     selectionIDMapfMuon[idlabel] = float_muonsel;
   }
@@ -1112,7 +1145,7 @@ void AnalyzerCore::SetupSelectionElectron(std::string path_sel){
           cout << "Setup: string " << cutnames.at(x) << " = " <<tmp << endl;
           string_elsel.push_back(make_pair(cutnames.at(x),tmp) );
         }
-	else  if (x > 34 && x < 42){
+	else  if (x > 34 && x < 46){
           is >> tmp;
           cout << "Setup: string " << cutnames.at(x) << " = " <<tmp << endl;
           string_elsel.push_back(make_pair(cutnames.at(x),tmp) );
@@ -1124,6 +1157,16 @@ void AnalyzerCore::SetupSelectionElectron(std::string path_sel){
 
           float_elsel.push_back(make_pair(cutnames.at(x),tmpf));
         }
+      }
+    }
+
+    std::map<TString, vector<pair<TString,float> > >::iterator fit = selectionIDMapfElectron.find(idlabel);
+
+    if(idlabel!=""){
+      if(fit != selectionIDMapfElectron.end()){
+	cerr << "Repeated ID " <<idlabel<< endl;
+	exit(EXIT_FAILURE);
+	
       }
     }
     selectionIDMapsElectron[idlabel] = string_elsel;
@@ -1802,9 +1845,12 @@ void AnalyzerCore::SetupID(){
 
   if(IDSetup) return;
 
-  if(k_classname.Contains("SKTreeMaker")){
-    IDSetup=true;
+  // IF STANDARD SKTREE CODE NO NEED FOR ID
+  if(!k_classname.Contains("HN")){
+    if(k_classname.Contains("SKTreeMaker")){
+      IDSetup=true;
     return;
+    }
   }
 
   string lqdir =  getenv("LQANALYZER_DIR");
@@ -1816,9 +1862,9 @@ void AnalyzerCore::SetupID(){
 
   SetupSelectionElectron(lqdir + "/CATConfig/SelectionConfig/electrons.sel");
   SetupSelectionElectron(lqdir + "/CATConfig/SelectionConfig/user_electrons.sel");
-  if(k_classname.Contains("HNDiElectron"))SetupSelectionElectron(lqdir + "/CATConfig/SelectionConfig/"+username+"_electrons.sel");
-  if(k_classname.Contains("FakeRateCalculator_El")) SetupSelectionElectron(lqdir + "/CATConfig/SelectionConfig/"+username+"_electrons.sel");
-  if(k_classname.Contains("ElectronTypes")) SetupSelectionElectron(lqdir + "/CATConfig/SelectionConfig/"+username+"_electrons.sel");
+  //if(k_classname.Contains("HNDiElectron"))SetupSelectionElectron(lqdir + "/CATConfig/SelectionConfig/"+username+"_electrons.sel");
+  //if(k_classname.Contains("FakeRateCalculator_El")) SetupSelectionElectron(lqdir + "/CATConfig/SelectionConfig/"+username+"_electrons.sel");
+  //if(k_classname.Contains("ElectronTypes")) SetupSelectionElectron(lqdir + "/CATConfig/SelectionConfig/"+username+"_electrons.sel");
   SetupSelectionJet(lqdir + "/CATConfig/SelectionConfig/jets.sel");
   SetupSelectionJet(lqdir + "/CATConfig/SelectionConfig/user_jets.sel");
 
@@ -1977,8 +2023,16 @@ void AnalyzerCore::SetUpEvent(Long64_t entry, float ev_weight) throw( LQError ) 
   vector<snu::KTruth> gen;
   if(k_usetruth) gen=GetTruthParticles(np);
   
-  LQEvent lqevent(GetAllMuons(), GetAllElectrons(), photons, skjets,skfatjets, skgenjets, gen, triggerinfo,eventinfo);
+  vector<snu::KMuon>  muons = GetAllMuons();
+
+  if(!k_classname.Contains("SKTreeMaker")){
+    if(k_skim="FLATCAT"){
+      SetCorrectedMomentum(muons, gen);
+    }
+  }
+  LQEvent lqevent(muons, GetAllElectrons(), photons, skjets,skfatjets, skgenjets, gen, triggerinfo,eventinfo);
   
+
   //  eventbase is master class to use in analysis 
   //
   
@@ -2171,15 +2225,25 @@ bool AnalyzerCore::TruthMatched(std::vector<snu::KElectron> el, bool tightdxy, b
       if(el[iel].GetType() == 22) pass=false; // ?
       if(el[iel].GetType() == 24) pass=false;
       if(el[iel].GetType() > 25) pass=false;
-      if(tightdxy){
-	if(el[iel].GetType() == 6) pass=false;
-	if(el[iel].GetType() == 13) pass=false;
-	if(el[iel].GetType() == 20) pass=false;
-	if(el[iel].GetType() == 21) pass=false;
-	if(el[iel].GetType() == 23) pass=false;
-      }
     }
   }
+  
+  return pass;
+}
+
+bool AnalyzerCore::TruthMatched(snu::KMuon mu){
+
+  bool pass=false;
+  
+  if(mu.GetType() ==0) pass=true;
+  if(mu.GetType() ==1) pass=true;
+  if(mu.GetType() ==3) pass=true;
+  if(mu.GetType() ==6) pass=true;
+  if(mu.GetType() ==8) pass=true;
+  if(mu.GetType() ==9) pass=true;
+  if(mu.GetType() ==12) pass=true;
+  if(mu.GetType() ==24) pass=true;
+  if(mu.GetType() ==21) pass=true;
   
   return pass;
 }
@@ -2271,7 +2335,7 @@ void AnalyzerCore::TruthPrintOut(){
     if(eventbase->GetTruth().at(ig).IndexMother() >= int(eventbase->GetTruth().size()))continue;
     if (eventbase->GetTruth().at(ig).PdgId() == 2212)  cout << ig << " | " << eventbase->GetTruth().at(ig).PdgId() << "  |               |         |        |         |       |         |" << endl;
 
-    cout << ig << " |  " <<  eventbase->GetTruth().at(ig).PdgId() << " |  " << eventbase->GetTruth().at(ig).GenStatus() << " |  " << eventbase->GetTruth().at(eventbase->GetTruth().at(ig).IndexMother()).PdgId()<< " |   " << eventbase->GetTruth().at(ig).Eta() << " | " << eventbase->GetTruth().at(ig).Pt() << " | " << eventbase->GetTruth().at(ig).Phi()<< " |   " << eventbase->GetTruth().at(ig).IndexMother()  << endl; 
+    cout << ig << " |  " <<  eventbase->GetTruth().at(ig).PdgId() << " |  " << eventbase->GetTruth().at(ig).GenStatus() << " |  " << eventbase->GetTruth().at(eventbase->GetTruth().at(ig).IndexMother()).PdgId()<< " |   " << eventbase->GetTruth().at(ig).Eta() << " | " << eventbase->GetTruth().at(ig).Pt() << " | " << eventbase->GetTruth().at(ig).Phi()<< " |   " << eventbase->GetTruth().at(ig).IndexMother()  << " " << eventbase->GetTruth().at(ig).ReadStatusFlag(7) <<  endl; 
     
   }
 
@@ -2810,6 +2874,17 @@ void AnalyzerCore::FillCLHist(histtype type, TString hist, snu::KEvent ev,vector
       sigpit_ee->second->Fill(ev, muons, electrons, jets, fatjets,w);
     }
   }
+  else if(type==sighist_e){
+
+    map<TString, SignalPlotsEE*>::iterator sigpit_ee = mapCLhistSigEE.find(hist);
+    if(sigpit_ee !=mapCLhistSigEE.end()) sigpit_ee->second->Fill(ev, muons, electrons, jets, fatjets,w);
+    else {
+      mapCLhistSigEE[hist] = new SignalPlotsEE(hist,1);
+      sigpit_ee = mapCLhistSigEE.find(hist);
+      sigpit_ee->second->Fill(ev, muons, electrons, jets, fatjets,w);
+    }
+  }
+
 
   else if(type==sighist_m){
 
@@ -3457,9 +3532,11 @@ vector<snu::KElectron> AnalyzerCore::GetTruePrompt(vector<snu::KElectron> electr
       }
       else{
 	
-	bool ismatched =  TruthMatched(electrons.at(i),  keep_chargeflip);
+	bool ismatched = TruthMatched(electrons.at(i),  keep_chargeflip);                                                                                                                            
+	//electrons.at(i).MCMatched();                                                                                                                                                                         
+	// TruthMatched(electrons.at(i),  keep_chargeflip);
 	//electrons.at(i).MCMatched();
-	
+	if(electrons.at(i).MCFromTau()) ismatched=false;
 	if(keepfake&&keep_chargeflip) prompt_electrons.push_back(electrons.at(i));
 	else if(keep_chargeflip&& ismatched) prompt_electrons.push_back(electrons.at(i));
 	else if(keepfake&&! MCIsCF(electrons.at(i))) prompt_electrons.push_back(electrons.at(i)); 
@@ -3511,14 +3588,25 @@ void AnalyzerCore::CorrectMuonMomentum(vector<snu::KMuon>& k_muons){
     
 }
 
+void AnalyzerCore::SetCorrectedMomentum(vector<snu::KMuon>& k_muons, vector<snu::KTruth> truth){
+
+  for(std::vector<snu::KMuon>::iterator it = k_muons.begin(); it != k_muons.end(); it++){
+
+    if(it->RochPt() < 0.){
+      it->SetRochPt(mcdata_correction->GetCorrectedMuonMomentum(*it, truth));
+    }
+  }
+
+}
+
 
 void AnalyzerCore::SetCorrectedMomentum(vector<snu::KMuon>& k_muons){
   
   for(std::vector<snu::KMuon>::iterator it = k_muons.begin(); it != k_muons.end(); it++){
-    if(k_classname=="SKTreeMaker" && (it->RochPt() >0.)) exit(EXIT_FAILURE);
+    //if(k_classname=="SKTreeMaker" && (it->RochPt() >0.)) exit(EXIT_FAILURE);
     if(k_classname!="SKTreeMaker" && k_classname.Contains("SKTreeMaker")){
       
-      if(it->RochPt() < 0.) {
+    if(it->RochPt() < 0.) {
 	cerr << "Roch Pt wrongly set in dilep skim" << endl;
 	exit(EXIT_FAILURE);
       }

@@ -162,7 +162,6 @@ bool MuonSelection::MuonPass(snu::KMuon muon, TString muid, float ptcut, float e
   MuonID = PassUserID(muid, muon);
   if(!MuonID)  pass_selection = false;
 
-
   if(( muon.Pt() < ptcut )) pass_selection = false;
   if(!(fabs(muon.Eta()) < etacut)) pass_selection = false;
 
@@ -187,7 +186,6 @@ bool MuonSelection::MuonPass(snu::KMuon muon, TString muid, vector<pair<TString,
 
   MuonID = PassUserID(muid, muon, vids, vidf);
   if(!MuonID)  pass_selection = false;
-
 
   if(( muon.Pt() < ptcut )) pass_selection = false;
   if(!(fabs(muon.Eta()) < etacut)) pass_selection = false;
@@ -220,7 +218,9 @@ void MuonSelection::SelectMuons(std::vector<KMuon>& leptonColl, TString muid,vec
       float origpt = muit->Pt();
       float origreliso03=muit->RelIso03();
       float origreliso04=muit->RelIso04();
+
       muit->SetPtEtaPhiM(muit->RochPt(), muit->Eta(), muit->Phi(), muit->M());
+      
       muit->SetRelIso(0.3, origreliso03*origpt/muit->RochPt());
       muit->SetRelIso(0.4, origreliso04*origpt/muit->RochPt());
       muit->SetIsRochesterCorrected(true);
@@ -439,6 +439,8 @@ bool MuonSelection::PassID(TString id, snu::KMuon mu, bool cutondxy, bool cutond
     }
   }
 
+  else if (id == "MUON_POG_MEDIUM") {
+  }
 
   else if (id == "MUON_POG_TIGHT") {
     if(!(mu.IsPF() == 1        )){

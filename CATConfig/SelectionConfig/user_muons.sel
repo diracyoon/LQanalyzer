@@ -3,4 +3,5 @@ webpage https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2
 | ID              |  ptmin  | |etamax| |  isomin04   | isomax04 | IsTight(POG)  | IsMedium(POG)  | IsLoose(POG)   | |dxymax|  |  |dzmax|  | chi2max | |dxysigmin|  |  |dxysigmax|  | ApplyRoch |
 
 | MUON_NOCUT      | 0.      | 8.       |   0.        | 1000.    | false         | false          |  false         | 999.      | 999.      | 999.    | 999.         | 999.         | false |
-| MUON_HN_FAKELOOSEST      | 5.      | 2.5       |   0.       | 0.4    | true         | false          |  false         | 2.     | 0.05      | 50.    | 0.         | 10.         | true |
+
+| MUON_HN_FAKELOOSEST                 | 5.     | 2.4      |   0.        | 0.60     | true          | false          |  false         | 999.      | 0.5       | 50.     | 999.    | 999.         |  true      |

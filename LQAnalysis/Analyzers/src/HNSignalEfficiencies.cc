@@ -113,9 +113,72 @@ void HNSignalEfficiencies::ExecuteEvents()throw( LQError ){
   if(isData)mutag="MUON_HN_TRI_HIGHDXY_LOOSE";
 
   std::vector<snu::KElectron> electrons_nc=GetElectrons(eltag);
+  //if(electrons_nc.size() > 0) cout << electrons_nc[0].Pt() << " " << electrons_nc[0].Eta() << endl;
+
+  if(SameCharge(electrons_nc)){
+    TruthPrintOut();
+    for(unsigned int iel =0 ; iel < electrons_nc.size(); iel++){
+      if(electrons_nc[iel].Pt() < 10.) continue;
+      cout << "El pt = " << electrons_nc[iel].Pt() << " eta ="  << electrons_nc[iel].Eta() << " " << electrons_nc[iel].Phi() << endl;
+      cout << "type      :  Mother pdgid    :   Isprompt(SK)    :  prompt flag  "<<  endl;
+      cout << electrons_nc[iel].GetType() << " " << electrons_nc[iel].MotherPdgId() << " " << electrons_nc[iel].MCIsPrompt() << " " << electrons_nc[iel].IsPromptFlag() << endl;
+      cout << "Ext conv     : sk conv" << endl;
+      cout << electrons_nc[iel].MCIsExternalConversion() << "  " << electrons_nc[iel].MCIsFromConversion() << endl;
+    }
+  }
+  else return;
+
   std::vector<snu::KMuon> muons_nc=GetMuons(mutag);
   
-  std::vector<snu::KElectron> electrons_tm_nc=GetElectrons(false,false,"ELECTRON_NOCUT");
+
+  std::vector<snu::KElectron> electrons_tm_nc;
+
+  std::vector<snu::KElectron> looseveto = GetElectrons(false,false,"ELECTRON_HN_FAKELOOSEST");
+  
+  if(looseveto.size() < 2) return;
+  if(!PassTrigger("HLT_Ele27_WPTight_Gsf_v")) return;
+  if(!SameCharge(looseveto)) return;
+  for(unsigned int iel=0; iel<looseveto.size(); iel++){
+    
+    if(looseveto.at(iel).TriggerMatched("HLT_Ele27_WPTight_Gsf_v")) {
+      if(fabs(looseveto[iel].dxy()) < 0.01){
+	if(looseveto[iel].Pt() > 30){
+	  if(looseveto[iel].PFRelIso(0.3) > 0.05){
+	    cout << "None tight el " << endl;
+	  }
+	  else             cout << "Ttight el " << endl;
+
+	}
+      }
+    }
+    float el_pt_corr = looseveto.at(iel).Pt()*(1+max(0.,(looseveto.at(iel).PFRelIso(0.3)-0.05))) ; /// will need changing for systematics                                         
+
+    float reliso = looseveto[iel].PFRelIso(0.3);
+    bool pass_trigger_emulation=true;
+    if(looseveto[iel].Pt() < 15.){
+      if(!looseveto[iel].PassHLTID()) pass_trigger_emulation=false;
+    }
+    else{
+      if(!looseveto[iel].IsTrigMVAValid()) pass_trigger_emulation=false;
+    }
+    if(!pass_trigger_emulation) continue;
+    if(fabs(looseveto[iel].dz()) > 0.2) continue;
+    if(fabs(looseveto[iel].dxy()) > 0.1) continue;
+
+    if(fabs(looseveto[iel].SCEta())<0.8 ){
+      if(looseveto[iel].MVA() < -0.02) continue;
+    }
+    else  if(fabs(looseveto[iel].SCEta())<1.479 ){
+      if(looseveto[iel].MVA() < -0.52) continue;
+    }
+    else {
+      if(looseveto[iel].MVA() < -0.52) continue;
+    }
+    electrons_tm_nc.push_back(looseveto[iel]);
+  }
+
+
+
   std::vector<snu::KMuon> muons_tm_nc=GetMuons("MUON_NOCUT",false);
 
   if((muons_tm_nc.size() + electrons_tm_nc.size()) > 1)  counter("SkimReq",1.);
@@ -154,11 +217,26 @@ void HNSignalEfficiencies::ExecuteEvents()throw( LQError ){
   if(SameCharge(electrons_tm_nc))   FillCLHist(sighist_ee, "SSNoCut", eventbase->GetEvent(), muons_tm_nc,electrons_tm_nc,jets_nc, fatjetcoll,weight);
   if(SameCharge(electrons_nc)) {
     if(electrons_nc[1].Pt() > 10){
-      if(electrons_nc[0].MCMatched()&&!electrons_nc[1].MCMatched())FillHist("El_typePF", electrons_nc[1].GetType(),weight, 0., 40., 40);
-      else if(!electrons_nc[0].MCMatched()&&electrons_nc[1].MCMatched())FillHist("El_typeFP", electrons_nc[0].GetType(),weight, 0., 40., 40);
+      if(electrons_nc[0].MCMatched()&&!electrons_nc[1].MCMatched()){
+	FillHist("El_typePF", electrons_nc[1].GetType(),weight, 0., 40., 40);
+	FillHist("El_motherpdgidPF", fabs(electrons_nc[1].MotherPdgId()),weight, 0., 450., 450);
+	FillHist("El_motherpdgidPF_typePF",electrons_nc[1].GetType(), fabs(electrons_nc[1].MotherPdgId()),weight, 0., 40., 40, 0., 450., 450);
+
+      }
+      else if(!electrons_nc[0].MCMatched()&&electrons_nc[1].MCMatched()){
+	FillHist("El_typeFP", electrons_nc[0].GetType(),weight, 0., 40., 40);
+	FillHist("El_motherpdgidFP", fabs(electrons_nc[0].MotherPdgId()),weight, 0., 450., 450);
+        FillHist("El_motherpdgidFP_typeFP",electrons_nc[0].GetType(), fabs(electrons_nc[0].MotherPdgId()),weight, 0., 40., 40, 0., 450., 450);
+
+      }
       else if(!electrons_nc[0].MCMatched()&&!electrons_nc[1].MCMatched()){
 	FillHist("El_typeFF", electrons_nc[0].GetType(),weight, 0., 40., 40);
 	FillHist("El_typeFF", electrons_nc[1].GetType(),weight, 0., 40., 40);
+	FillHist("El_motherpdgidFF", fabs(electrons_nc[0].MotherPdgId()),weight, 0., 450., 450);
+        FillHist("El_motherpdgidFF_typeFF",electrons_nc[0].GetType(), fabs(electrons_nc[0].MotherPdgId()),weight, 0., 40., 40, 0., 450., 450);
+	FillHist("El_motherpdgidFF", fabs(electrons_nc[1].MotherPdgId()),weight, 0., 450., 450);
+        FillHist("El_motherpdgidFF_typeFF",electrons_nc[1].GetType(), fabs(electrons_nc[1].MotherPdgId()),weight, 0., 40., 40, 0., 450., 450);
+
       }
     }
   }

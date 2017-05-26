@@ -62,6 +62,10 @@ SignalPlotsEE::SignalPlotsEE(TString name, int nel): StdPlots(name){
   map_sig["h_osll_closestZ_mass"]       =SetupHist("h_osll_closestZ_mass_"          + name,"Invariant mass of the two leading os electrons",100,0,500,"M_{ll} GeV");
 
   map_sig["h_l1jjmass"]               = SetupHist("h_l1jjmass_"          + name,"Invariant mass of the two leading jets and leading electron",100,0,1000,"M_{l1jj} GeV");
+  map_sig["h_lmeanjjmass"]               = SetupHist("h_lmeanjjmass_"          + name,"Invariant mass of the two leading jets and leading electron",100,0,1000,"M_{l1jj} GeV");
+  map_sig["h_L40jjmass"]               = SetupHist("h_L40jjmass_"          + name,"Invariant mass of the two leading jets and leading electron",100,0,1000,"M_{l1jj} GeV");
+  map_sig["h_L100jjmass"]               = SetupHist("h_L100jjmass_"          + name,"Invariant mass of the two leading jets and leading electron",100,0,1000,"M_{l1jj} GeV");
+  map_sig["h_L500jjmass"]               = SetupHist("h_L500jjmass_"          + name,"Invariant mass of the two leading jets and leading electron",100,0,1000,"M_{l1jj} GeV");
   map_sig["h_l1fjmass"]               = SetupHist("h_l1fjmass_"          + name,"Invariant mass of the two leading jets and leading electron",100,0,1000,"M_{l1jj} GeV");
   if(nel > 1) map_sig["h_l2jjmass"]               = SetupHist("h_l2jjmass_"          + name,"Invariant mass of the two leading jets and second electron",100,0,1000,"M_{l2jj} GeV");
   if(nel > 1) map_sig["h_l2fjmass"]               = SetupHist("h_l2fjmass_"          + name,"Invariant mass of the two leading jets and second electron",100,0,1000,"M_{l2jj} GeV");
@@ -82,13 +86,48 @@ SignalPlotsEE::SignalPlotsEE(TString name, int nel): StdPlots(name){
     map_sig["h_l2jjjj_ss_mass"]          = SetupHist("h_l2jjjj_ss_mass_"       + name,"Invariant mass of the four particles",200,0,2000, "M_{l2jjjj} (s) GeV");
   }
   
+  map_sig["h_st_forward"]          = SetupHist("h_st_forward_"       + name,"ST foward jets", 100, 0., 1000.,"ST_{fj} GeV");
+  map_sig["h_st_central"]          = SetupHist("h_st_central_"       + name,"ST central jets", 100, 0., 1000.,"ST_{cj} GeV");
+  map_sig["h_st_fc_ratio"]          = SetupHist("h_st_fc_ratio_"       + name,"ST ratio", 100, 0., 1.,"ST (ratio)");
+
+  map_sig["h_ht_forward"]          = SetupHist("h_ht_forward_"       + name,"ST foward jets", 100, 0., 1000.,"HT_{fj} GeV");
+  map_sig["h_ht_central"]          = SetupHist("h_ht_central_"       + name,"ST central jets", 100, 0., 1000.,"HT_{cj} GeV");
+  map_sig["h_ht_fc_ratio"]          = SetupHist("h_ht_fc_ratio_"       + name,"ST ratio", 100, 0., 1.,"HT (ratio)");
+
+
+  map_sig["h_lt" ]          = SetupHist("h_lt_"       + name,"LT", 100., 0., 500.,"LT");
+  map_sig["h_lt_ht" ]          = SetupHist("h_lt_ht_"       + name,"LT", 100., 0., 5.,"LT");
+  map_sig["h_lt_forward" ]          = SetupHist("h_lt_forward_"       + name,"LT", 100., 0., 500.,"LT");
+  map_sig["h_lt_central" ]          = SetupHist("h_lt_central_"       + name,"LT", 100., 0., 500.,"LT");
+  map_sig["h_lt_rforward" ]          = SetupHist("h_lt_rforward_"       + name,"LT", 100., 0., 5.,"LT");
+
+  map_sig["h_mass_forward"]          = SetupHist("h_mass_forward_"       + name,"Mass Forward jets", 100, 0., 1000.,"M_{fj} GeV");
+  map_sig["h_mass_central"]          = SetupHist("h_mass_central_"       + name,"Mass Forward jets", 100, 0., 1000.,"M_{cj} GeV");
+
+  map_sig["h_centralNJets"]          = SetupHist("h_centralNJets_"   + name,"NFJ",10, 0, 10.,"N_{CJ}");
+  map_sig["h_forwardNJets"]          = SetupHist("h_forwardNJets_"   + name,"NFJ",10, 0, 10.,"N_{FJ}");
+  
+  map_sig["h_max_deta"]  = SetupHist("h_max_deta_"  + name,"max_deta", 100, 0., 10.,"#Delta #Eta");
+  map_sig["h_llfj_mass"]          = SetupHist("h_llfj_mass_" + name , "h_llfj_mass_", 100, 0., 1000.,"M_{llfj} GeV");
+  map_sig["h_llcj_mass"]          = SetupHist("h_llcj_mass_"  + name,  "h_llfj_mass_",100, 0., 1000.,"M_{llfj} GeV");
+  map_sig["h_llDfj_mass"]          = SetupHist("h_llDfj_mass_"  + name, "h_llfj_mass_", 100, 0., 1000.,"M_{llDfj} GeV");
+
   /// ALL Lepton plots  
   map_sig["h_LeptonEta"]              = SetupHist("h_LeptonEta_"         + name,"leading lepton eta",60,-3.,3., "#eta_{l}");
   map_sig["h_LeptonPhi"]              = SetupHist("h_LeptonPhi_"         + name,"leading lepton phi",64,-3.2,3.2);
   map_sig["h_LeptonPt"]               = SetupHist("h_LeptonPt_"          + name,"lepton pt",250,0,500);
   map_sig["h_LeptonEnergy"]           = SetupHist("h_LeptonEnergy_"          + name,"lepton e",500,0,500);
   map_sig["h_leadingLeptonPt"]        = SetupHist("h_leadingLeptonPt_"   + name,"leading lepton pt",100,0,500);
+
+  map_sig["h_sumeta"]     = SetupHist("h_sumeta_"   + name,"", 100, -10., 10.);
   
+  map_sig2["h_lt_jjdr"]  = SetupHist2("h_lt_jjdr_"  + name,"eta " , 10., 0.,2000., 3.,0., 4.5);
+  map_sig2["h_lt_CM"]   = SetupHist2("h_lt_CM_"  + name,"eta " , 10., 0.,2000., 10, 0., 1000.);
+  map_sig2["h_lt_lljjmass"]   = SetupHist2("h_lt_lljjmass_"  + name,"eta " , 10., 0.,2000., 10, 0.,2000.);
+  map_sig2["h_lt_lmeanjjmass"]   = SetupHist2("h_lt_lmeanjjmass_" + name,"eta " , 10., 0.,2000., 10, 0.,1000.);
+
+  map_sig2["EtaRegion"]           = SetupHist2("EtaRegion_el_"  + name,"eta " , 8, 0., 8., 8, 0.,8.);
+  map_sig2["JetEtaRegion"]           = SetupHist2("JetEtaRegion_el_"  + name,"eta " , 8, 0., 8., 8, 0.,8.);
   map_sig2["h_Lepton_C1_mvapt"]           = SetupHist2("h_LeptonC1_mvapt_"         + name,"el mva C1",200, 10., 410., 200, -1.,1.);
   map_sig2["h_Lepton_C2_mvapt"]           = SetupHist2("h_LeptonC2_mvapt_"         + name,"el mva C1",200, 10., 410.,200, -1.,1.);
   map_sig2["h_Lepton_C3_mvapt"]           = SetupHist2("h_LeptonC3_mvapt_"         + name,"el mva C1",200, 10., 410.,200, -1.,1.);
@@ -125,7 +164,7 @@ SignalPlotsEE::SignalPlotsEE(TString name, int nel): StdPlots(name){
   if(nel > 1 ) {
     map_sig["h_secondLeptonPt"]         = SetupHist("h_secondLeptonPt_"    + name,"secondary lepton pt",60,0,300);
     map_sig["h_secondLeptonEta"]        = SetupHist("h_secondLeptonEta_"   + name,"second lepton eta",60,-3.,3.);    
-    map_sig["h_secondLeptonRelIso"]     = SetupHist("h_secondLeptonRelIso_"      + name,"leading lepton relIso",100,0,1.);
+    map_sig["h_secondLeptonRelIso"]     = SetupHist("h_secondLeptonRelIso_"      + name,"leading lepton relIso",1000,0,10.);
     map_sig["h_secondLeptonMiniRelIso"]     = SetupHist("h_secondLeptonMiniRelIso_"      + name,"leading lepton mini relIso",100,0,1.);  
     if(nel > 2 ) {
       map_sig["h_thirdLeptonPt"]         = SetupHist("h_thirdLeptonPt_"    + name,"thirdary lepton pt",60,0,300);
@@ -144,13 +183,21 @@ SignalPlotsEE::SignalPlotsEE(TString name, int nel): StdPlots(name){
   map_sig["h_leadingLeptonEta"]       = SetupHist("h_leadingLeptonEta_"  + name,"leading lepton eta",60,-3.,3.);
 
   map_sig["h_LeptonIso"]              = SetupHist("h_LeptonIso_"         + name,"leading lepton relIso",50,0,10.);
-  map_sig["h_LeptonRelIso"]           = SetupHist("h_LeptonRelIso_"      + name,"leading lepton relIso",100,0,1.);
-  map_sig["h_leadingLeptonRelIso"]    = SetupHist("h_leadingLeptonRelIso_"      + name,"leading lepton relIso",100,0,1.);
+  map_sig["h_LeptonRelIso"]           = SetupHist("h_LeptonRelIso_"      + name,"leading lepton relIso",1000,0,10.);
+  map_sig["h_leadingLeptonRelIso"]    = SetupHist("h_leadingLeptonRelIso_"      + name,"leading lepton relIso",1000,0,10.);
   map_sig["h_leadingLeptonMiniRelIso"]    = SetupHist("h_leadingLeptonMiniRelIso_"      + name,"leading lepton mini relIso",100,0,1.);
   map_sig["h_LeptonDZ_EC"]               = SetupHist("h_LeptonDZ_EC_"          + name," leading lepton DZ", 400, -0.5 , 0.5);
   map_sig["h_LeptonDZ_B"]               = SetupHist("h_LeptonDZ_B_"          + name," leading lepton DZ", 400, -0.5 , 0.5);
   map_sig["h_LeptonDXY_EC"]              = SetupHist("h_LeptonDXY_EC_"         + name," lepton DXY_{ec}", 1000, -0.25 , 0.25);
   map_sig["h_LeptonDXY_B"]              = SetupHist("h_LeptonDXY_B_"         + name," lepton DXY_{b}", 1000, -0.25 , 0.25);
+  map_sig["h_LeptonDXY_pt1_EC"]              = SetupHist("h_LeptonDXY_pt1_EC_"         + name," lepton DXY_{ec}", 1000, -0.25 , 0.25);
+  map_sig["h_LeptonDXY_pt1_B"]              = SetupHist("h_LeptonDXY_pt1_B_"         + name," lepton DXY_{b}", 1000, -0.25 , 0.25);
+  map_sig["h_LeptonDXY_pt2_EC"]              = SetupHist("h_LeptonDXY_pt2_EC_"         + name," lepton DXY_{ec}", 1000, -0.25 , 0.25);
+  map_sig["h_LeptonDXY_pt2_B"]              = SetupHist("h_LeptonDXY_pt2_B_"         + name," lepton DXY_{b}", 1000, -0.25 , 0.25);
+  map_sig["h_LeptonDXY_pt3_EC"]              = SetupHist("h_LeptonDXY_pt3_EC_"         + name," lepton DXY_{ec}", 1000, -0.25 , 0.25);
+  map_sig["h_LeptonDXY_pt3_B"]              = SetupHist("h_LeptonDXY_pt3_B_"         + name," lepton DXY_{b}", 1000, -0.25 , 0.25);
+
+
   map_sig["h_LeptonDXY"]              = SetupHist("h_LeptonDXY_"         + name," leading lepton DXY", 1000, -0.25 , 0.25);
   map_sig["h_LeptonDXYSig"]              = SetupHist("h_LeptonDXYSig_"         + name," leading lepton DXYSig", 1000, -10. , 10.);
   
@@ -195,7 +242,12 @@ SignalPlotsEE::SignalPlotsEE(TString name, int nel): StdPlots(name){
   map_sig["h_rest_jets_eta"]               = SetupHist("h_rest_jets_eta_"          + name,"#eta distribution of the two rest_jets",120,-5,5);
 
   /// dPhi/MT
-  map_sig["h_MTlepton"]               = SetupHist("h_MTlepton_"        + name,"Mt",100,0.0,500.0);
+  map_sig["h_contraMTlepton"]               = SetupHist("h_contraMTlepton_"        + name,"Mt",100,0.0,500.0);
+  map_sig["h_leadMTlepton"]               = SetupHist("h_leadMTlepton_"        + name,"Mt",100,0.0,500.0);
+  map_sig["h_secondMTlepton"]               = SetupHist("h_secondMTlepton_"        + name,"Mt",100,0.0,500.0);
+  map_sig["h_MTlepton_EB1"]               = SetupHist("h_MTlepton_EB1_"        + name,"Mt",100,0.0,500.0);
+  map_sig["h_MTlepton_EB2"]               = SetupHist("h_MTlepton_EB2_"        + name,"Mt",100,0.0,500.0);
+  map_sig["h_MTlepton_EE"]               = SetupHist("h_MTlepton_EE_"        + name,"Mt",100,0.0,500.0);
   map_sig["h_dphi_METlepton"]         = SetupHist("h_dphi_METlepton_"  + name , "METlepdphi", 50, -5., 5.);
  
   
@@ -291,7 +343,7 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
       float dR =jets[i].DeltaR(jets[j]);
       float dPhi = fabs(TVector2::Phi_mpi_pi(jets[i].Phi() - jets[j].Phi()));
       if(dR < min_jj_Dr) min_jj_Dr = dR;
-      if(dR < min_jj_DPhi) min_jj_DPhi = dPhi;
+      if(dPhi < min_jj_DPhi) min_jj_DPhi = dPhi;
     }
   }
 
@@ -308,6 +360,7 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
     }
     if(jets.size() > 1)Fill("h_leadJetdR",min_jj_Dr,weight);
     if(jets.size() > 1)Fill("h_leadJetdPhi",min_jj_DPhi,weight);
+    
   }
 
 
@@ -334,6 +387,9 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
   int nbjet=0;
   /// use CSVM https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagPerformanceOP
   float leadjetmass=0.;
+  float contramass(-999.);
+  int jet_eta1=0;
+  int jet_eta2=0;
   for(UInt_t emme=0; emme<jets.size(); emme++){
     
     for(UInt_t enne=1; enne<jets.size(); enne++) {
@@ -344,10 +400,61 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
 	dijetmass = dijetmass_tmp;
 	m = emme;
 	n = enne;
+	
+	
+	if(jets[m].Eta() < -2.1){
+	  jet_eta1=1;
+	}
+	else  if(jets[m].Eta() < -1.5){
+	  jet_eta1=2;
+	}
+	else  if(jets[m].Eta() < -0.8){
+	  jet_eta1=3;
+	}
+	else  if(jets[m].Eta() < 0.){
+	  jet_eta1=4;
+	}
+	else  if(jets[m].Eta() < 0.8){
+	  jet_eta1=5;
+	}
+	else  if(jets[m].Eta() < 1.5){
+	  jet_eta1=6;
+	}
+	else  if(jets[m].Eta() < 2.1){
+	  jet_eta1=7;
+	}
+	else  jet_eta1=8;
+
+	if(jets[n].Eta() < -2.1){
+          jet_eta2=1;
+        }
+	else  if(jets[n].Eta() < -1.5){
+          jet_eta2=2;
+	}
+        else  if(jets[n].Eta() < -0.8){
+          jet_eta2=3;
+        }
+        else  if(jets[n].Eta() < 0.){
+          jet_eta2=4;
+        }
+        else  if(jets[n].Eta() < 0.8){
+          jet_eta2=5;
+        }
+        else  if(jets[n].Eta() < 1.5){
+          jet_eta2=6;
+        }
+        else  if(jets[n].Eta() < 2.1){
+          jet_eta2=7;
+        }
+        else  jet_eta2=8;
+
+	float dPhi = fabs(TVector2::Phi_mpi_pi(jets[emme].Phi() - jets[enne].Phi()));
+	contramass=2*jets[emme].Pt()*jets[enne].Pt()*(1+cos(dPhi));
+	contramass=sqrt(contramass);
       }
     }
   }
-  
+  if(jets.size() > 1)  Fill("h_contraMTlepton",contramass, weight);
   float fmass = 9999.;
   int ifn=-999;
   for(UInt_t ifj =0; ifj < fatjets.size(); ifj++){
@@ -405,6 +512,7 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
     }
     float ce_dijetmass=9999.9;
     float ce_dijetmass_tmp=9999.9;
+    
 
     int c_m(0), c_n(0);
     for(UInt_t emme=0; emme<central_jets.size(); emme++){
@@ -415,9 +523,13 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
 	  ce_dijetmass = ce_dijetmass_tmp;
 	  c_m = central_jets[emme];
 	  c_n = central_jets[enne];
+
 	}
       }
     }
+
+    Fill("JetEtaRegion",jet_eta1, jet_eta2,  weight);
+
     
     if( (p_forward_jet >= 1) && (m_forward_jet >= 1)) {
       
@@ -461,20 +573,37 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
       }
     }
   }
-
+  
+  float lljjmass=0.;
+  float lmeanjjmass=0.;
   if(electrons.size() ==2 ){
     Fill("h_llmass", (electrons[0]+electrons[1]).M(),weight);
     Fill("h_llpt", (electrons[0]+electrons[1]).Pt(),weight);
     if(jets.size() >= 2){
       Fill("h_l1jjmass", (electrons[0] + jets[m] + jets[n]).M(),weight);
       Fill("h_l2jjmass", (electrons[1] + jets[m] + jets[n]).M(),weight);
+      float l1jjmass= (electrons[0] + jets[m] + jets[n]).M();
+      float l2jjmass= (electrons[1] + jets[m] + jets[n]).M();
+      Fill("h_lmeanjjmass",(l1jjmass+l2jjmass)/2., weight);
+      float l40jj=l1jjmass;
+      if(fabs(l2jjmass-40.) < fabs(l1jjmass-40.)) l40jj=l2jjmass;
+      float l100jj=l1jjmass;
+      if(fabs(l2jjmass-100.) < fabs(l1jjmass-100.)) l100jj=l2jjmass;
+      float l500jj=l1jjmass;
+      if(fabs(l2jjmass-500.) < fabs(l1jjmass-500.)) l500jj=l2jjmass;
+      Fill("h_L40jjmass",l40jj,weight);
+      Fill("h_L100jjmass", l100jj,weight);
+      Fill("h_L500jjmass",l500jj,weight);
+      
+      lmeanjjmass= (l1jjmass+l2jjmass)/2.;
+      lljjmass= (electrons[0] +electrons[1] + jets[m] + jets[n]).M();
       Fill("h_lljjmass", (electrons[0] +electrons[1] + jets[m] + jets[n]).M(),weight);
     }
     if(fatjets.size() > 0){
       Fill("h_l1fjmass", (electrons[0] + fatjets[ifn]).M(),weight);
       Fill("h_l2fjmass", (electrons[1] + fatjets[ifn]).M(),weight);
       Fill("h_llfjmass", (electrons[0] +electrons[1] + fatjets[ifn]).M(),weight);
-    }
+    } 
     
   }
 
@@ -647,10 +776,25 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
     if(fabs(elit->Eta()) > 1.5) {
       Fill("h_LeptonDXY_EC", elit->dxy(),weight);
       Fill("h_LeptonDZ_EC", elit->dz(),weight);
+      if(elit->Pt() < 20.){
+	Fill("h_LeptonDXY_pt1_EC", elit->dxy(),weight);
+      }
+      else   if(elit->Pt() < 50.){
+	Fill("h_LeptonDXY_pt2_EC", elit->dxy(),weight);
+      }
+      else         Fill("h_LeptonDXY_pt3_EC", elit->dxy(),weight);
+
     }    
     else{
       Fill("h_LeptonDZ_B", elit->dz(),weight);
       Fill("h_LeptonDXY_B", elit->dxy(),weight);
+      if(elit->Pt() < 20.){
+	Fill("h_LeptonDXY_pt1_B", elit->dxy(),weight);
+      }      
+      else   if(elit->Pt() < 50.){
+	Fill("h_LeptonDXY_pt2_B", elit->dxy(),weight);
+      }
+      else   Fill("h_LeptonDXY_pt3_B", elit->dxy(),weight);
     }
     Fill("h_LeptonDXY", elit->dxy(),weight);
     Fill("h_LeptonDXYSig", elit->dxySig() ,weight);
@@ -697,7 +841,13 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
   for(unsigned int i=0 ; i < electrons.size(); i++){
     float dphi = fabs(TVector2::Phi_mpi_pi(electrons.at(i).Phi()- ev.METPhi(snu::KEvent::pfmet)));
     float MT = sqrt(2.* electrons.at(i).Et()*ev.PFMET() * (1 - cos( dphi)));
-    Fill("h_MTlepton",MT, weight);
+    if(i==0)     Fill("h_leadMTlepton",MT, weight);
+    if(i==1)     Fill("h_secondMTlepton",MT, weight);
+    
+    if(electrons.at(i).IsEB1())     Fill("h_MTlepton_EB1",MT, weight);
+    if(electrons.at(i).IsEB2())     Fill("h_MTlepton_EB2",MT, weight);
+    if(electrons.at(i).IsEE())     Fill("h_MTlepton_EE",MT, weight);
+
     Fill("h_dphi_METlepton",dphi, weight);
   }
 
@@ -733,7 +883,15 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
   }
 
 
+  vector<snu::KJet> central_jets;
+  vector<snu::KJet> forward_jets;
+
+  float max_deta=0.;
+  snu::KParticle fjets;
   for(UInt_t j=0; j < jets.size(); j++){ 
+
+    if(fabs(jets[j].Eta()) < 1.5) central_jets.push_back(jets[j]);
+    else forward_jets.push_back(jets[j]);
     ht+= jets[j].Pt(); 
     if(j==0)Fill("h_leadingJetPt", jets[0].Pt(),weight);
     if(j==1)Fill("h_secondJetPt", jets[1].Pt(),weight);
@@ -747,6 +905,16 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
     Fill("h_PileupJetIDMVA", jets[j].PileupJetIDMVA(),weight);
     Fill("h_jets_phi",jets[j].Phi(),weight);
     Fill("h_bTag",jets[j].CSVInclV2(),weight);
+    
+    for(UInt_t i=0; i < jets.size(); i++){
+      if(i==j) continue;
+      float deta = fabs(jets[j].Eta() - jets[i].Eta() );
+      if(deta > max_deta){
+	max_deta=deta;
+	fjets=jets[j]+jets[i];
+      }
+    }
+
     if(jets.at(j).IsBTagged(KJet::CSVv2, KJet::Medium)) nbjet++; 
     for(unsigned int iel2=0 ; iel2 < electrons.size(); iel2++){
       float dphi =fabs(TVector2::Phi_mpi_pi(electrons.at(iel2).Phi()- jets.at(j).Phi()));
@@ -755,6 +923,113 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
     }
   }
   
+  float st_foward=0.;
+  float st_central=0.;
+  snu::KParticle fj;
+  snu::KParticle cj;
+
+  float ht_foward=0.;
+  float ht_central=0.;
+  for(UInt_t j=0; j < forward_jets.size(); j++){
+    st_foward=st_foward+forward_jets[j].Pt();
+    ht_foward=ht_foward+forward_jets[j].Pt();
+    fj+=forward_jets[j];
+  }
+  for(UInt_t j=0; j < central_jets.size(); j++){
+    st_central=st_central+central_jets[j].Pt();
+    ht_central=ht_central+central_jets[j].Pt();
+    cj+=central_jets[j];
+  }
+
+  float lt=0.;
+  float ltc=-0.;  float ltf=0.;
+  for(unsigned int iel2=0 ; iel2 < electrons.size(); iel2++){
+    lt+=electrons[iel2].Pt();
+    if(fabs(electrons[iel2].Eta()) < 1.5){
+      st_central=st_central+ electrons[iel2].Pt();
+      ltc+= electrons[iel2].Pt();
+      cj+=  electrons[iel2];
+    }
+    else{
+      st_foward=st_foward+ electrons[iel2].Pt();
+      ltf+=electrons[iel2].Pt();
+      fj+=electrons[iel2];
+    }
+  }
+  
+  int eta1=0.;
+  int eta2=0.;
+  float sumeta=0.;
+  for(unsigned int iel2=0 ; iel2 < electrons.size(); iel2++){
+    sumeta=sumeta+electrons[iel2].Eta();
+    int etareg=0.;
+    if(electrons[iel2].Eta() < -2.1){
+      etareg=1;
+    }
+    else  if(electrons[iel2].Eta() < -1.5){
+      etareg=2;
+    } 
+    else  if(electrons[iel2].Eta() < -0.8){
+      etareg=3;
+    }
+    else  if(electrons[iel2].Eta() < 0.){
+      etareg=4;
+    }
+    else  if(electrons[iel2].Eta() < 0.8){
+      etareg=5;
+    }      
+    else  if(electrons[iel2].Eta() < 1.5){
+      etareg=6;
+    }
+    else  if(electrons[iel2].Eta() < 2.1){
+      etareg=7;
+    }
+    else etareg=8;
+    
+    if(iel2==0) eta1=etareg;
+    else eta2=etareg;
+
+  }
+  Fill("EtaRegion",eta1, eta2,  weight);
+  
+
+  Fill("h_lt",lt,weight);
+  Fill("h_lt_ht",lt/ht,weight);
+  if(ltf > 0.)Fill("h_lt_forward",ltf,weight);
+  if(ltc > 0.) {
+    Fill("h_lt_central",ltc,weight);
+    Fill("h_lt_rforward",ltf/ltc,weight);
+  }
+  
+  Fill("h_lt_jjdr",lt,min_jj_Dr, weight);
+  Fill("h_lt_CM",lt,contramass, weight);
+  Fill("h_lt_lljjmass",lt,lljjmass,weight);
+  Fill("h_lt_lmeanjjmass",lt,lmeanjjmass,weight);
+  Fill("h_sumeta",sumeta,weight);  
+  
+  if(st_foward>0.)Fill("h_st_forward",st_foward,weight);
+  if(st_central>0.)Fill("h_st_central",st_central,weight);
+  if(st_central > 0.)Fill("h_st_fc_ratio",st_foward/st_central,weight);
+  if(ht_foward>0.)Fill("h_ht_forward",ht_foward,weight);
+  if(ht_central>0.)Fill("h_ht_central",ht_central,weight);
+  if(ht_central>0.)Fill("h_ht_fc_ratio",ht_foward/ht_central,weight);
+  Fill("h_mass_forward",fj.M(),weight);
+  Fill("h_mass_central",cj.M(),weight);
+  Fill("h_centralNJets",central_jets.size(), weight);
+  Fill("h_forwardNJets",forward_jets.size(), weight);
+
+  Fill("h_max_deta",max_deta,weight);
+
+  if(electrons.size() ==2)
+{
+    cj=cj+electrons[0]+electrons[1];
+    fj=fj+electrons[0]+electrons[1];
+    fjets=fjets+electrons[0]+electrons[1];
+    Fill("h_llcj_mass",cj.M(), weight);
+    Fill("h_llfj_mass",fj.M(), weight);
+    Fill("h_llDfj_mass",fjets.M(), weight);
+ }
+
   float st = ht + ev.PFMET();
   for(unsigned int i=0 ; i < electrons.size(); i++){
     st+= electrons.at(i).Pt();
@@ -766,7 +1041,8 @@ void SignalPlotsEE::Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons, std::ve
   Fill("h_Nbjets",nbjet, weight);
   Fill("h_Njets",jets.size(), weight);
   Fill("h_Nfatjets",fatjets.size(), weight);
-  
+  //Fill("h_lt_met",lt/(),weight);  
+
   if(debug)cout<< "Plotting [6] " << endl;
   return;
 }/// End of Fill

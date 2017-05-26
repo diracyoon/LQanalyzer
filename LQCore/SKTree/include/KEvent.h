@@ -51,6 +51,7 @@ namespace snu {
     void SetPFMETShift(syst_dir dir, met_syst type, double val);
     void SetPFSumETShift(syst_dir dir, met_syst type, double val);
 
+    void SetTopPtReweight(double tw);
     void SetPFMETx(double metx);
     void SetPFMETy(double mety);
 
@@ -132,6 +133,8 @@ namespace snu {
     inline Double_t PFMETUnSmeared() const {return k_PF_MET_JetRes_up;}
     inline Double_t PFMETx() const {return k_PF_METx;}
     inline Double_t PFMETy() const {return k_PF_METy;}
+
+    inline Double_t TopReweight() const{return sqrt(k_top_reweight);}
 
     inline Double_t PFMETType1() const {return sqrt(pow(k_PF_MET_Type1x,2.) + pow(k_PF_MET_Type1y,2.));}
     inline Double_t PFMETType1x() const {return k_PF_MET_Type1x;}
@@ -266,9 +269,9 @@ namespace snu {
 
     std::string k_catversion;
     Double_t k_rho;
+    Double_t k_top_reweight;
 
-
-    ClassDef(KEvent,32);
+    ClassDef(KEvent,33);
   }; 
   
 }//namespace snu

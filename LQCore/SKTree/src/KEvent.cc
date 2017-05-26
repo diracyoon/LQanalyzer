@@ -93,7 +93,8 @@ KEvent::KEvent() :
   k_pu_gold_weightH(-999.),
   k_catversion(""),
   k_rho(-999.),
-  prop_metrc(false)
+  prop_metrc(false),
+  k_top_reweight(1.)
 {
 
 }
@@ -283,6 +284,7 @@ void KEvent::Reset()
   k_rho= -999.;
 
   prop_metrc=false;
+  k_top_reweight=1.;
 }
 
 
@@ -380,7 +382,7 @@ KEvent& KEvent::operator= (const KEvent& p)
       k_rho= p.Rho();
 	
       prop_metrc = p.PropagatedRochesterToMET();
-      
+      k_top_reweight=p.TopReweight();
     }
     
     return *this;
@@ -393,6 +395,9 @@ void KEvent::SetCatVersion(std::string cat){
 
 void KEvent::SetRho(double rho){
   k_rho=rho;
+}
+void KEvent::SetTopPtReweight(double topw){
+  k_top_reweight = topw;
 }
 
 void KEvent::SetPropagatedRochesterToMET(bool hasprop){
