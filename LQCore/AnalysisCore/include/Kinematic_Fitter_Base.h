@@ -13,29 +13,34 @@
 class Kinematic_Fitter_Base
 {
  public:
-  Kinematic_Fitter_Base(const Bool_t& a_chk_debug=kFALSE);
+  Kinematic_Fitter_Base(const Bool_t& a_chk_high_mass_fitter=kTRUE, const Bool_t& a_chk_debug=kFALSE);
   virtual ~Kinematic_Fitter_Base();
 
   virtual void Fit()=0;
   virtual void Set(const TLorentzVector& a_met, const TLorentzVector& a_lepton, const vector<TLorentzVector>& a_jet_vector, const Bool_t* a_target_jet,  const Bool_t* a_b_tag)=0;
-    
+  void Get_B_Tag(Bool_t b_tag_return[4], const TString& type="BEST", const Int_t& index=-1);
   Double_t Get_Chi2(const TString& type="BEST", const Int_t& index=-1);
-  void Get_Chi2_Piece(Double_t chi2_piece_return[11],  const TString& type="BEST", const Int_t& index=-1);
+  void Get_Chi2_Piece(Double_t chi2_piece_return[],  const TString& type="BEST", const Int_t& index=-1);
   Bool_t Get_Convergence_Checker(){ return chk_convergence; }
   Bool_t Get_Neutrino_Pz_Sol_Checker(){ return chk_neutrino_pz_real; }
   TLorentzVector& Get_Fitted_Object(const Int_t& obj_index, const TString& type="BEST", const Int_t& index=-1);
   TLorentzVector& Get_Unfitted_Object(const Int_t& obj_index, const TString& type="BEST", const Int_t& index=-1);
   Fitter_Result_Container Get_Fitter_Result();
   void Get_Parameters(Double_t parameter_return[NFIT], const TString& type="BEST", const Int_t& index=-1);
-  void Get_Permutation(Int_t permuatation_return[4]);
+  void Get_Permutation(Int_t permuatation_return[4], const TString& type="BEST", const Int_t& index=-1);
   Bool_t Pass_Goodness_Cut();
   Bool_t Pass_Goodness_Cut(const Double_t& cut_level);
 
  protected:
+  Bool_t chk_high_mass_fitter;
   Bool_t chk_debug;
   Bool_t chk_neutrino_pz_real; 
   
   Int_t reordering_index[4];
+  
+  Int_t n_b_tag;
+  Bool_t measured_b_tag[4];
+  Bool_t reordered_b_tag[4];
   
   Double_t neutrino_pz[2];
 
@@ -97,10 +102,9 @@ class Kinematic_Fitter_Base
   
   Double_t best_parameter[NFIT];
   Double_t parameter[2][24][NFIT];
-
-  Int_t n_b_tag;
-  Bool_t measured_b_tag[4];
-  Bool_t reordered_b_tag[4];
+  
+  Bool_t best_b_tag[4];
+  Bool_t b_tag[2][24][4];
 
   TS_Correction* ts_correction;
  
@@ -111,11 +115,11 @@ class Kinematic_Fitter_Base
   Bool_t Pass_B_Tag_Configuration();
   Bool_t Pass_Native_Top_Mass();
   void Permutation();
-  void Reordering_Jets();
+  void Reordering_Jets(const Int_t& i, const Int_t& j);
   void Resol_Neutrino_Pt();
   void Set_Minimizer_Parameters(const Int_t& i);
   Bool_t Sol_Neutrino_Pz();
-  void Store_Results(const Int_t& i, const Int_t& j);
+  void Store_Results(const Int_t& i, const Int_t& j, const Bool_t& b_tag_config_check, const Bool_t& native_top_mass_check);
   void Store_Unfitted_Object(const Int_t& i, const Int_t& j);
   
   ClassDef(Kinematic_Fitter_Base, 1);

@@ -59,17 +59,39 @@ TS_Correction::~TS_Correction()
 
 //////////
 
-void TS_Correction::Get_Correction(const TLorentzVector& jet, const Int_t jet_type, Double_t corr_val[2])
+TLorentzVector TS_Correction::Get_Corrected_Jet(const TLorentzVector& a_jet, const Int_t& jet_type)
 {
-  Double_t pt = jet.Pt();     
+  Double_t corr_val[2];
+  Get_Correction(a_jet, jet_type, corr_val);
+		 
+  Double_t pt = corr_val[0]*a_jet.Pt();
+  Double_t eta = a_jet.Eta();
+  Double_t phi = a_jet.Phi();
+  Double_t mass;// = a_jet.M();
+  if(jet_type==2) mass = B_MASS;
+  else if(jet_type==1) mass = C_MASS;
+  else mass = 0;
+  //cout << "mass = " << mass << endl;
+  
+  TLorentzVector corrected_jet;
+  corrected_jet.SetPtEtaPhiM(pt, eta, phi, mass);
+  
+  return corrected_jet; 
+}//TLorentzVector TS_Correction::Get_Corrected_Jet(const TLorentzVetor& jet, const Int_t& jet_type)
+
+//////////
+
+    void TS_Correction::Get_Correction(const TLorentzVector& a_jet, const Int_t jet_type, Double_t corr_val[2])
+{
+  Double_t pt = a_jet.Pt();     
                                                                       
-  Double_t eta = TMath::Abs(jet.Eta());
+  Double_t eta = TMath::Abs(a_jet.Eta());
   Int_t eta_bin = Find_Eta_Bin(eta);
   
   (this->*corr_func_ptr)(pt, eta_bin, jet_type, corr_val);
 
   return;
-}//void Get_Correction(const TLorentzVector& jet, const Int_t jet_type, Double_t par[2])
+}//void TS_Correction::Get_Correction(const TLorentzVector& jet, const Int_t jet_type, Double_t par[2])
 
 //////////
 

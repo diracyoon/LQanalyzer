@@ -6,7 +6,7 @@ ClassImp(Kinematic_Fitter_2);
 
 //////////
 
-Kinematic_Fitter_2::Kinematic_Fitter_2(const Bool_t& a_chk_debug) : Kinematic_Fitter_Base(a_chk_debug)
+Kinematic_Fitter_2::Kinematic_Fitter_2(const Bool_t& a_chk_high_mass_fitter, const Bool_t& a_chk_debug) : Kinematic_Fitter_Base(a_chk_high_mass_fitter, a_chk_debug)
 {
   cout << "Kinematic_Fitter type : 2" << endl;
 }//Kinematic_Fitter_2::Kinematic_Fitter_2()
@@ -96,7 +96,7 @@ void Kinematic_Fitter_2::Fit()
       for(Int_t j=0; j<24; j++)
 	{
 	  //permutation on jets
-	  Reordering_Jets();
+	  Reordering_Jets(i, j);
 
 	  //b tag configuration check
 	  Bool_t b_tag_config_check = Pass_B_Tag_Configuration();
@@ -117,7 +117,7 @@ void Kinematic_Fitter_2::Fit()
 	      minimizer->Minimize();
 
 	      //store results
-	      Store_Results(i, j);
+	      Store_Results(i, j, b_tag_config_check, native_top_mass_check);
 	    }//if
 	  
 	  //jet ordering permutation                                                               

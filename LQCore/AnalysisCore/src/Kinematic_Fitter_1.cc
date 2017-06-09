@@ -6,7 +6,7 @@ ClassImp(Kinematic_Fitter_1);
 
 //////////
 
-Kinematic_Fitter_1::Kinematic_Fitter_1(const Bool_t& a_chk_debug) : Kinematic_Fitter_Base(a_chk_debug)
+Kinematic_Fitter_1::Kinematic_Fitter_1(const Bool_t& a_chk_high_mass_fitter, const Bool_t& a_chk_debug) : Kinematic_Fitter_Base(a_chk_high_mass_fitter, a_chk_debug)
 {
   cout << "Kinematic_Fitter type : 1" << endl;
 }//Kinematic_Fitter_1::Kinematic_Fitter_1()
@@ -86,7 +86,7 @@ void Kinematic_Fitter_1::Fit()
       for(Int_t j=0; j<24; j++)
 	{
 	  //permutation on jets
-	  Reordering_Jets();
+	  Reordering_Jets(i, j);
 
 	  //store unfitted object
 	  Store_Unfitted_Object(i, j);
@@ -95,7 +95,7 @@ void Kinematic_Fitter_1::Fit()
 	  Bool_t b_tag_config_check = Pass_B_Tag_Configuration();
 	  
 	  //native top mass check
-	  Bool_t native_top_mass_check = Pass_Native_Top_Mass();
+	  Bool_t native_top_mass_check = kTRUE;//Pass_Native_Top_Mass();
 	  
 	  //if b tag configuration is failed, it is not necessary to proceed minimization step.
 	  if(b_tag_config_check==kTRUE && native_top_mass_check==kTRUE)
@@ -110,7 +110,7 @@ void Kinematic_Fitter_1::Fit()
 	      minimizer->Minimize();
 
 	      //store results
-	      Store_Results(i, j);
+	      Store_Results(i, j, b_tag_config_check, native_top_mass_check);
 	    }//if
 	  
 	  //jet ordering permutation                                                               

@@ -27,8 +27,9 @@ Double_t Kinematic_Fitter_Base::f_chi2_piece[N_CHI2_PIECE];
 
 /////////
 
-Kinematic_Fitter_Base::Kinematic_Fitter_Base(const Bool_t& a_chk_debug)
+Kinematic_Fitter_Base::Kinematic_Fitter_Base(const Bool_t& a_chk_high_mass_fitter, const Bool_t& a_chk_debug)
 {  
+  chk_high_mass_fitter = a_chk_high_mass_fitter;
   chk_debug = a_chk_debug;
 
   const char* min_name = "Minuit";
@@ -62,14 +63,14 @@ Kinematic_Fitter_Base::Kinematic_Fitter_Base(const Bool_t& a_chk_debug)
   parameter_start[6] = 1.0;
   parameter_start[7] = 1.0;
   
-  parameter_step[0] = 0.03;
-  parameter_step[1] = 0.03;
-  parameter_step[2] = 0.03;
-  parameter_step[3] = 0.03;
+  parameter_step[0] = 0.01;
+  parameter_step[1] = 0.01;
+  parameter_step[2] = 0.01;
+  parameter_step[3] = 0.01;
   parameter_step[4] = 0.01;
-  parameter_step[5] = 0.03;
-  parameter_step[6] = 0.03;
-  parameter_step[7] = 0.03;
+  parameter_step[5] = 0.01;
+  parameter_step[6] = 0.01;
+  parameter_step[7] = 0.01;
 }//Kinematic_Fitter_Base::Kinematic_Fitter_Base(const Bool_t& a_chk_debug)
 
 //////////
@@ -78,6 +79,29 @@ Kinematic_Fitter_Base::~Kinematic_Fitter_Base()
 {
   delete ts_correction;
 }//Kinematic_Fitter_Base::~Kinematic_Fitter_Base()
+
+//////////
+
+void Kinematic_Fitter_Base::Get_B_Tag(Bool_t b_tag_return[4], const TString& type, const Int_t& index)
+{
+  if(type=="BEST")
+    {
+      for(Int_t i=0; i<4; i++){ b_tag_return[i] = best_b_tag[i]; }
+
+      return;
+    }
+  else
+    {
+      Int_t i = index/24;
+      Int_t j = index%24;
+
+      for(Int_t k=0; k<4; k++){ b_tag_return[k] = b_tag[i][j][k]; }
+      
+      return;
+    }
+  
+  return;
+}//void Kinematic_Fitter_Base::Get_B_Tag(Bool_t b_tag_return[4], const TString& type, const Int_t& index)
 
 //////////
 
@@ -97,11 +121,11 @@ Double_t Kinematic_Fitter_Base::Get_Chi2(const TString& type, const Int_t& index
 
 //////////
 
-void Kinematic_Fitter_Base::Get_Chi2_Piece(Double_t chi2_piece_return[11], const TString& type, const Int_t& index)
+void Kinematic_Fitter_Base::Get_Chi2_Piece(Double_t chi2_piece_return[], const TString& type, const Int_t& index)
 {
   if(type=="BEST")
     {
-      for(Int_t i=0; i<11; i++){ chi2_piece_return[i] = best_chi2_piece[i]; }
+      for(Int_t i=0; i<N_CHI2_PIECE; i++){ chi2_piece_return[i] = best_chi2_piece[i]; }
       
       return;
     }
@@ -110,7 +134,7 @@ void Kinematic_Fitter_Base::Get_Chi2_Piece(Double_t chi2_piece_return[11], const
       Int_t i = index/24;
       Int_t j = index%24;
 
-      for(Int_t k=0; k<11; k++){ chi2_piece_return[k] = chi2_piece[i][j][k]; }
+      for(Int_t k=0; k<N_CHI2_PIECE; k++){ chi2_piece_return[k] = chi2_piece[i][j][k]; }
 
       return;
     }
@@ -226,10 +250,24 @@ void Kinematic_Fitter_Base::Get_Parameters(Double_t parameter_return[NFIT], cons
 
 //////////
 
-void Kinematic_Fitter_Base::Get_Permutation(Int_t permutation_return[4])
+void Kinematic_Fitter_Base::Get_Permutation(Int_t permutation_return[4], const TString& type, const Int_t& index)
 {
-  for(Int_t i=0; i<4; i++){ permutation_return[i] = best_permutation[i]; }
+  if(type=="BEST")
+    {
+      for(Int_t i=0; i<4; i++){ permutation_return[i] = best_permutation[i]; }
 
+      return;
+    }
+  else
+    {
+      Int_t i = index/24;
+      Int_t j = index%24;
+
+      for(Int_t k=0; k<4; k++){ permutation_return[k] = permutation[i][j][k]; }
+
+      return;
+    }
+  
   return;
 }//void Kinematic_Fitter_Base::Get_Permutation(Double_t permuatation_return[4])
 
@@ -301,9 +339,11 @@ void Kinematic_Fitter_Base::Clear()
     {
       for(Int_t j=0; j<24; j++)
 	{
-	  chi2[i][j] = -999;
+	  chi2[i][j] = 999;
 
+	  for(Int_t k=0; k<4; k++){ permutation[i][j][k] = 999; }
 	  for(Int_t k=0; k<NFIT; k++){ parameter[i][j][k] = 999; }
+	  for(Int_t k=0; k<N_CHI2_PIECE; k++){ chi2_piece[i][j][k] = 999; }
         }
     }
 
@@ -331,10 +371,19 @@ Bool_t Kinematic_Fitter_Base::Pass_B_Tag_Configuration()
     }
   else if(n_b_tag==3)
     {
-      //for three b tag event, let's choose jet[3] as b tagged jet. It doesn't destroy generality
-      if(reordered_b_tag[0]==kTRUE && reordered_b_tag[1]==kTRUE && reordered_b_tag[2]==kTRUE) b_tag_config_check = kTRUE;
-    }
+      Bool_t b_tag_config = kFALSE;
+      Bool_t b_tag_p_comp = kFALSE;
       
+      //for three b tag event, let's choose jet[3] as b tagged jet. It doesn't destroy generality
+      if(reordered_b_tag[0]==kTRUE && reordered_b_tag[1]==kTRUE && reordered_b_tag[2]==kTRUE) b_tag_config = kTRUE;
+      
+      //additional constrain on jet[1] and jet[2] because chi2 can't distinguish those permutation
+      if(chk_high_mass_fitter==kTRUE){ if(reordered_jet[1].Pt()<reordered_jet[2].Pt()) b_tag_p_comp = kTRUE; }
+      else{ if(reordered_jet[1].Pt()>reordered_jet[2].Pt()) b_tag_p_comp = kTRUE; }
+      
+      if(b_tag_config==kTRUE && b_tag_p_comp==kTRUE) b_tag_config_check = kTRUE; 
+    }
+  
   return b_tag_config_check;
 }///Bool_t kinematic_Fitter_Base::Pass_B_Tag_Configuration()
 
@@ -353,56 +402,59 @@ Bool_t Kinematic_Fitter_Base::Pass_Native_Top_Mass()
 
 //////////
 
-void Kinematic_Fitter_Base::Reordering_Jets()
+void Kinematic_Fitter_Base::Reordering_Jets(const Int_t& i, const Int_t& j)
 {
-  for(Int_t i=0; i<4; i++)
-    {
-      
+  for(Int_t k=0; k<4; k++)
+    {      
       //apply top specific correction & set quark mass
       Double_t ts_corr = 1;
       Double_t jet_pt_error = 1;
       Double_t q_mass = 1;
       
       //b quark
-      if(reordering_index[i]==0 || reordering_index[i]==1)
+      if(reordering_index[k]==0 || reordering_index[k]==1 || reordering_index[k]==2)
 	{
-	  ts_corr = ts_corr_value[reordering_index[i]][2];
-          jet_pt_error = ts_corr_error[reordering_index[i]][2];
+	  ts_corr = ts_corr_value[reordering_index[k]][2];
+          jet_pt_error = ts_corr_error[reordering_index[k]][2];
 
           q_mass = B_MASS; 
 	}
       
-      // //c quark in charged higgs case
-      // else if(reordering_index[i]==3)
-      // 	{
-      // 	  ts_corr = ts_corr_value[reordering_index[i]][1];
-      // 	  jet_pt_error = ts_corr_error[reordering_index[i]][1];
+      //c quark in charged higgs case
+      else if(reordering_index[k]==3)
+      	{
+      	  ts_corr = ts_corr_value[reordering_index[k]][1];
+      	  jet_pt_error = ts_corr_error[reordering_index[k]][1];
 	  
-      // 	  q_mass = C_MASS;
-      // 	}
+      	  q_mass = C_MASS;
+      	}
       
       else 
       	{
-      	  ts_corr = ts_corr_value[reordering_index[i]][0];                                  
-      	  jet_pt_error = ts_corr_error[reordering_index[i]][0];                             
+      	  ts_corr = ts_corr_value[reordering_index[k]][0];                                  
+      	  jet_pt_error = ts_corr_error[reordering_index[k]][0];                             
 	 
       	  q_mass = 0;                                                                  
       	}   
 	  
-      Double_t pt = measured_jet[reordering_index[i]].Pt()*ts_corr;                         
-      Double_t eta = measured_jet[reordering_index[i]].Eta();                               
-      Double_t phi = measured_jet[reordering_index[i]].Phi(); 
+      Double_t pt = measured_jet[reordering_index[k]].Pt()*ts_corr;                         
+      Double_t eta = measured_jet[reordering_index[k]].Eta();                               
+      Double_t phi = measured_jet[reordering_index[k]].Phi(); 
 	
       //reodered_jet
-      reordered_jet[i].SetPtEtaPhiM(pt, eta, phi, q_mass);
+      reordered_jet[k].SetPtEtaPhiM(pt, eta, phi, q_mass);
 
       //jet pt error
-      error_reordered_jet_pt[i] = jet_pt_error;
+      error_reordered_jet_pt[k] = jet_pt_error;
 
       //reordering b tag
-      reordered_b_tag[i] = measured_b_tag[reordering_index[i]];
+      reordered_b_tag[k] = measured_b_tag[reordering_index[k]];
+      
+      //save permutation
+      permutation[i][j][k] = reordering_index[k];
+      b_tag[i][j][k] = reordered_b_tag[k];
     }
-
+  
   return;
 }//void Kinematic_Fitter_Base::Reordering_Jets()
 
@@ -502,14 +554,14 @@ Bool_t Kinematic_Fitter_Base::Sol_Neutrino_Pz()
 
 //////////
 
-void Kinematic_Fitter_Base::Store_Results(const Int_t& i, const Int_t& j)
+void Kinematic_Fitter_Base::Store_Results(const Int_t& i, const Int_t& j, const Bool_t& b_tag_config_check, const Bool_t& native_top_mass_check)
 {
   /*store results*/
   
   //chi2
   chi2[i][j] = minimizer->MinValue();
   
-  for(Int_t k=0; k<10; k++){ chi2_piece[i][j][k] = f_chi2_piece[k]; }
+  for(Int_t k=0; k<N_CHI2_PIECE; k++){ chi2_piece[i][j][k] = f_chi2_piece[k]; }
   
   //parameters 
   const Double_t* parameter_result = minimizer->X();
@@ -525,13 +577,13 @@ void Kinematic_Fitter_Base::Store_Results(const Int_t& i, const Int_t& j)
   fitted_neutrino[i][j] = fitting_neutrino;
 
   //update best results
-  if(chi2[i][j]<best_chi2) 
+  if(chi2[i][j]<best_chi2 && b_tag_config_check==kTRUE && native_top_mass_check==kTRUE) 
     {
       chk_convergence = kTRUE;
       
       //chi
       best_chi2 = chi2[i][j];                                                           
-      for(Int_t k=0; k<10; k++){ best_chi2_piece[k] = chi2_piece[i][j][k]; } 
+      for(Int_t k=0; k<N_CHI2_PIECE; k++){ best_chi2_piece[k] = chi2_piece[i][j][k]; } 
 
       //parameters
       for(Int_t k=0; k<NFIT; k++){ best_parameter[k] = parameter[i][j][k]; } 
@@ -539,6 +591,7 @@ void Kinematic_Fitter_Base::Store_Results(const Int_t& i, const Int_t& j)
       //permutation & jets
       for(Int_t k=0; k<4; k++)
 	{
+	  best_b_tag[k] = b_tag[k];
 	  best_permutation[k] = reordering_index[k];                                    
 	  best_fitted_jet[k] =  fitted_jet[i][j][k];                                    
 	  best_unfitted_jet[k] = unfitted_jet[j][k];
@@ -554,7 +607,7 @@ void Kinematic_Fitter_Base::Store_Results(const Int_t& i, const Int_t& j)
     }
   
   return;
-}//void Kinematic_Fitter_Base::Store_Results(const Int_t& i, const Int_t& j)
+}//void Kinematic_Fitter_Base::Store_Results(const Int_t& i, const Int_t& j, const Bool_t& b_tag_config_check, const Bool_t& native_top_mass_check);
 
 //////////
 

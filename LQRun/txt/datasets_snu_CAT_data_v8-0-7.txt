@@ -204,8 +204,6 @@ SKSinglePhoton_hndilep              F        /data7/DATA/CatNtuples/v8-0-7/SKTre
 SKSinglePhoton_hndilep              G        /data7/DATA/CatNtuples/v8-0-7/SKTrees/DataHNDiLep/SinglePhoton/periodG/
 SKSinglePhoton_hndilep              H_v2        /data7/DATA/CatNtuples/v8-0-7/SKTrees/DataHNDiLep/SinglePhoton/periodH_v2/
 SKSinglePhoton_hndilep              H_v3        /data7/DATA/CatNtuples/v8-0-7/SKTrees/DataHNDiLep/SinglePhoton/periodH_v3/
-<<<<<<< HEAD
-=======
 SKSingleMuon_hnfake                B        /data7/DATA/CatNtuples/v8-0-7/SKTrees/DataHNFake/SingleMuon/periodB/
 SKSingleMuon_hnfake                C        /data7/DATA/CatNtuples/v8-0-7/SKTrees/DataHNFake/SingleMuon/periodC/
 SKSingleMuon_hnfake                D        /data7/DATA/CatNtuples/v8-0-7/SKTrees/DataHNFake/SingleMuon/periodD/
@@ -254,7 +252,6 @@ SKSinglePhoton_hnfake              F        /data7/DATA/CatNtuples/v8-0-7/SKTree
 SKSinglePhoton_hnfake              G        /data7/DATA/CatNtuples/v8-0-7/SKTrees/DataHNFake/SinglePhoton/periodG/
 SKSinglePhoton_hnfake              H_v2        /data7/DATA/CatNtuples/v8-0-7/SKTrees/DataHNFake/SinglePhoton/periodH_v2/
 SKSinglePhoton_hnfake              H_v3        /data7/DATA/CatNtuples/v8-0-7/SKTrees/DataHNFake/SinglePhoton/periodH_v3/
->>>>>>> CatAnalyzer_13TeV_v8-0-7.12
 SKSingleMuon_trilep                B        /data7/DATA/CatNtuples/v8-0-7/SKTrees/DataTriLep/SingleMuon/periodB/
 SKSingleMuon_trilep                C        /data7/DATA/CatNtuples/v8-0-7/SKTrees/DataTriLep/SingleMuon/periodC/
 SKSingleMuon_trilep                D        /data7/DATA/CatNtuples/v8-0-7/SKTrees/DataTriLep/SingleMuon/periodD/

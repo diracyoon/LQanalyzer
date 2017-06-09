@@ -8,6 +8,8 @@
 #include <TLorentzVector.h>
 #include <TString.h>
 
+#include "My_Defs.h"
+
 #define N_QUARK_TYPE 3
 
 using namespace std;
@@ -18,6 +20,7 @@ class TS_Correction
   TS_Correction(const Int_t& a_correction_type);
   ~TS_Correction();
 
+  TLorentzVector Get_Corrected_Jet(const TLorentzVector& a_jet, const Int_t& jet_type);
   void Get_Correction(const TLorentzVector& jet, const Int_t jet_type, Double_t corr_val[2]);
 
  private:

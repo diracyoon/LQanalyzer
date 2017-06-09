@@ -3685,6 +3685,66 @@ std::vector<snu::KMuon> AnalyzerCore::sort_muons_ptorder(std::vector<snu::KMuon>
 /*private methods*/
 ///////////////////
 
+Bool_t AnalyzerCore::Chk_Permutation_Match(const Int_t permutation_truth[], const Int_t permutation_fitter[])
+{  
+  Int_t permutation_temp[4];
+  for(Int_t i=0; i<4; i++){ permutation_temp[i] = permutation_truth[i]; }
+
+  sort(permutation_temp, permutation_temp+4);
+    
+  Int_t permutation_order[4];
+  for(Int_t i=0; i<4; i++)
+    {
+      for(Int_t j=0; j<4; j++)
+	{
+	  if(permutation_truth[i]==permutation_temp[j])
+	    {
+	      permutation_order[i] = j;
+	      break;
+	    }
+	}
+    }
+  
+  Bool_t chk_permutation_match;
+  if(permutation_order[0]==permutation_fitter[0] && permutation_order[1]==permutation_fitter[1]) chk_permutation_match = kTRUE;
+  else chk_permutation_match = kFALSE;
+
+  return chk_permutation_match;
+}//Bool_t AnalyzerCore::Chk_Permutation_Match(const Int_t permutation_truth[], const Int_t permutation_fitter[])
+
+//////////
+
+Bool_t AnalyzerCore::Chk_True_Jet_Input(const Int_t permutation_truth[], const Bool_t* target_jet, const Int_t n_jet)
+{
+  Bool_t chk_true_jet_input = kTRUE;
+  
+  for(Int_t i=0; i<n_jet; i++)
+    {
+      if(target_jet[i]==kTRUE)
+        {
+	  Bool_t chk_found = kFALSE;
+          for(Int_t j=0; j<4; j++)
+            {
+              if(permutation_truth[j]==i)
+                {
+                  chk_found = kTRUE;
+                  break;
+                }
+            }
+	  
+	  if(chk_found==kFALSE)
+            {
+              chk_true_jet_input = kFALSE;
+              break;
+            }
+        }
+    }
+    
+  return chk_true_jet_input;
+}//Bool_t AnalyzerCore::Chk_True_Jet_Input(const Int_t* permutation_truth, const Bool_t* target_jet)
+
+//////////
+
 Bool_t AnalyzerCore::Compare_Jet_Pt(const snu::KJet& jet0, const snu::KJet& jet1)
 {
   return jet0.Pt() > jet1.Pt();
@@ -3886,12 +3946,12 @@ Bool_t AnalyzerCore::Search_Truth_Value(std::vector<snu::KTruth>& gen_truth_coll
 
 //////////
 
-Bool_t AnalyzerCore::Truth_Jet_Match(const snu::KTruth gen_quark[], const vector<snu::KJet>& jet_vector, Int_t permutation_truth[4])
+Bool_t AnalyzerCore::Truth_Jet_Match(const snu::KTruth gen_quark[], const vector<snu::KJet>& jet_vector, Int_t permutation_truth[4], const Double_t distance_match)
 {
   //Bool_t chk_print = kTRUE;
-  Bool_t chk_print = kFALSE;
+  //Bool_t chk_print = kFALSE;
 
-  if(chk_print) cout << endl;
+  //if(chk_print) cout << endl;
 
   Int_t njet = jet_vector.size();
 
@@ -3912,7 +3972,7 @@ Bool_t AnalyzerCore::Truth_Jet_Match(const snu::KTruth gen_quark[], const vector
       else chk_btag[i] = kFALSE;
     }
 
-  if(chk_print) cout << "njet = " << njet << ", nbjet = " << nbjet << endl;
+  //if(chk_print) cout << "njet = " << njet << ", nbjet = " << nbjet << endl;
 
   for(Int_t i=0; i<4; i++)
     {
@@ -3923,18 +3983,18 @@ Bool_t AnalyzerCore::Truth_Jet_Match(const snu::KTruth gen_quark[], const vector
 	  snu::KJet jet = jet_vector.at(j);
           Double_t distance = Distance(gen_quark[i], jet);
 
-          if(chk_print) cout << i << "\t" << gen_quark[i].PdgId() << "\t" << gen_quark[i].Pt() << "\t" << j << "\t" << jet.Pt() << "\t" << distance << "\t" << chk_btag[j] << endl;
+          //if(chk_print) cout << i << "\t" << gen_quark[i].PdgId() << "\t" << gen_quark[i].Pt() << "\t" << j << "\t" << jet.Pt() << "\t" << distance << "\t" << chk_btag[j] << endl;
 
-          if(distance<DISTANCE_MATCH)
+          if(distance<distance_match)
             {
-              if(chk_print) cout << "Distance Match" << endl;
+              //if(chk_print) cout << "Distance Match" << endl;
 
               if(chk_btag[j]==kTRUE && (gen_quark[i].PdgId()==5||gen_quark[i].PdgId()==-5) )
                 {
                   match[j] = kTRUE;
                   permutation_truth[i] = j;
 
-                  if(chk_print) cout << "Found b tag" << endl;
+                  //if(chk_print) cout << "Found b tag" << endl;
 
                   break;
                 }//b tag jet
@@ -3943,7 +4003,7 @@ Bool_t AnalyzerCore::Truth_Jet_Match(const snu::KTruth gen_quark[], const vector
                   match[j] = kTRUE;
                   permutation_truth[i] = j;
 
-                  if(chk_print) cout << "Found No b tag" << endl;
+                  //if(chk_print) cout << "Found No b tag" << endl;
 
                   break;
                 }//no b tag jet
@@ -3962,7 +4022,7 @@ Bool_t AnalyzerCore::Truth_Jet_Match(const snu::KTruth gen_quark[], const vector
               //     match[j] = kTRUE;
               //     permutation_truth[i] = j;
 
-              //     if(chk_print) cout << "Found" << endl;
+              //     //if(chk_print) cout << "Found" << endl;
 
               //     break;
               //   }
@@ -3977,12 +4037,12 @@ Bool_t AnalyzerCore::Truth_Jet_Match(const snu::KTruth gen_quark[], const vector
   Bool_t chk_match = kFALSE;
   if(count==4) chk_match = kTRUE;
 
-  if(chk_print)
-    {
-      if(chk_match==kTRUE) cout << "GOOD" << endl;
-      else cout << "BAD" << endl;
-    }
-
+  //if(chk_print)
+  // {
+  //   if(chk_match==kTRUE) cout << "GOOD" << endl;
+  //   else cout << "BAD" << endl;
+  // }
+  
   delete[] match;
   delete[] chk_btag;
 
