@@ -20,7 +20,7 @@ Jet_Selection_Test_0::Jet_Selection_Test_0() : AnalyzerCore()
   // This function sets up Root files and histograms Needed in ExecuteEvents
   InitialiseAnalysis();
 
-  Bool_t high_mass_fitter = kTRUE;
+  Bool_t high_mass_fitter = kFALSE;
   chk_debug = kFALSE;
 
   fitter = new Kinematic_Fitter_1(high_mass_fitter, chk_debug);
@@ -215,18 +215,7 @@ void Jet_Selection_Test_0::ExecuteEvents() throw(LQError)
  
   Double_t chi2_piece[N_CHI2_PIECE];
   fitter->Get_Chi2_Piece(chi2_piece);
-  
-  for(Int_t i=0; i<N_CHI2_PIECE; i++)
-    {
-      TString hname = "Chi2_Piece_";
-      hname += i;
-   
-      FillHist(hname, chi2_piece[i], weight);
-      if(chk_true_jet_input==kFALSE) FillHist(hname + "_TF", chi2_piece[i], weight);
-      else if(chk_permutation_match==kFALSE) FillHist(hname + "_TS_PF", chi2_piece[i], weight);
-      else FillHist(hname + "_PS", chi2_piece[i], weight);
-    }  
-  
+    
   TLorentzVector fitted_object[6];
   for(Int_t i=0; i<6; i++){ fitted_object[i] = fitter->Get_Fitted_Object(i); }
   
@@ -262,6 +251,17 @@ void Jet_Selection_Test_0::ExecuteEvents() throw(LQError)
       if(chk_true_jet_input==kTRUE && chk_permutation_match==kTRUE) FillHist("Jet_Permutation_Match_2B", 1, weight);
       else FillHist("Jet_Permutation_Match_2B", 0, weight);
 
+      for(Int_t i=0; i<N_CHI2_PIECE; i++)
+	{
+	  TString hname = "Chi2_Piece_2B_";
+	  hname += i;
+
+	  FillHist(hname, chi2_piece[i], weight);
+	  if(chk_true_jet_input==kFALSE) FillHist(hname + "_TF", chi2_piece[i], weight);
+	  else if(chk_permutation_match==kFALSE) FillHist(hname + "_TS_PF", chi2_piece[i], weight);
+	  else FillHist(hname + "_PS", chi2_piece[i], weight);
+	}
+      
       FillHist("Chi2_2B", chi2, weight);
       if(chk_true_jet_input==kFALSE) FillHist("Chi2_2B_TF", chi2, weight);
       else if(chk_permutation_match==kFALSE) FillHist("Chi2_2B_TS_PF", chi2, weight);
@@ -285,6 +285,17 @@ void Jet_Selection_Test_0::ExecuteEvents() throw(LQError)
       if(chk_true_jet_input==kTRUE && chk_permutation_match==kTRUE) FillHist("Jet_Permutation_Match_3B", 1, weight);
       else FillHist("Jet_Permutation_Match_3B", 0, weight);
       
+      for(Int_t i=0; i<N_CHI2_PIECE; i++)
+	{
+	  TString hname = "Chi2_Piece_3B_";
+	  hname += i;
+
+	  FillHist(hname, chi2_piece[i], weight);
+	  if(chk_true_jet_input==kFALSE) FillHist(hname + "_TF", chi2_piece[i], weight);
+	  else if(chk_permutation_match==kFALSE) FillHist(hname + "_TS_PF", chi2_piece[i], weight);
+	  else FillHist(hname + "_PS", chi2_piece[i], weight);
+	}
+
       FillHist("Chi2_3B", chi2, weight);
       if(chk_true_jet_input==kFALSE) FillHist("Chi2_3B_TF", chi2, weight);
       else if(chk_permutation_match==kFALSE) FillHist("Chi2_3B_TS_PF", chi2, weight);
@@ -354,9 +365,19 @@ void Jet_Selection_Test_0::InitialiseAnalysis() throw(LQError)
   //chi2
   for(Int_t i=0; i<N_CHI2_PIECE; i++)
     {
-      TString hname = "Chi2_Piece_";
+      //2b
+      TString hname = "Chi2_Piece_2B_";
       hname += i;
 
+      MakeHistograms(hname, 100, 0, 50);
+      MakeHistograms(hname + "_TF", 100, 0, 50);
+      MakeHistograms(hname + "_TS_PF", 100, 0, 50);
+      MakeHistograms(hname + "_PS", 100, 0, 50);
+    
+      //3b
+      hname = "Chi2_Piece_3B_";
+      hname += i;
+      
       MakeHistograms(hname, 100, 0, 50);
       MakeHistograms(hname + "_TF", 100, 0, 50);
       MakeHistograms(hname + "_TS_PF", 100, 0, 50);

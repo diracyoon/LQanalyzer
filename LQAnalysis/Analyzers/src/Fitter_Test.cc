@@ -20,7 +20,7 @@ Fitter_Test::Fitter_Test() : AnalyzerCore()
   // This function sets up Root files and histograms Needed in ExecuteEvents
   InitialiseAnalysis();
 
-  Bool_t high_mass_fitter = kFALSE;
+  Bool_t high_mass_fitter = kTRUE;
   chk_debug = kFALSE;
   fitter = new Kinematic_Fitter_1(high_mass_fitter, chk_debug);
  
@@ -224,16 +224,6 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   
   Double_t chi2_piece[N_CHI2_PIECE];
   fitter->Get_Chi2_Piece(chi2_piece);
-
-  for(Int_t i=0; i<N_CHI2_PIECE; i++)
-    {
-      TString hname = "Chi2_Piece_";
-      hname += i;
-      
-      FillHist(hname, chi2_piece[i], weight);
-      if(chk_permutation_match==kFALSE) FillHist(hname + "_PF", chi2_piece[i], weight);
-      else FillHist(hname + "_PS", chi2_piece[i], weight);
-    }
   
   TLorentzVector fitted_object[6];
   TLorentzVector unfitted_object[6];
@@ -302,7 +292,17 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
 	  if(chk_permutation_fail_reason==kFALSE) FillHist("Jet_Permutation_Match_Fail_Reason_2B", 0, weight);
 	  else FillHist("Jet_Permutation_Match_Fail_Reason_2B", 1, weight);
 	}
-           
+      
+      for(Int_t i=0; i<N_CHI2_PIECE; i++)
+	{
+	  TString hname = "Chi2_Piece_2B_";
+	  hname += i;
+
+	  FillHist(hname, chi2_piece[i], weight);
+	  if(chk_permutation_match==kFALSE) FillHist(hname + "_PF", chi2_piece[i], weight);
+	  else FillHist(hname + "_PS", chi2_piece[i], weight);
+	}
+     
       FillHist("Chi2_2B", chi2, weight);
       if(chk_permutation_match==kFALSE) FillHist("Chi2_2B_PF", chi2, weight);
       else FillHist("Chi2_2B_PS", chi2, weight);
@@ -343,6 +343,16 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
           else FillHist("Jet_Permutation_Match_Fail_Reason_3B", 1, weight);
 	}
 	  
+      for(Int_t i=0; i<N_CHI2_PIECE; i++)
+	{
+	  TString hname = "Chi2_Piece_3B_";
+	  hname += i;
+
+	  FillHist(hname, chi2_piece[i], weight);
+	  if(chk_permutation_match==kFALSE) FillHist(hname + "_PF", chi2_piece[i], weight);
+	  else FillHist(hname + "_PS", chi2_piece[i], weight);
+	}
+
       FillHist("Chi2_3B", chi2, weight);
       if(chk_permutation_match==kFALSE) FillHist("Chi2_3B_PF", chi2, weight);
       else FillHist("Chi2_3B_PS", chi2, weight);
@@ -360,10 +370,6 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
       TLorentzVector jet_1 = ts_correction->Get_Corrected_Jet(jet_hard_coll.at(permutation_truth[1]), 2);
       TLorentzVector jet_2 = ts_correction->Get_Corrected_Jet(jet_hard_coll.at(permutation_truth[2]), 2);
 
-      // cout << jet_1.Pt() << " " << jet_2.Pt() << endl;
-      // cout << jet_1.P() << " " << jet_2.P() << endl;
-      // cout << endl;
-      
       if(jet_1.Pt()>jet_2.Pt()) FillHist("Two_B_Pt_Comparison", 0, weight);
       else FillHist("Two_B_Pt_Comparison", 1, weight);
       
@@ -423,7 +429,16 @@ void Fitter_Test::InitialiseAnalysis() throw(LQError)
   //chi2
   for(Int_t i=0; i<N_CHI2_PIECE; i++)
     {
-      TString hname = "Chi2_Piece_";
+      //2b
+      TString hname = "Chi2_Piece_2B_";
+      hname += i;
+
+      MakeHistograms(hname, 100, 0, 50);
+      MakeHistograms(hname + "_PF", 100, 0, 50);
+      MakeHistograms(hname + "_PS", 100, 0, 50);
+   
+      //3b
+      hname = "Chi2_Piece_3B_";
       hname += i;
 
       MakeHistograms(hname, 100, 0, 50);
