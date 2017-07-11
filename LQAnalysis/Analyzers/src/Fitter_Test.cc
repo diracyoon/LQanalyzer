@@ -65,27 +65,16 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   if(!isData) weight*=MCweight;
 
   FillCutFlow("NoCut", weight);
-
-  /*////////////////////*/
-  /*Gen Truth*/
-  /*////////////////////*/
   
-  std::vector<snu::KTruth> gen_truth_coll;
-  eventbase->GetTruthSel()->Selection(gen_truth_coll);
-
-  snu::KTruth gen_quark[4];
-  snu::KTruth gen_neutrino;
-  snu::KTruth gen_lepton;
-  Bool_t chk_semi_leptonic = Search_Truth_Value(gen_truth_coll, gen_quark, gen_neutrino, gen_lepton);
-
-  if(chk_semi_leptonic==kFALSE) throw LQError("No semi-leptonic decay", LQError::SkipEvent);
-  FillCutFlow("SemiLeptonic", weight);
-  
-  //Vertex cut
+  /*//////////*/
+  /*Vertex cut*/
+  /*//////////*/
   if(!eventbase->GetEvent().HasGoodPrimaryVertex()) throw LQError("Fails vertex cuts", LQError::SkipEvent);
   FillCutFlow("VertexCut", weight);
   
+  /*///*/
   /*MET*/
+  /*///*/
   //Pass basic MET filter
   if(!PassMETFilter()) throw LQError("Fail basic MET filter.", LQError::SkipEvent);
   FillCutFlow("METCut", weight);
@@ -173,6 +162,21 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
  
   if(n_bjet_target<2) throw LQError("Fails at least two b tagged jet in leading four hard jets", LQError::SkipEvent);
   FillCutFlow("TwoBJets", weight);
+
+  /*////////////////////*/
+  /*Gen Truth*/
+  /*////////////////////*/
+
+  std::vector<snu::KTruth> gen_truth_coll;
+  eventbase->GetTruthSel()->Selection(gen_truth_coll);
+
+  snu::KTruth gen_quark[4];
+  snu::KTruth gen_neutrino;
+  snu::KTruth gen_lepton;
+  Bool_t chk_semi_leptonic = Search_Truth_Value(gen_truth_coll, gen_quark, gen_neutrino, gen_lepton);
+
+  if(chk_semi_leptonic==kFALSE) throw LQError("No semi-leptonic decay", LQError::SkipEvent);
+  FillCutFlow("SemiLeptonic", weight);
   
   //parton-jet matching for all jets
   Int_t permutation_truth[4] = {0, 0, 0, 0};
