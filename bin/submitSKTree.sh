@@ -7,7 +7,7 @@ cp $LQANALYZER_DATASETFILE_DIR/list_all_mc*  $LQANALYZER_DIR/LQRun/txt/
 
 
 declare -a list_of_skims=("FLATCAT" "SKTree_NoSkim" "SKTree_LeptonSkim" "SKTree_DiLepSkim"  "SKTree_HNDiLepSkim" "SKTree_HNFakeSkim" "SKTree_TriLepSkim" "NoCut" "Lepton" "DiLep")
-declare -a list_of_sampletags=("ALL" "DATA" "MC" "DoubleEG" "DoubleMuon" "MuonEG" "SingleMuon" "SinglePhoton" "SingleElectron" "SingleLepton")
+declare -a list_of_sampletags=("ALL" "DATA" "MC" "DoubleEG" "DoubleMuon" "MuonEG" "SingleMuon" "SinglePhoton" "SingleElectron" "SingleLepton" "DoubleMuon_CF")
 declare -a  oldcat=("v7-4-4" "v7-4-5")
 
 #declare -a queueoptions=("allq" "fastq" "longq" "node1" "node2" "node3" "node4" "node5" "node6" "None")
@@ -409,11 +409,11 @@ if [[ $submit_file_tag  != ""  ]];
     file_tag_exists=false
     for all_files in ${test_single_file[@]};
       do
-      if [[ $all_files == $submit_file_tag ]];
-	  then
-	  file_tag_exists=true
-      fi
-      done
+	if [[ $all_files == $submit_file_tag ]];
+	then
+	    file_tag_exists=true
+	fi
+    done
     if [[ $file_tag_exists == "false" ]];
 	then
 	echo "LQanalyzer::sktree :: ERROR :: 'sktree -i <samplename>'"
@@ -606,10 +606,10 @@ if [[ $submit_file_list  != ""  ]];
 	    file_tag_exists=false
 	    for all_files in ${test_single_file[@]};
 	      do
-	      if [[ $all_files == $part_of_list ]];
-		  then
-		  file_tag_exists=true
-	      fi
+		if [[ $all_files == $part_of_list ]];
+		then
+		    file_tag_exists=true
+		fi
 	    done
 	    if [[ $file_tag_exists == "false" ]];
 		then

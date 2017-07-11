@@ -106,6 +106,18 @@ def   MergeData(defrunnp,defruncf,defdata_lumi, defFinaloutputdir,  defcatversio
             if not  "SKTreeMaker" in cycle:
                 os.system("source hadd.sh " + defFinaloutputdir + " "+defcycle+"_"+defoutput_file_skim_tag+".root "+defFinaloutputdir+"/"+defcycle+"'*'"+defoutput_file_skim_tag+"'*'")
                 os.system("mv "  + defFinaloutputdir+ "/"+ defcycle+"_"+defoutput_file_skim_tag+".root " + defFinaloutputdirMC+ "/"+defcycle+ "_"+defchannel+"_"+foutname+".root")
+                if os.getenv("USER") == "jalmond":
+                    transout=defFinaloutputdirMC.replace("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/","/afs/cern.ch/work/j/jalmond/CAT/")
+                    catpath=os.getenv("LQANALYZER_DIR")+"/bin/catconfig"
+                    readcatpath=open(catpath,"r")
+                    lxmachine=""
+                    for rline in readcatpath:
+                        if "localcpu" in rline:
+                            srline = rline.split()
+                            lxmachine=srline[2]
+                readcatpath.close()
+                os.system("scp -r "+ defFinaloutputdirMC+ "/"+defcycle+ "_"+defchannel+"_"+foutname+".root" + " jalmond@"+lxmachine+".cern.ch:"+transout)
+                
 
 
     elif defruncf == "True":
@@ -162,6 +174,19 @@ def   MergeData(defrunnp,defruncf,defdata_lumi, defFinaloutputdir,  defcatversio
 
                 os.system("source hadd.sh " + defFinaloutputdir + " "+defcycle+"_data_cat_"+defcatversion+".root "+defFinaloutputdir+"/"+defcycle+"'*'"+defoutput_file_skim_tag+"'*'")
                 os.system("mv "  + defFinaloutputdir+ "/"+defcycle+"_data_cat_"+defcatversion+".root  " + defFinaloutputdirMC+ "/"+defcycle+"_data_" + defchannel+"_cat_"+defcatversion+".root")
+                
+                if os.getenv("USER") == "jalmond":
+                    transout=defFinaloutputdirMC.replace("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/","/afs/cern.ch/work/j/jalmond/CAT/")
+                    catpath=os.getenv("LQANALYZER_DIR")+"/bin/catconfig"
+                    readcatpath=open(catpath,"r")
+                    lxmachine=""
+                    for rline in readcatpath:
+                        if "localcpu" in rline:
+                            srline = rline.split()
+                            lxmachine=srline[2]
+                readcatpath.close()
+                os.system("scp -r "+ defFinaloutputdirMC+ "/"+ defcycle+"_data_" + defchannel+"_cat_"+defcatversion+".root  jalmond@"+lxmachine+".cern.ch:"+transout)
+
 
 def UpdateOutput(outputlist,outputlist_path):
     out_file = open(outputlist_path,"w")
@@ -380,6 +405,10 @@ def FreeSpaceInQueue(jobqueue, deftagger):
     for cline in file_clust_check_njobs:
         if "fastq" in cline:
             splitline = cline.split()
+            if len(splitline) ==6 and ".local" in cline:
+                if splitline[5] == "a":
+                    return 0
+                            
             if len(splitline) ==5:
                 qjobinfo=splitline[2]
                 qjobinfo=qjobinfo.replace("/"," ")
@@ -388,6 +417,10 @@ def FreeSpaceInQueue(jobqueue, deftagger):
                 fastq_nallowedinqueue=fastq_nallowedinqueue+float(splitqjobinfo[2])
         if "longq" in cline:
             splitline = cline.split()
+            if len(splitline) ==6 and ".local" in cline:
+                if splitline[5] == "a":
+                    return 0
+
             if len(splitline) ==5:
                 qjobinfo=splitline[2]
                 qjobinfo=qjobinfo.replace("/"," ")
@@ -422,6 +455,9 @@ def ChangeQueue(jobsummary, jobqueue, ncores_job, deftagger, rundebug):
     fastq_nallowedinqueue=0.
     longq_ninqueue=0.
     longq_nallowedinqueue=0.
+    alarm_fast=False
+    alarm_long=False
+        
     for cline in file_clust_check_njobs:
         if "fastq" in cline:
             splitline = cline.split()
@@ -431,6 +467,17 @@ def ChangeQueue(jobsummary, jobqueue, ncores_job, deftagger, rundebug):
                 splitqjobinfo=qjobinfo.split()
                 fastq_ninqueue=fastq_ninqueue+float(splitqjobinfo[1])
                 fastq_nallowedinqueue=fastq_nallowedinqueue+float(splitqjobinfo[2])
+            elif len(splitline) ==6 and ".local" in cline:
+                if splitline[5] == "a":
+                    alarm_fast=True
+                else:
+                    qjobinfo=splitline[2]
+                    qjobinfo=qjobinfo.replace("/"," ")
+                    splitqjobinfo=qjobinfo.split()
+                    fastq_ninqueue=fastq_ninqueue+float(splitqjobinfo[1])
+                    fastq_nallowedinqueue=fastq_nallowedinqueue+float(splitqjobinfo[2])
+                    
+
         if "longq" in cline:
             splitline = cline.split()
             if len(splitline) ==5:
@@ -439,7 +486,26 @@ def ChangeQueue(jobsummary, jobqueue, ncores_job, deftagger, rundebug):
                 splitqjobinfo=qjobinfo.split()
                 longq_ninqueue=longq_ninqueue+float(splitqjobinfo[1])
                 longq_nallowedinqueue=longq_nallowedinqueue+float(splitqjobinfo[2])
-        
+            elif len(splitline) ==6 and ".local" in cline:
+                if splitline[5] == "a":
+                    alarm_long=True
+                else:
+                    qjobinfo=splitline[2]
+                    qjobinfo=qjobinfo.replace("/"," ")
+                    splitqjobinfo=qjobinfo.split()
+                    longq_ninqueue=longq_ninqueue+float(splitqjobinfo[1])
+                    longq_nallowedinqueue=longq_nallowedinqueue+float(splitqjobinfo[2])
+        if alarm_long and alarm_fast:
+            curses.echo()
+            curses.nocbreak()
+            curses.endwin()
+            print "Exiting since fast and long queues are in alarm state"
+            sys.exit()
+        elif alarm_long:
+            return "fastq"
+        elif alarm_fast:
+            return "longq"
+                
     file_clust_check_njobs.close()
     if rundebug:
         file_debug.write("queue fast: fastq_ninqueue=" + str(fastq_ninqueue) + " fastq_nallowedinqueue = " + str(fastq_nallowedinqueue)+ " \n")
@@ -1327,6 +1393,7 @@ def GetRunning(tagger, rsample):
 
     
 
+
 #Import parser to get options                                                                                                                                                 
 parser = OptionParser()
 parser.add_option("-p", "--period", dest="period", default="A",help="which data period or mc sample")
@@ -1428,6 +1495,50 @@ tmpsubmit_allfiles=options.submitallfiles
 submit_allfiles=False
 if tmpsubmit_allfiles == "true":
     submit_allfiles=True
+
+
+
+if getpass.getuser()  == "jalmond":
+    transout=Finaloutputdir
+    transout=transout.replace("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/" ,"/afs/cern.ch/work/j/jalmond/CAT/")
+
+
+    os.system("cat ~/.ssh/config > check_connection.txt")
+    
+    ch_connect = open("check_connection.txt",'r')
+    cpath="/tmp/"
+    for line in ch_connect:
+        if "ControlPath" in line:
+            if "~/ssh" in line:
+                cpath="~/"
+            elif "/tmp/" in line:
+                cpath="/tmp/"
+            else:
+                print "Modify the cms21 connection since  ControlPath in ~/.ssh/cofig is set to something other than tmp or home dir"
+
+    ch_connect.close()
+    os.system("rm check_connection.txt")
+    os.system("ls " + cpath + " > check_snu_connection.txt")
+    snu_connect = open("check_snu_connection.txt",'r')
+    connected_lxplus=False
+    catpath=os.getenv("LQANALYZER_DIR")+"/bin/catconfig"
+    readcatpath=open(catpath,"r")
+    lxmachine=""
+    for rline in readcatpath:
+        if "localcpu" in rline:
+            srline = rline.split()
+            lxmachine=srline[2]
+    readcatpath.close()
+
+    for line in snu_connect:
+        if "ssh-jalmond@"+lxmachine in line:
+            connected_lxplus=True
+    snu_connect.close()
+    os.system("rm check_snu_connection.txt")
+    
+    if not connected_lxplus:
+        print "No connection to " + lxmachine
+        sys.exit()                                                                                                                                                                 
 
 queuepath=path_jobpre+"/LQAnalyzer_rootfiles_for_analysis/CattupleConfig/QUEUE/ForceQueue.txt"
 file_queuepath = open(queuepath,"r")

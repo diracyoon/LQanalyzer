@@ -102,11 +102,12 @@ void FakeRateCalculator_El::ExecuteEvents()throw( LQError ){
     // | ELECTRON_HN_FAKELOOSEST              | 5.     | 2.5     |   0.5     | 0.50      | false         | false          |  false       | false         | 0.05    | 0.05  | 0.10   | 0.10   | true    | true     | 999.         | 4.            | false      |      false     |  false           | false |
 
 
-    /// MEDIUM MVA
+    /// TIGHT MVA
     // mvaCategoriesMapName = mvaCategoriesMapName, # map with category index for all particles                                                                             
-    //  cutCategory0 =  0.836695742607, # EB1                                                                                                                                
-    //  cutCategory1 =  0.715337944031, # EB2                                                                                                                                
-    //  cutCategory2 =  0.356799721718, # EE                                                                                                                                 
+    //cutCategory0 =  0.940962684155, # EB1                                                                                                                                                                                                                           
+    //cutCategory1 =  0.899208843708, # EB2                                                                                                                                                                                                                           
+    //cutCategory2 =  0.758484721184, # EE                                                                                                                                                                                                                            
+
     //  )
     
     
@@ -185,7 +186,7 @@ void FakeRateCalculator_El::ExecuteEvents()throw( LQError ){
 	}
       }
     }
-      
+    
     GetFakeRateAndPromptRates(tmploose_el_mediumMVA,"MVA_TIGHT",tmploose_el_tightMVA,0.05,weight,true, false);
     
     

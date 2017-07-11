@@ -238,11 +238,13 @@ bool MuonSelection::PassUserID(TString id, snu::KMuon mu, vector<pair<TString, T
   if(mu.Pt() == 0.) return false;
   
   float dxymax(0.);
-  float dzmax(0.);
+  float dzmax_b(0.);
+  float dzmax_ec(0.);
   float chi2max(0.);
 
   bool checkdxymax(false);
-  bool checkdzmax (false);
+  bool checkdzmax_b (false);
+  bool checkdzmax_ec (false);
   bool checkchi2max(false);
   bool checkisloose (false);
   bool checkismedium (false);
@@ -261,8 +263,16 @@ bool MuonSelection::PassUserID(TString id, snu::KMuon mu, vector<pair<TString, T
   
   for(unsigned int idel =0; idel < vidf.size(); idel++){
     if(!Check( vidf[idel].second)) continue;
-    if(vidf[idel].first == "isomax04") {
-      if(LeptonRelIso > vidf[idel].second) {if(debug){ cout << "Fail iso"  << endl; } return false;}
+    
+    if(fabs(mu.Eta()) < 1.5){
+      if(vidf[idel].first == "isomax04_b") {
+	if(LeptonRelIso > vidf[idel].second) {if(debug){ cout << "Fail iso"  << endl; } return false;}
+      }
+    }
+    else{
+      if(vidf[idel].first == "isomax04_ec") {
+        if(LeptonRelIso > vidf[idel].second) {if(debug){ cout << "Fail iso"  << endl; } return false;}
+      }
     }
     if(vidf[idel].first == "|dxymax|") {
       checkdxymax=true;
@@ -278,17 +288,31 @@ bool MuonSelection::PassUserID(TString id, snu::KMuon mu, vector<pair<TString, T
       checkchi2max=true;
       chi2max=vidf[idel].second;
     }
-    if(vidf[idel].first == "|dzmax|") {
-      checkdzmax=true;
-      dzmax=vidf[idel].second;
+    if(fabs(mu.Eta()) < 1.5){
+      if(vidf[idel].first == "|dzmax_b|") {
+	checkdzmax_b=true;
+	dzmax_b=vidf[idel].second;
+      }
+    }
+    else{
+      if(vidf[idel].first == "|dzmax_ec|") {
+        checkdzmax_ec=true;
+        dzmax_ec=vidf[idel].second;
+      }
     }
   }
 
 
-  if(checkdxymax || checkchi2max || checkdzmax) {
-    if(checkistight && ! PassID("MUON_POG_TIGHT",mu, !checkdxymax,!checkdzmax,!checkchi2max)) {if(debug){ cout << "Fail pogtight"  << endl;} return false;}
+  if(checkdxymax || checkchi2max || checkdzmax_b || checkdzmax_ec) {
+    if(checkistight && ! PassID("MUON_POG_TIGHT",mu, !checkdxymax,!(checkdzmax_b||checkdzmax_ec),!checkchi2max)) {if(debug){ cout << "Fail pogtight"  << endl;} return false;}
     if(checkdxymax && (fabs(mu.dXY()) > dxymax)){ if(debug){ cout << "Fail dxy "  << endl;} return false;}
-    if(checkdzmax && (fabs(mu.dZ()) > dzmax)){ if(debug){ cout << "Fail dZ"  << endl;}return false;}
+    if(fabs(mu.Eta()) < 1.5){
+      if(checkdzmax_b && (fabs(mu.dZ()) > dzmax_b)){ if(debug){ cout << "Fail dZ"  << endl;}return false;}
+    }
+    else {
+      if(checkdzmax_ec && (fabs(mu.dZ()) > dzmax_ec)){ if(debug){ cout << "Fail dZ"  << endl;}return false;}
+
+    }
     if(checkchi2max && (fabs(mu.GlobalChi2()) > chi2max)){ if(debug){ cout << "Fail GlobalChi2"  << endl;} return false;}
   }
   else  if(checkistight &&  ! mu.IsTight ()) { if(debug){ cout << "Fail tight"  << endl;} return false;}
@@ -304,17 +328,21 @@ bool MuonSelection::PassUserID(TString id, snu::KMuon mu){
 
   if(mu.Pt() == 0.) return false;
 
-  float isomax = AccessFloatMap("isomax04",id);
+  float isomax_b = AccessFloatMap("isomax04_b",id);
+  float isomax_ec = AccessFloatMap("isomax04_ec",id);
   float dxymax = AccessFloatMap("|dxymax|",id);
   float dxysigmax = AccessFloatMap("|dxysigmax|",id);
   float dxysigmin = AccessFloatMap("|dxysigmin|",id);
 
-  float dzmax = AccessFloatMap("|dzmax|",id);
+  float dzmax_b = AccessFloatMap("|dzmax_b|",id);
+  float dzmax_ec = AccessFloatMap("|dzmax_ec|",id);
   float chi2max = AccessFloatMap("chi2max",id);
 
-  bool checkisomax     = CheckCutFloat("isomax04",id);
+  bool checkisomax_b     = CheckCutFloat("isomax04_b",id);
+  bool checkisomax_ec     = CheckCutFloat("isomax04_ec",id);
   bool checkdxymax      = CheckCutFloat("|dxymax|",id);
-  bool checkdzmax       = CheckCutFloat("|dzmax|",id);
+  bool checkdzmax_b       = CheckCutFloat("|dzmax_b|",id);
+  bool checkdzmax_ec      = CheckCutFloat("|dzmax_ec|",id);
   bool checkdxysigmin  = CheckCutFloat("|dxysigmin|",id);
   bool checkdxysigmax  = CheckCutFloat("|dxysigmax|",id);
   bool checkchi2max     = CheckCutFloat("chi2max",id);
@@ -333,16 +361,27 @@ bool MuonSelection::PassUserID(TString id, snu::KMuon mu){
   
   if(checkismedium && ! mu.IsMedium ()) { pass_selection = false;if(debug){ cout << "Fail ismedium"  << endl;}}
 
-  if(checkdxymax || checkchi2max || checkdzmax) {
-    if(checkistight && ! PassID("MUON_POG_TIGHT",mu, !checkdxymax,!checkdzmax,!checkchi2max)) { pass_selection = false;if(debug){ cout << "Fail pogtight"  << endl;}}
+  if(checkdxymax || checkchi2max || checkdzmax_b|| checkdzmax_ec) {
+    if(checkistight && ! PassID("MUON_POG_TIGHT",mu, !checkdxymax,!(checkdzmax_b||checkdzmax_ec),!checkchi2max)) { pass_selection = false;if(debug){ cout << "Fail pogtight"  << endl;}}
     if(checkdxymax && (fabs(mu.dXY()) > dxymax)){ pass_selection = false;if(debug){ cout << "Fail dxy "  << endl;}}
-    if(checkdzmax && (fabs(mu.dZ()) > dzmax)){ pass_selection = false;if(debug){ cout << "Fail dZ"  << endl;}}
+    if(fabs(mu.Eta()) < 1.5){
+      if(checkdzmax_b && (fabs(mu.dZ()) > dzmax_b)){ pass_selection = false;if(debug){ cout << "Fail dZ"  << endl;}}
+    }
+    else{
+      if(checkdzmax_ec && (fabs(mu.dZ()) > dzmax_ec)){ pass_selection = false;if(debug){ cout << "Fail dZ"  << endl;}}
+    }
     if(checkchi2max && (fabs(mu.GlobalChi2()) > chi2max)){ pass_selection = false;if(debug){ cout << "Fail GlobalChi2"  << endl;}}
   }
   else  if(checkistight &&  ! mu.IsTight ()) { pass_selection = false;if(debug){ cout << "Fail tight"  << endl;}}
 
 
-  if(checkisomax && (LeptonRelIso > isomax)) { pass_selection = false;if(debug){ cout << "Fail iso"  << endl;}}
+  if(fabs(mu.Eta()) < 1.5){
+    if(checkisomax_b && (LeptonRelIso > isomax_b)) { pass_selection = false;if(debug){ cout << "Fail iso"  << endl;}}
+  }
+  else{
+    if(checkisomax_ec && (LeptonRelIso > isomax_ec)) { pass_selection = false;if(debug){ cout << "Fail iso"  << endl;}}
+
+  }
 
   if(checkdxysigmin &&(fabs(mu.dXYSig()) < dxysigmin)) { pass_selection = false;if(debug){ cout << "Fail dsximin"  << endl;}}
   if(checkdxysigmax &&(fabs(mu.dXYSig()) > dxysigmax)) { pass_selection = false;if(debug){ cout << "Fail dsigmax"  << endl;}}

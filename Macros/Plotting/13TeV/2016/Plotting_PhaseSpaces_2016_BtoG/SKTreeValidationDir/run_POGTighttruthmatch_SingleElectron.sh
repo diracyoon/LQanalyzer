@@ -1,0 +1,9 @@
+cd SKTreeValidationSingleElectron/ 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTighttruthmatch_SingleElectron.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTighttruthmatch_SingleElectron_noW.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTighttruthmatch_SingleElectron_IDW.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTighttruthmatch_SingleElectron_puW.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTighttruthmatch_SingleElectron_Trigger.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTighttruthmatch_SingleElectron_Wregion.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTighttruthmatch_SingleElectron_dijet.txt 
+cd -

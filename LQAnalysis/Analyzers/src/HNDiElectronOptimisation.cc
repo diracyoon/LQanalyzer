@@ -86,7 +86,7 @@ void HNDiElectronOptimisation::ExecuteEvents()throw( LQError ){
   TString analysis_trigger="HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v";
   
   //if(!PassTrigger(analysis_trigger))   return;
-
+  
   
   OptimiseID(true, true,  true, weight);
   //if(k_running_nonprompt)OptimiseID(true, true,false,  weight);

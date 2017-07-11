@@ -1,0 +1,24 @@
+# Specify_location_of_data/mc 
+mcpath          /data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/SKTreeValidation/periodBtoE/ 
+datapath        /data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/SKTreeValidation/periodBtoE/SKTreeValidation_data_DoubleEG_cat_v8-0-1.root 
+datadrivenpath  /data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/SKTreeValidation/periodBtoE/ 
+# Specify_the_list_of_hists_to_plot 
+plottingpath    dat/hn_histfile.txt 
+cutpath         dat/hn_cut_POGTight_DiElectron_IDW.txt 
+# file_prefix 
+prefix          SKTreeValidation_SK 
+postfix         _cat_v8-0-1.root 
+# NAME_THE_OUTPUT_DIR 
+outputdir  HN13TeV_SKTreeValidation_v801_periodCtoD_DoubleEG_DiElectron_IDW_POGTight 
+histdir    CAT2015_v801 
+# CONFIGURE_HISTOGRAMS 
+showdata   true 
+usenp      false 
+ylog       true 
+# List_the_samples_to_be_includedv 
+samples    top 
+samples    wjets 
+samples    dylow 
+samples    dyhigh 
+#samples    qcd 
+END 

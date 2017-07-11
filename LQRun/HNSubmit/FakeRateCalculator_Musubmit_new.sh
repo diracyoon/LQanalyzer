@@ -1,4 +1,5 @@
-sktree -a FakeRateCalculator_Mu  -S DoubleMuon -n 200 -F
-sktree -a FakeRateCalculator_Mu  -S SingleMuon -n 200 -F
-sktree -a FakeRateCalculator_Mu  -list tmpall_mc
+sktree -a FakeRateCalculator_Mu  -s SKTree_HNFakeSkim  -list tmpall_mc -n 100 -F
+sktree -a FakeRateCalculator_Mu  -S DoubleMuon -s SKTree_HNFakeSkim -n 200 -F
+sktree -a FakeRateCalculator_Mu  -S SingleMuon -s SKTree_HNFakeSkim -n 200 -F
+
 

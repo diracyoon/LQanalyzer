@@ -112,9 +112,50 @@ void HNSignalEfficiencies::ExecuteEvents()throw( LQError ){
   TString mutag = "MUON_NOCUT";
   if(isData)mutag="MUON_HN_TRI_HIGHDXY_LOOSE";
 
-  std::vector<snu::KElectron> electrons_nc=GetElectrons(eltag);
+  std::vector<snu::KMuon> muons_nc=GetMuons(mutag,false);
+  //if(muons_nc.size() > 0) cout << muons_nc[0].Pt() << " " << muons_nc[0].Eta() << endl;                                                                            
+  /*
+  if(muons_nc.size()  == 3){
+    cout << "TRI " << endl;
+    TruthPrintOut();
+    for(unsigned int iel =0 ; iel < muons_nc.size(); iel++){
+      if(muons_nc[iel].Pt() < 5.) continue;
+      cout << "El pt = " << muons_nc[iel].Pt() << " eta ="  << muons_nc[iel].Eta() << " " << muons_nc[iel].Phi() << endl;
+      cout << "type      :  Mother pdgid    :   Isprompt(SK)    :  prompt flag  "<<  endl;
+      cout << muons_nc[iel].GetType() << " " << muons_nc[iel].MotherPdgId() << " " << muons_nc[iel].MCIsPrompt() << " " << muons_nc[iel].IsPromptFlag() << endl;
+      cout << "Ext conv     : sk conv" << endl;
+    }
+  }
+  else  if(SameCharge(muons_nc)){
+    TruthPrintOut();
+    for(unsigned int iel =0 ; iel < muons_nc.size(); iel++){
+      if(muons_nc[iel].Pt() < 5.) continue;
+      cout << "El pt = " << muons_nc[iel].Pt() << " eta ="  << muons_nc[iel].Eta() << " " << muons_nc[iel].Phi() << endl;
+      cout << "type      :  Mother pdgid    :   Isprompt(SK)    :  prompt flag  "<<  endl;
+      cout << muons_nc[iel].GetType() << " " << muons_nc[iel].MotherPdgId() << " " << muons_nc[iel].MCIsPrompt() << " " << muons_nc[iel].IsPromptFlag() << endl;
+      cout << "Ext conv     : sk conv" << endl;
+    }
+  }
+  else return;
+
+  */
+  std::vector<snu::KElectron> electrons_nc=GetElectrons(false,false,eltag);
   //if(electrons_nc.size() > 0) cout << electrons_nc[0].Pt() << " " << electrons_nc[0].Eta() << endl;
 
+  if(electrons_nc.size() ==3){
+    cout << "TRIEL" << endl;
+    TruthPrintOut();
+    
+    for(unsigned int iel =0 ; iel < electrons_nc.size(); iel++){
+      if(electrons_nc[iel].Pt() < 10.) continue;
+      cout << "El pt = " << electrons_nc[iel].Pt() << " eta ="  << electrons_nc[iel].Eta() << " " << electrons_nc[iel].Phi() << endl;
+      cout << "type      :  Mother pdgid    :   Isprompt(SK)    :  prompt flag  "<<  endl;
+      cout << electrons_nc[iel].GetType() << " " << electrons_nc[iel].MotherPdgId() << " " << electrons_nc[iel].MCIsPrompt() << " " << electrons_nc[iel].IsPromptFlag() << endl;
+      cout << "Ext conv     : sk conv" << endl;
+      cout << electrons_nc[iel].MCIsExternalConversion() << "  " << electrons_nc[iel].MCIsFromConversion() << endl;
+    }
+
+  }
   if(SameCharge(electrons_nc)){
     TruthPrintOut();
     for(unsigned int iel =0 ; iel < electrons_nc.size(); iel++){
@@ -128,7 +169,6 @@ void HNSignalEfficiencies::ExecuteEvents()throw( LQError ){
   }
   else return;
 
-  std::vector<snu::KMuon> muons_nc=GetMuons(mutag);
   
 
   std::vector<snu::KElectron> electrons_tm_nc;
@@ -213,8 +253,8 @@ void HNSignalEfficiencies::ExecuteEvents()throw( LQError ){
   
 
 
-  FillCLHist(sighist_ee, "NoCut", eventbase->GetEvent(), muons_tm_nc,electrons_tm_nc,jets_nc, fatjetcoll,weight);
-  if(SameCharge(electrons_tm_nc))   FillCLHist(sighist_ee, "SSNoCut", eventbase->GetEvent(), muons_tm_nc,electrons_tm_nc,jets_nc, fatjetcoll,weight);
+  FillCLHist(sighist_ee, "NoCut", eventbase->GetEvent(), muons_tm_nc,electrons_tm_nc,jets_nc, jets,fatjetcoll,weight);
+  if(SameCharge(electrons_tm_nc))   FillCLHist(sighist_ee, "SSNoCut", eventbase->GetEvent(), muons_tm_nc,electrons_tm_nc,jets_nc, jets,fatjetcoll,weight);
   if(SameCharge(electrons_nc)) {
     if(electrons_nc[1].Pt() > 10){
       if(electrons_nc[0].MCMatched()&&!electrons_nc[1].MCMatched()){
@@ -364,20 +404,20 @@ void HNSignalEfficiencies::ExecuteEvents()throw( LQError ){
 
   if(SameCharge(hn_electrons)) { 
     counter("SSHNee",1);
-    FillCLHist(sighist_ee, "SSHNee", eventbase->GetEvent(), hn_muons,hn_electrons,hn04jets, fatjetcoll,weight);
+    FillCLHist(sighist_ee, "SSHNee", eventbase->GetEvent(), hn_muons,hn_electrons,hn04jets, jets,fatjetcoll,weight);
   }
   if(SameCharge(pog_electrons)) {
     counter("SSPOGee",1);
-    FillCLHist(sighist_ee, "SSPOGee", eventbase->GetEvent(), pog_muons,pog_electrons,hn04jets, fatjetcoll,weight);
+    FillCLHist(sighist_ee, "SSPOGee", eventbase->GetEvent(), pog_muons,pog_electrons,hn04jets, jets,fatjetcoll,weight);
   }
  
   if(SameCharge(hn_muons)) {
     counter("SSHNmm",1);
-    FillCLHist(sighist_mm, "SSHNmm", eventbase->GetEvent(), hn_muons,hn_electrons,hn04jets, fatjetcoll,weight);
+    FillCLHist(sighist_mm, "SSHNmm", eventbase->GetEvent(), hn_muons,hn_electrons,hn04jets, jets,fatjetcoll,weight);
   }
   if(SameCharge(pog_muons)) {
     counter("SSPOGmm",1);
-    FillCLHist(sighist_mm, "SSPOGmm", eventbase->GetEvent(), pog_muons,pog_electrons,hn04jets, fatjetcoll,weight);
+    FillCLHist(sighist_mm, "SSPOGmm", eventbase->GetEvent(), pog_muons,pog_electrons,hn04jets, jets,fatjetcoll,weight);
   }
  
 }

@@ -22,6 +22,8 @@ class FakeRateCalculator_Mu : public AnalyzerCore {
   void MakeHistograms();
 
 
+  void RunFakes(TString tag, TString ID);
+
   void GetFakeRates(std::vector<snu::KMuon> loose_el, std::vector<snu::KMuon> tight_el,TString tightlabel,  std::vector<snu::KJet> jets,std::vector<snu::KJet> alljets, TString tag, double w, float isocut,bool makebasicplots);
   
   void MakeMCFakeratePlots(TString label, bool pass_single_trigger, std::vector<snu::KMuon> muons, std::vector<snu::KJet> jets, std::vector<snu::KJet> alljets, double w);

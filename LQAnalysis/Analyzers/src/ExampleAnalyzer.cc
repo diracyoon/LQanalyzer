@@ -101,6 +101,7 @@ void ExampleAnalyzer::ExecuteEvents()throw( LQError ){
 
 
    std::vector<snu::KElectron> electrons =  GetElectrons(false,false, "ELECTRON_NOCUT");
+   std::vector<snu::KElectron> CFelectrons = GetElectrons(false,false, "ELECTRON_HN_TIGHTv4");
    /*
      
    std::vector<snu::KElectron> electrons =  GetElectrons(BaseSelection::ELECTRON_NOCUT);  ... WONT WORK
@@ -148,7 +149,17 @@ void ExampleAnalyzer::ExecuteEvents()throw( LQError ){
        }
      }
    }
-	    
+
+   	    
+   float cf_weight = -999.;
+   if(CFelectrons.size() == 2){
+     if(CFelectrons.at(0).Charge() != CFelectrons.at(1).Charge()){//CF estimation is from OS dielectrons
+       cf_weight = GetCFweight(CFelectrons, true, "ELECTRON_HN_TIGHTv4");//put in electronColl vector, apply sf, electron ID
+       FillHist("chargeflipped_Z_mass", (CFelectrons.at(0)+CFelectrons.at(1)).M(),cf_weight, 50., 130., 80);
+       FillHist("chargeflipped_leading_lepton", CFelectrons.at(0).Pt(), cf_weight, 0., 200., 200);
+     }
+   }
+
    
    return;
 }// End of execute event loop

@@ -23,6 +23,8 @@ class HNDiLepton : public AnalyzerCore {
   virtual void EndCycle()throw( LQError );
   virtual void ClearOutputVectors()throw( LQError );
   
+  void DoCutFlow(float w);
+
   void InitialiseAnalysis() throw( LQError );
   void MakeHistograms();
   void FillEventCutFlow(int cf,TString cut,  float weight);
@@ -43,7 +45,8 @@ class HNDiLepton : public AnalyzerCore {
   bool MidMassCheckSignalRegion(  std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, bool runcf);
   bool HighMassCheckSignalRegion(  std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, bool runcf);
 
-  bool CheckSignalRegion( bool isss,  std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, TString name, float w);
+  bool CheckSignalRegion( bool isss,  std::vector<snu::KMuon> muons,  std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, std::vector<snu::KJet> alljets,  TString name, float w);
+
 
   void FillTriggerEfficiency(TString cut, float w, TString label,  std::vector<TString> list);
   void CheckJetsCloseToLeptons(std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets);

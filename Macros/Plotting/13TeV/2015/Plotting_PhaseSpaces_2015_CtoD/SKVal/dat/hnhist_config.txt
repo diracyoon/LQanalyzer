@@ -1,0 +1,54 @@
+h_Njets 1 0 10
+h_PFMET 2 0. 300.
+END
+h_lljjjj_mass 2 0. 1200.
+h_l1jjjj_mass 2 0. 1200.
+h_l2jjjj_mass 2 0. 1200.
+h_lljjjj_os_mass 2 0. 1200.
+h_l1jjjj_os_mass 2 0. 1200.
+h_l2jjjj_os_mass 2 0. 1200.
+h_lljjjj_ss_mass 2 0. 1200.
+h_l1jjjj_ss_mass 2 0. 1200.
+h_l2jjjj_ss_mass 2 0. 1200.		 
+END
+h_l2jj_centralmass 10 0. 1200.
+h_l1jj_centralmass 10 0. 1200.
+h_lljj_centralmass 10 0. 1200.
+h_forward_jet_pt 2 20. 250.
+h_central_jet_pt 2 20. 250.
+h_forward_jet_eta 5 -2.5 2.5
+h_central_jet_eta  5 -2.5 2.5
+h_dijetsmass  10 0. 1200.
+h_Nbjets 1 0 3
+h_jets_pt 2 0. 300.
+h_nVertices 2 0. 40.
+h_PFMET 2 0. 300.
+h_Njets 1 0 10
+h_leadingLeptonPt  4 2. 300.
+h_secondLeptonPt  4 2. 500.
+h_LeptonEta 2 -2.5 2.5
+END
+h_l1jjmass   1 50. 400.
+h_l2jjmass   1 50. 400.
+h_lljjmass   1 50. 500.
+h_leadingLeptonPt  2 10. 500.
+h_secondLeptonPt  2 10. 500.
+h_LeptonEta 2 -2.5 2.5
+h_Njets 1 0 6
+h_Nbjets 1 0 4
+h_jets_pt 2 0. 105.
+h_PFMET 1 0. 300.
+h_MT 2 0. 300.
+h_nVertices 1 0. 40.
+h_Nelectrons 1 0 5
+h_Nmuons 1 0 5
+END
+
+h_Nbjets 1 0 3
+h_bTag 2 -1. 1.
+h_jets_pt 2 0. 105.
+h_dijetsmass  5 0. 200.
+h_l1jjmass   2 50. 400.
+h_l2jjmass   2 50. 400.
+h_lljjmass   2 50. 500.
+END

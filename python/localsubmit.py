@@ -746,10 +746,25 @@ out_end=sample
 
 
 output=workspace + sample + "_" + now() + "_" + os.getenv("HOSTNAME")  + "/"
+output_tag=2
+while os.path.exists(output):
+    output=workspace + sample + "_" + now() + "_" + os.getenv("HOSTNAME")  + "v" +str(output_tag) +"/"
+    output_tag=output_tag+1
+
 mergeoutputdir = mergetmpwork + sample + "_" + now() + "_" + os.getenv("HOSTNAME")  + "/"
+merge_tags=2
+while os.path.exists(mergeoutputdir):
+    mergeoutputdir=mergetmpwork + sample + "_" + now() + "_" + os.getenv("HOSTNAME")  +"v" +str(merge_tags)+"/"
+    merge_tags=merge_tags+1
+
+
 if not mc:
     output=workspace + new_channel+ "_"+ sample + "_" + now() + "_" + os.getenv("HOSTNAME") + "/" 
     mergeoutputdir = mergetmpwork + new_channel+ "_"+ sample + "_" + now() + "_" + os.getenv("HOSTNAME") + "/"
+    merge_tags=2
+    while os.path.exists(mergeoutputdir):
+        mergeoutputdir = mergetmpwork + new_channel+ "_"+ sample + "_" + now() + "_" + os.getenv("HOSTNAME") + "v" +str(merge_tags)+"/"
+
 
 outputdir= output+ "output/"
 outputdir_tmp= output+ "output_tmp/"
@@ -759,6 +774,7 @@ if not (os.path.exists(output)):
 if not (os.path.exists(mergeoutputdir)):
     os.system("mkdir " + mergeoutputdir)
     print "Making tmp merge dir " + mergeoutputdir
+
 
 if(os.path.exists(outputdir)):
     number_of_outputfiles = sum(1 for item in os.listdir(outputdir) if isfile(join(outputdir, item)))
@@ -1582,6 +1598,23 @@ else:
             os.system("rm  "  +  Finaloutputdir   + outfile)
         os.system("mv " +outputdir + "*.root" + " " + mergeoutputdir)
         os.system("hadd " + mergeoutputdir +  outfile  + " "+ mergeoutputdir + "*.root")
+        
+        if os.getenv("USER") == "jalmond":
+
+            transout=Finaloutputdir.replace("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/","/afs/cern.ch/work/j/jalmond/CAT/")
+            
+            catpath=os.getenv("LQANALYZER_DIR")+"/bin/catconfig"
+            readcatpath=open(catpath,"r")
+            lxmachine=""
+            for rline in readcatpath:
+                if "localcpu" in rline:
+                    srline = rline.split()
+                    lxmachine=srline[2]
+            readcatpath.close()
+            
+            os.system("scp -r "+mergeoutputdir +  outfile + " jalmond@"+lxmachine+".cern.ch:"+transout)
+            
+
         os.system("mv " + mergeoutputdir +  outfile + " "  + Finaloutputdir)
         os.system("ls -lh " + Finaloutputdir +  outfile + " > " + path_jobpre +"LQAnalyzer_rootfiles_for_analysis/CATAnalyzerStatistics/" + getpass.getuser() + "/filesize_" + original_sample+ tagger +".txt")
         f = ROOT.TFile(Finaloutputdir +  outfile)

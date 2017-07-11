@@ -1,0 +1,21 @@
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lr@{\hspace{0.5mm}}c@{\hspace{0.5mm}}c@{\hspace{0.5mm}}l}
+\hline
+\hline
+Source & \multicolumn{4}{c}{} \\
+\hline
+Triboson&0.2& $\pm$& 0.0&$^{+0.1}_{-0.1}$\\
+ZZ&38.9& $\pm$& 0.5&$^{+6.7}_{-6.7}$\\
+\hline
+Total&39.2& $\pm$&0.5&$^{+6.7}_{-6.7}$\\
+\hline
+Data&  \multicolumn{4}{c}{$36.0$}\\
+\hline
+Signficance&  \multicolumn{4}{c}{$-0.4\sigma$}\\
+\hline
+\hline
+\end{tabular}
+\caption{ Number of events with four electrons (POG tight) with two Z-candidtaes peak .}
+\end{center}
+\end{table}

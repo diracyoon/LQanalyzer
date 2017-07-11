@@ -1,0 +1,12 @@
+cd SKTreeValidationMuonEG/ 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_EMuon.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_EMuon_BB.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_EMuon_dijet.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_EMuon_EB.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_EMuon_EE.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_EMuon_IDW.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_EMuon_noW.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_EMuon_puW.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_EMuon_Trigger.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_EMuon_SSPreselection.txt 
+cd -

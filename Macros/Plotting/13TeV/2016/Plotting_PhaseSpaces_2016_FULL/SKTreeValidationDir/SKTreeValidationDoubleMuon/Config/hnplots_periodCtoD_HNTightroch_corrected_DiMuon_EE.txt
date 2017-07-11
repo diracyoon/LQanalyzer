@@ -1,0 +1,24 @@
+# Specify_location_of_data/mc 
+mcpath          /data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/SKTreeValidation/periodBtoG/ 
+datapath        /data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/SKTreeValidation/periodBtoG/SKTreeValidation_data_DoubleMuon_cat_v8-0-2.root 
+datadrivenpath  /data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/SKTreeValidation/periodBtoG/ 
+# Specify_the_list_of_hists_to_plot 
+plottingpath    dat/hn_histfile.txt 
+cutpath         dat/hn_cut_HNTightroch_corrected_DiMuon_EE.txt 
+# file_prefix 
+prefix          SKTreeValidation_SK 
+postfix         _cat_v8-0-2.root 
+# NAME_THE_OUTPUT_DIR 
+outputdir  HN13TeV_SKTreeValidation_v802_periodCtoD_DoubleMuon_DiMuon_EE_HNTightroch_corrected 
+histdir    CAT2015_v802 
+# CONFIGURE_HISTOGRAMS 
+showdata   true 
+usenp      false 
+ylog       true 
+# List_the_samples_to_be_includedv 
+samples    top 
+samples    wjets 
+samples    dylow 
+samples    dyhigh 
+samples    vv 
+END 

@@ -49,9 +49,10 @@ class SignalPlotsMM : public StdPlots{
 
   /// fill functions                                                                                                                                                                                                                                                                                                                          
   void Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons,std::vector<snu::KElectron>& electrons, std::vector<snu::KJet>& jets, Double_t weight);
-  void Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons,std::vector<snu::KElectron>& electrons, std::vector<snu::KJet>& jets, std::vector<snu::KFatJet>& fatjets, Double_t weight);
+  void Fill(snu::KEvent ev, std::vector<snu::KMuon>& muons,std::vector<snu::KElectron>& electrons, std::vector<snu::KJet>& jets,std::vector<snu::KJet>& alljets, std::vector<snu::KFatJet>& fatjets, Double_t weight);
 
   TH1D* SetupHist(TString hname, TString alabel, int nbin, double xmin, double xmax, TString xtitle="" );
+  TH2D* SetupHist2(TString hname, TString alabel, int nbinx, double xmin, double xmax, int nbiny, double ymin, double ymax, TString xtitle="" , TString ytitle="");
 
 
   void Fill(TString name, double value, double weight);

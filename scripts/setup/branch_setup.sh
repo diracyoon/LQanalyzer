@@ -14,6 +14,8 @@
 echo "Setting up environment for compiling/running CATAnalzer with SKTree"
 
 setupok=False
+alias killbkg="python python/killbkg.py "$1
+
 
 while read line
   do

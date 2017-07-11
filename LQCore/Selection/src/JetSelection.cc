@@ -226,7 +226,7 @@ void JetSelection::SelectJets(std::vector<KJet>& jetColl, std::vector<snu::KFatJ
       }
     }/// End of muon loop                                                                                                                                                    
     for (UInt_t ilep = 0; ilep < electronColl.size(); ilep++) {
-      if (electronColl[ilep].DeltaR( pre_jetColl[ijet] ) < 0.4 ) {
+      if (electronColl[ilep].DeltaR( pre_jetColl[ijet] ) < 0.3 ) {
         jetIsOK = false;
         ilep = electronColl.size();
       }

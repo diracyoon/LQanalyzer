@@ -1,0 +1,24 @@
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lr@{\hspace{0.5mm}}c@{\hspace{0.5mm}}c@{\hspace{0.5mm}}l}
+\hline
+\hline
+Source & \multicolumn{4}{c}{} \\
+\hline
+DY$\rightarrow$ ee&1107736.5& $\pm$& 5018.7&$^{+149675.0}_{-149675.0}$\\
+Higgs&14865.0& $\pm$& 251.4&$^{+2972.0}_{-2972.0}$\\
+Top&77858.7& $\pm$& 180.7&$^{+14047.2}_{-14047.2}$\\
+Triboson&43.1& $\pm$& 1.2&$^{+9.7}_{-9.7}$\\
+W+Jets&1705.8& $\pm$& 836.4&$^{+511.8}_{-511.8}$\\
+\hline
+Total&1202209.0& $\pm$&5097.3&$^{+150363.0}_{-150363.0}$\\
+\hline
+Data&  \multicolumn{4}{c}{$1012530.0$}\\
+\hline
+Signficance&  \multicolumn{4}{c}{$-1.3\sigma$}\\
+\hline
+\hline
+\end{tabular}
+\caption{ Number of events with two opposite sign electrons (POG tight) with Z peak removed.}
+\end{center}
+\end{table}

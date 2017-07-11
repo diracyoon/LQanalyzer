@@ -24,6 +24,7 @@
    string lqdir = getenv("LQANALYZER_DIR");
    m_fakeobj = new HNCommonLeptonFakes(lqdir+"/LQAnalysis/src/HNCommonLeptonFakes/share/");
    dd_eventbase= 0;
+   UsePtCone=false;
 
 
  }
@@ -287,31 +288,23 @@
    return em_weight;
  }
 
- float DataDrivenBackgrounds::Get_DataDrivenWeight_MM(bool geterr, vector<snu::KMuon> k_muons,   TString IDmu, TString method){
-   if(method == "dxy" && IDmu == "MUON_HN_TRI_TIGHT") return Get_DataDrivenWeight_MM(geterr, k_muons);
 
-   float mm_weight = 0.;
-
-   if(k_muons.size()!=2) return 0.;
-   bool is_mu1_tight=dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(0),IDmu);
-   bool is_mu2_tight=dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(1),IDmu);
-   vector<TLorentzVector> muons=MakeTLorentz(k_muons);
-   mm_weight =m_fakeobj->get_dilepton_mm_eventweight("dijet",geterr, muons, is_mu1_tight,is_mu2_tight,IDmu);
-
-   return 1.;
- }
-
- float DataDrivenBackgrounds::Get_DataDrivenWeight_MM(bool geterr, vector<snu::KMuon> k_muons){
-
-   float mm_weight = 0.;
+float DataDrivenBackgrounds::Get_DataDrivenWeight_MM(bool geterr, vector<snu::KMuon> k_muons, bool tight1, bool tight2, TString ID1,TString ID2, bool cl1, bool cl2, TString method,float iso1, float iso2, bool useclosej, bool singletrig){
+  
+  float mm_weight = 0.;
 
    if(k_muons.size()==2){
-     bool is_mu1_tight = dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(0),"MUON_HN_TRI_TIGHT");
-     bool is_mu2_tight = dd_eventbase->GetMuonSel()->MuonPass(k_muons.at(1),"MUON_HN_TRI_TIGHT");
+     bool is_mu1_tight = tight1;
+     bool is_mu2_tight = tight2;
 
      vector<TLorentzVector> muons=MakeTLorentz(k_muons);
+     
+     float pt_corr1 = muons.at(0).Pt()*(1+max(0.,(k_muons.at(0).RelIso04()-iso1))) ; /// will need changing for systematics                                                                                                                
+     float pt_corr2 = muons.at(1).Pt()*(1+max(0.,(k_muons.at(1).RelIso04()-iso2))) ; /// will need changing for systematics                                                      
+                     
 
-     mm_weight =m_fakeobj->get_dilepton_mm_eventweight(geterr, muons, is_mu1_tight,is_mu2_tight);
+     if(!singletrig)mm_weight =m_fakeobj->get_dilepton_mm_eventweight("dijet",geterr, muons, is_mu1_tight,is_mu2_tight, ID1,ID2, cl1, cl2,method,  pt_corr1,pt_corr2,useclosej);
+     else mm_weight =m_fakeobj->get_dilepton_mm_eventweight("isodijet",geterr, muons, is_mu1_tight,is_mu2_tight, ID1,ID2, cl1, cl2,method,  pt_corr1,pt_corr2,useclosej);
 
    }
    return mm_weight;
@@ -336,7 +329,7 @@
    return mmm_weight;
  }
 
- float DataDrivenBackgrounds::Get_DataDrivenWeight(bool geterr, std::vector<snu::KMuon> k_muons, TString muid, int n_muons, std::vector<snu::KElectron> k_electrons, TString elid, int n_electrons, TString elidloose, TString elmethod){
+ float DataDrivenBackgrounds::Get_DataDrivenWeight(bool geterr, std::vector<snu::KMuon> k_muons, TString muid,  int n_muons, std::vector<snu::KElectron> k_electrons, TString elid, int n_electrons, TString elidloose, TString method, int HalfSampleErrorDir){
 
    float this_weight = 0.;
 
@@ -372,6 +365,8 @@
      return 0.;
    }
 
+   m_fakeobj->SetUsePtCone(UsePtCone);
+
    std::vector<TLorentzVector> muons=MakeTLorentz(k_muons);
    std::vector<TLorentzVector> electrons=MakeTLorentz(k_electrons);
    std::vector<TString> vkeys;
@@ -385,9 +380,9 @@
      vkeys.push_back(regel1);
    }
 
+   std::vector<TString> keys = GetElFRKey(elidloose, elid, method, vkeys);
 
-   std::vector<TString> elkeys = GetElFRKey(elidloose, elid, elmethod, vkeys);
-   this_weight =m_fakeobj->get_eventweight(geterr, muons, muid, electrons,  elkeys , isT);
+   this_weight =m_fakeobj->get_eventweight(geterr, muons, muid, electrons,  keys , isT, HalfSampleErrorDir);
 
    return this_weight;
  }
@@ -458,7 +453,7 @@ void  DataDrivenBackgrounds::Test(){
 }
 float DataDrivenBackgrounds::Get_DataDrivenWeight_EE(bool geterr,vector<snu::KElectron> k_electrons){
 
-  return Get_DataDrivenWeight_EE( geterr,k_electrons, "ELECTRON16_HN_FAKELOOSE_NOD0","ELECTRON16_HN_TIGHT","dijet_ajet40");
+  return Get_DataDrivenWeight_EE( geterr,k_electrons, "ELECTRON_HN_FAKELOOSE", "ELECTRON_HN_TIGHTv4", "40",true);
 }
 
 
@@ -475,9 +470,10 @@ float DataDrivenBackgrounds::Get_DataDrivenWeight_EEmva(bool geterr,vector<snu::
 
     /// "" loose ID needs filling here                                                                                                                              
   }
-  return 1.;
+  return 0.;
 }
-float DataDrivenBackgrounds::Get_DataDrivenWeight_EE(bool geterr,vector<snu::KElectron> k_electrons,   TString IDloose,TString IDtight, TString method){
+
+float DataDrivenBackgrounds::Get_DataDrivenWeight_EE(bool geterr,vector<snu::KElectron> k_electrons,   TString IDloose,TString IDtight, TString awayjetpt, bool isDoubleTrig){
 
 
 
@@ -494,29 +490,31 @@ float DataDrivenBackgrounds::Get_DataDrivenWeight_EE(bool geterr,vector<snu::KEl
     bool is_el1_tight    =  dd_eventbase->GetElectronSel()->ElectronPass(k_electrons.at(0),IDtight);
     bool is_el2_tight    = dd_eventbase->GetElectronSel()->ElectronPass(k_electrons.at(1),IDtight);
     vector<TLorentzVector> electrons=MakeTLorentz(k_electrons);
+    
+    vector<TString> vkeys;
+    if(isDoubleTrig){
+      vkeys.push_back(IDtight+"_"+awayjetpt+"_ptcorr_eta");
+      vkeys.push_back(IDtight+"_"+awayjetpt+"_ptcorr_eta");
+      if(k_electrons.at(0).Pt() < 25.) return -999.;
+      if(k_electrons.at(1).Pt() < 10.) return -999.;
+    }
+    else{
+      if(k_electrons.at(0).Pt() < 30.) return -999.;
+      if(k_electrons.at(1).Pt() < 5.) return -999.;
 
+      vkeys.push_back("SingleElTrig_" + IDtight+"_"+awayjetpt+"_ptcorr_eta");
+      vkeys.push_back(IDtight+"_"+awayjetpt+"_ptcorr_eta");
 
-
-    std::vector<TString> vkeys;
-    for(unsigned int ikey=0; ikey < electrons.size(); ikey++){
-      TString regel1="reg1";
-      if(k_electrons.at(ikey).Pt() > 50.) {
-	if(k_electrons.at(ikey).IsEB1()) regel1="reg2";
-	if(k_electrons.at(ikey).IsEB2()) regel1="reg3";
-	if(k_electrons.at(ikey).IsEE()) regel1="reg4";
-      }
-      vkeys.push_back(regel1);
     }
 
 
-    std::vector<TString> elkeys = GetElFRKey(IDloose, IDtight, method, vkeys);
-
-    return  m_fakeobj->get_dilepton_ee_eventweight(geterr,electrons, is_el1_tight, is_el2_tight, elkeys);
+    return  m_fakeobj->get_dilepton_ee_eventweight(geterr,electrons, is_el1_tight, is_el2_tight, vkeys);
       
     /// "" loose ID needs filling here
   }
   return 1.;
 }
+
 
 vector<TString> DataDrivenBackgrounds::GetElFRKey( TString IDloose,TString IDtight, TString method, std::vector<TString> regs1){
   
@@ -619,6 +617,20 @@ TString DataDrivenBackgrounds::GetElFRKey( TString IDloose,TString IDtight, TStr
 
 /// MISC FUNCTIONS
 
+void DataDrivenBackgrounds::SetUsePtCone(bool b){
+
+  UsePtCone = b;
+
+}
+
+double DataDrivenBackgrounds::MuonConePt(snu::KMuon muon, double tightiso){
+
+  double mu_pt_corr = muon.Pt()*(1+max(0.,(muon.RelIso04()-tightiso))) ;
+
+  return mu_pt_corr;
+
+}
+
 vector<TLorentzVector> DataDrivenBackgrounds::MakeTLorentz(vector<snu::KElectron> el){
 
   vector<TLorentzVector> tl_el;
@@ -635,7 +647,13 @@ vector<TLorentzVector> DataDrivenBackgrounds::MakeTLorentz(vector<snu::KMuon> mu
   vector<TLorentzVector> tl_mu;
   for(vector<KMuon>::iterator itmu=mu.begin(); itmu!=mu.end(); ++itmu) {
     TLorentzVector tmp_mu;
-    tmp_mu.SetPtEtaPhiM((*itmu).Pt(),(*itmu).Eta(),(*itmu).Phi(),(*itmu).M());
+    double this_pt = (*itmu).Pt();
+
+    if(UsePtCone){
+      this_pt = MuonConePt((*itmu), 0.1);
+    }
+
+    tmp_mu.SetPtEtaPhiM(this_pt,(*itmu).Eta(),(*itmu).Phi(),(*itmu).M());
     tl_mu.push_back(tmp_mu);
   }
   return tl_mu;

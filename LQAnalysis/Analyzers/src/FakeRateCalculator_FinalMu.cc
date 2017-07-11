@@ -71,15 +71,7 @@ void FakeRateCalculator_FinalMu::ExecuteEvents()throw( LQError ){
   numberVertices = eventbase->GetEvent().nVertices();   
 
   /// These run on double electron dataset
-  if((isData&&k_channel == "DoubleEG") || !isData){
-
-    // GetFakeRateAndPromptRates fills fake rate + prompt rate plots
-    // hist names are tagged with second argu
-    // dijet method
-
-    
-    /// ELECTRON_HN_FAKELOOSEST has no ID cuts
-    /// only pt/eta/chargeconst/looseIP/
+  if((isData&&k_channel == "DoubleMuon") || !isData){
 
     std::vector<snu::KElectron> tmploose_el = GetElectrons(false,false,"ELECTRON_HN_FAKELOOSEST");
     

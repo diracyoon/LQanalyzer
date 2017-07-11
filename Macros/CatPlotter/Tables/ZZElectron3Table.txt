@@ -1,0 +1,24 @@
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lr@{\hspace{0.5mm}}c@{\hspace{0.5mm}}c@{\hspace{0.5mm}}l}
+\hline
+\hline
+Source & \multicolumn{4}{c}{} \\
+\hline
+Higgs&0.0& $\pm$& 0.0&$^{+0.0}_{-0.0}$\\
+Misid. Lepton Background&1.8& $\pm$& 0.7&$^{+0.6}_{-0.6}$\\
+Top&0.4& $\pm$& 0.1&$^{+0.1}_{-0.1}$\\
+Triboson&0.1& $\pm$& 0.0&$^{+0.0}_{-0.0}$\\
+ZZ&18.0& $\pm$& 0.3&$^{+3.1}_{-3.1}$\\
+\hline
+Total&20.3& $\pm$&0.8&$^{+3.1}_{-3.1}$\\
+\hline
+Data&  \multicolumn{4}{c}{$18.0$}\\
+\hline
+Signficance&  \multicolumn{4}{c}{$-0.4\sigma$}\\
+\hline
+\hline
+\end{tabular}
+\caption{ Number of events with four electrons (POG tight) with two Z-candidtaes peak .}
+\end{center}
+\end{table}

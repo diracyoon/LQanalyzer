@@ -1,0 +1,24 @@
+# Specify_location_of_data/mc
+mcpath	        /home/jalmond/HeavyNeutrino/13TeV/LQAnalyzer_cat/LQanalyzer/data/output/CAT/Electron/periodCtoD/
+datapath	/home/jalmond/HeavyNeutrino/13TeV/LQAnalyzer_cat/LQanalyzer/data/output/CAT/Electron/periodCtoD/ExampleAnalyzerDiElectron_data_catv7-4-4.root 
+datadrivenpath	/home/jalmond/HeavyNeutrino/13TeV/LQAnalyzer_cat/LQanalyzer/data/output/CAT/Electron/periodCtoD/
+# Specify_the_list_of_hists_to_plot
+plottingpath	dat/trihists.txt
+cutpath		dat/tri_cuts.txt
+# file_prefix
+prefix		ExampleAnalyzerDiElectron_SK
+postfix         _dilep_catv7-4-4.root
+# NAME_THE_OUTPUT_DIR
+outputdir  HN13TeV_ExampleCode_v744_skdilep_electron_triel_periodCtoD_nomet_LJ
+histdir    CATNov15
+# CONFIGURE_HISTOGRAMS
+showdata   true
+usenp      false
+ylog	   true
+# List_the_samples_to_be_included
+samples    top
+samples    wjets
+samples    vv
+samples    dylow
+samples    dyhigh
+END

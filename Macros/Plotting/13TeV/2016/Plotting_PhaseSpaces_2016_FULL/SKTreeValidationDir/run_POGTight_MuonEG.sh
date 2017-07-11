@@ -1,0 +1,11 @@
+cd SKTreeValidationMuonEG/ 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTight_ElectronMuon.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTight_ElectronMuon_BB.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTight_ElectronMuon_dijet.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTight_ElectronMuon_EB.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTight_ElectronMuon_EE.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTight_ElectronMuon_IDW.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTight_ElectronMuon_noW.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTight_ElectronMuon_puW.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTight_ElectronMuon_Trigger.txt 
+cd -

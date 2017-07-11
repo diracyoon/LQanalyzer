@@ -25,10 +25,13 @@ class HNDiElectron : public AnalyzerCore {
   
   void InitialiseAnalysis() throw( LQError );
   void MakeHistograms();
-  void FillEventCutFlow(TString cut, TString label , float weight);
+  void FillEventCutFlow(int cf,TString cut,  float weight);
+
 
   void MakeControlPlots(int method, TString methodtag, float w)throw( LQError );
+  void MakeMMControlPlots(int method, TString methodtag, float w)throw( LQError );
   void FillByTriggerTrigger(int iel_trig, TString tag, int method, TString methodtag, double evw);
+  void FillByMMTriggerTrigger(int iel_trig, TString tag, int method, TString methodtag, double evw);
   void MakeValidationPlots(float w);
 
   void RunAnalysis(TString plottag, TString tightelid, TString vetoelid, TString looseelid);
@@ -41,7 +44,7 @@ class HNDiElectron : public AnalyzerCore {
   bool MidMassCheckSignalRegion(  std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, bool runcf);
   bool HighMassCheckSignalRegion(  std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, bool runcf);
 
-  bool CheckSignalRegion( bool isss,  std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, TString name, float w);
+  bool CheckSignalRegion( bool isss,  std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets, std::vector<snu::KJet> alljets,TString name, float w);
 
   void FillTriggerEfficiency(TString cut, float w, TString label,  std::vector<TString> list);
   void CheckJetsCloseToLeptons(std::vector<snu::KElectron> electrons, std::vector<snu::KJet> jets);

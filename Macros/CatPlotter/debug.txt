@@ -1,0 +1,48 @@
+DEBUG 
+/data1//LQAnalyzer_rootfiles_for_analysis/CATAnalyzerStatistics/JobSummaryMar_2017.txt
+DYJets 7609.29279804
+/data1//LQAnalyzer_rootfiles_for_analysis/CATAnalyzerStatistics/JobSummaryMar_2017.txt
+deftagger 8890 defsample = DYJets defskim = SKTree_DiLepSkim defqueue = fastq
+dnjobs = 1000
+DYJets run on fastq
+sample: DYJets
+queue = fastq
+printedqueue = fastq
+nfreeqall = 93.0
+/data1//LQAnalyzer_rootfiles_for_analysis/CATAnalyzerStatistics/JobSummaryMar_2017.txt
+deftagger 8890 defsample = DYJets defskim = SKTree_DiLepSkim defqueue = fastq
+njobs = 1000
+queue ok
+queue fast: fastq_ninqueue=3.0 fastq_nallowedinqueue = 96.0 
+queue long: long_ninqueue=0.0 longq_nallowedinqueue = 128.0 
+ncores_job = 100 
+fastq2, return fastq
+newqueue = fastq
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Bjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Bjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Cjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Bjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Cjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Djobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Bjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Cjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Djobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Ejobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Bjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Cjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Djobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Ejobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Fjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Bjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Cjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Djobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Ejobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Fjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Gjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Bjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Cjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Djobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Ejobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Fjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/Gjobid.txt exists
+/data7/DATA//CAT_SKTreeOutput/jalmond/CLUSTERLOG12371/H_v2jobid.txt exists

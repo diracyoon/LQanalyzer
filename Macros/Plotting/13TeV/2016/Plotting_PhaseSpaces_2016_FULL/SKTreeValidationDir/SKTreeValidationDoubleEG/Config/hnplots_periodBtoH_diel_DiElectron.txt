@@ -1,0 +1,26 @@
+# Specify_location_of_data/mc
+mcpath	        /data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/HNDiElectron/periodH/
+datapath	/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/HNDiElectron/periodH/HNDiElectron_data_DoubleEG_cat_v8-0-6.root
+datadrivenpath	/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/HNDiElectron/periodH/
+# Specify_the_list_of_hists_to_plot
+plottingpath	dat/hnhist_diel_config.txt
+cutpath		dat/hn_cuts_diel.txt
+# file_prefix
+prefix		HNDiElectron_SK
+postfix		_cat_v8-0-6.root	
+# NAME_THE_OUTPUT_DIR
+outputdir  HN13TeV_HNDiElectron_v806_periodH_DiElectron
+histdir    CAT2016_v806
+# CONFIGURE_HISTOGRAMS
+showdata   true
+usenp      false
+ylog	   true
+# List_the_samples_to_be_included
+samples    top
+samples    wjets
+samples    vv
+samples	   dylow
+samples	   dyhigh
+#samples	      qcd
+#samples other
+END

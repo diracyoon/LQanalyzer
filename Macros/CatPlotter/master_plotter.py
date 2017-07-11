@@ -73,6 +73,7 @@ skim=""
 periodtag=""
 analyzer=""
 stream=""
+isblind="false"
 plottag="Default"
 outputlist=[]
 input_configfile = open(configinputfile,"r")
@@ -83,9 +84,13 @@ for line in input_configfile:
         sline = line.split()
         cut = sline[2]
         cutlist.append(cut)
+    elif "blinded" in line and "# " in line:
+        sline = line.split()
+        if sline[2] == "true":
+            isblind="true"
     elif "samples" in line and "# " in line:
         sline = line.split()
-        inputfile = str(os.getenv("LQANALYZER_DIR")) + "/CATConfig/PlotConfig/"+sline[2]
+        inputfile = str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/PlotConfig/"+sline[2]
     elif "skim" in line and "# " in line:
         sline = line.split()
         skim  = sline[2]
@@ -126,7 +131,7 @@ for line in input_configfile:
         outputlist.append("https://jalmond.web.cern.ch/jalmond/SNU/CATAnalyzerPlots/HN13TeV_" + analyzer+"_"+os.getenv("CATVERSION")+"_"+periodtag+"_"+cut+"/histograms/CAT2016_"+os.getenv("CATVERSION")+plottag+"/indexCMS.html")
 
     
-        os.system('python  ' + os.getenv("LQANALYZER_DIR") + '/Macros/CatPlotter/setupplotter.py -i ' + inputfile + ' -d ' + inputdir + ' -x ' + jobdir + ' -s ' + stream + ' -a ' + analyzer + ' -S ' + skim + ' -p ' + periodtag + ' -C ' + cutlist[0] + ' -M ' + configinputfile + ' -c ' + plottag)
+        os.system('python  ' + os.getenv("LQANALYZER_DIR") + '/Macros/CatPlotter/setupplotter.py -i ' + inputfile + ' -d ' + inputdir + ' -x ' + jobdir + ' -s ' + stream + ' -a ' + analyzer + ' -S ' + skim + ' -p ' + periodtag + ' -C ' + cutlist[0] + ' -M ' + configinputfile + ' -c ' + plottag + ' -b ' + isblind)
         histlist=[]
         binlist=[]
         xminlist=[]

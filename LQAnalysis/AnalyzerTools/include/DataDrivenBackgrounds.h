@@ -64,9 +64,10 @@ class DataDrivenBackgrounds{
   /// == Dilepton
   float Get_DataDrivenWeight_EE(bool geterr, std::vector<snu::KElectron> k_electrons);
   float Get_DataDrivenWeight_EEmva(bool geterr,std::vector<snu::KElectron> k_electrons, bool tight1, bool tight2, TString key1, TString key2);
-  float Get_DataDrivenWeight_EE(bool geterr, std::vector<snu::KElectron> k_electrons, TString IDloose,TString IDtight, TString method);
+  float Get_DataDrivenWeight_EE(bool geterr, std::vector<snu::KElectron> k_electrons, TString IDloose,TString IDtight, TString method, bool isedileptrig=true);
   float Get_DataDrivenWeight_MM(bool geterr, std::vector<snu::KMuon> k_muons);
-  float Get_DataDrivenWeight_MM(bool geterr, std::vector<snu::KMuon> k_muons,  TString ID, TString method);
+  float Get_DataDrivenWeight_MM(bool geterr, std::vector<snu::KMuon> k_muons,  bool tight1, bool tight2, TString ID1,TString ID2, bool cl1, bool cl2, TString method, float isocut1, float isocut2, bool useclosej, bool singletrig);
+
   float Get_DataDrivenWeight_EM(bool geterr,std::vector<snu::KMuon> k_muons, std::vector<snu::KElectron> k_electrons,  TString IDe, TString IDm,  TString method);
 
   float GetFakeRateEl(float pt, float eta, TString cut);
@@ -77,7 +78,7 @@ class DataDrivenBackgrounds{
   TString GetElFRKey(TString elidloose, TString elidtight, TString method);
   std::vector<TString> GetElFRKey( TString IDloose,TString IDtight, TString method, std::vector<TString> regs1);
   //==== General lepton fakes
-  float Get_DataDrivenWeight(bool geterr, std::vector<snu::KMuon> k_muons, TString muid, int n_muons, std::vector<snu::KElectron> k_electrons, TString elid, int n_electrons, TString elidloose="ELECTRON16_POG_FAKELOOSE", TString method="dijet_ajet40");
+  float Get_DataDrivenWeight(bool geterr, std::vector<snu::KMuon> k_muons, TString muid, int n_muons, std::vector<snu::KElectron> k_electrons, TString elid, int n_electrons, TString elidloose="ELECTRON16_POG_FAKELOOSE", TString method="dijet_ajet40", int HalfSampleErrorDir=0);
 
   /// = single lepton
   float Get_DataDrivenWeight_E(bool geterr, std::vector<snu::KElectron> k_electrons ,TString ID, TString method);
@@ -87,6 +88,10 @@ class DataDrivenBackgrounds{
   void Test();
 
   // Class object to get event weights for Fakes
+
+  //==== Use pt-cone-corrected
+  void SetUsePtCone(bool b);
+  double MuonConePt(snu::KMuon muon, double tightiso);
 
   /// GENERAL FUNCTIONS
   std::vector<TLorentzVector> MakeTLorentz( std::vector<snu::KElectron> el);
@@ -105,6 +110,7 @@ class DataDrivenBackgrounds{
 
   HNCommonLeptonFakes* m_fakeobj;
   EventBase* dd_eventbase;
+  bool UsePtCone;
 
 
 

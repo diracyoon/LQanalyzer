@@ -1,0 +1,22 @@
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lr@{\hspace{0.5mm}}c@{\hspace{0.5mm}}c@{\hspace{0.5mm}}l}
+\hline
+\hline
+Source & \multicolumn{4}{c}{} \\
+\hline
+Misid. Lepton Background&443.3& $\pm$& 6.4&$^{+150.7}_{-150.7}$\\
+WZ,ZZ,WW&77.0& $\pm$& 7.3&$^{+10.0}_{-10.0}$\\
+t$\bar{t}$,t/$\bar{t}$,t/$\bar{t}$W,t$\bar{t}$V&663.3& $\pm$& 40.3&$^{+136.5}_{-136.5}$\\
+\hline
+Total&1183.6& $\pm$&41.5&$^{+203.6}_{-203.6}$\\
+\hline
+Data&  \multicolumn{4}{c}{$1396.0$}\\
+\hline
+Signficance&  \multicolumn{4}{c}{$+1.0\sigma$}\\
+\hline
+\hline
+\end{tabular}
+\caption{Number of events containing two prompt electrons and two jets, with Z peak removed, in 19 fb$^{-1}$ of CMS data at 8~TeV}
+\end{center}
+\end{table}

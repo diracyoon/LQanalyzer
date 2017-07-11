@@ -1,0 +1,27 @@
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lr@{\hspace{0.5mm}}c@{\hspace{0.5mm}}c@{\hspace{0.5mm}}l}
+\hline
+\hline
+Source & \multicolumn{4}{c}{} \\
+\hline
+Higgs&0.6& $\pm$& 0.0&$^{+0.1}_{-0.1}$\\
+Misid. Lepton Background&88.5& $\pm$& 5.2&$^{+30.1}_{-30.1}$\\
+Top&4.2& $\pm$& 0.2&$^{+0.8}_{-0.8}$\\
+Triboson&1.6& $\pm$& 0.1&$^{+0.4}_{-0.4}$\\
+WW&0.2& $\pm$& 0.2&$^{+0.0}_{-0.0}$\\
+WZ&348.6& $\pm$& 5.2&$^{+69.7}_{-69.7}$\\
+Z$\gamma$&49.5& $\pm$& 5.4&$^{+7.4}_{-7.4}$\\
+ZZ&37.4& $\pm$& 0.5&$^{+6.6}_{-6.6}$\\
+\hline
+Total&530.5& $\pm$&9.2&$^{+76.5}_{-76.5}$\\
+\hline
+Data&  \multicolumn{4}{c}{$507.0$}\\
+\hline
+Signficance&  \multicolumn{4}{c}{$-0.3\sigma$}\\
+\hline
+\hline
+\end{tabular}
+\caption{ Number of events with three electrons (POG tight) with one Z-candidtaes peak as well as a b-jet veto (Medium working point) .}
+\end{center}
+\end{table}

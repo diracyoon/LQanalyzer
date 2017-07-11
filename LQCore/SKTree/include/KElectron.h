@@ -42,8 +42,11 @@ namespace snu {
     float ScaleFactor(const std::string& name, int sign) const ;
     Bool_t PassTrigMVAHNLoose() const ;
     Bool_t PassTrigMVAHNTight() const ;
+    Bool_t PassTrigMVAHNTightv2(float pt1, float pt2, float mvacut, float mvacut_ec) const ;
+    Bool_t PassTrigMVAHNTightv3() const ;
+    Bool_t PassTrigMVAHNTightv4() const ;
     Bool_t PassTrigMVAGENTTight() const ;
-
+    Bool_t PassTrigMVAGENTLoose() const;
 
     // set kinematic variables
     void SetSCEta(Double_t sceta);
@@ -128,14 +131,7 @@ namespace snu {
     ///// Functions to call class variables
     
     inline Int_t GetType()  const {
-      if(k_eltype < 32) return k_eltype;
-      else {
-	if(fabs(k_mc_pdgid) == 211) return 32;
-	if(fabs(k_mc_pdgid) == 310) return 33;
-	if(fabs(k_mc_pdgid) == 431) return 34;
-	if(fabs(k_mc_pdgid) == 13) return 35;
-	return 36;
-      }
+      return k_eltype;
     }
     inline Bool_t IsPromptFlag() const {return k_isprompt;}
     inline Double_t MVA() const {return k_mva;}

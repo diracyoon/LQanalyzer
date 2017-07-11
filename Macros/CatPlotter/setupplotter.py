@@ -14,7 +14,7 @@ def  MakeCutFile(cutlist, jobname):
 
 
 
-def  MakeConfFile(inputdir,jobname,datastream,analyzer,tag,tag2,catversion,periodtag,cut,leglist, plottag):
+def  MakeConfFile(inputdir,jobname,datastream,analyzer,tag,tag2,catversion,periodtag,cut,leglist, plottag, isblind):
 
     if not os.path.exists(str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/"+jobname +"/Config/"):
         os.system("mkdir " +  str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/"+jobname +"/Config/")
@@ -34,7 +34,10 @@ def  MakeConfFile(inputdir,jobname,datastream,analyzer,tag,tag2,catversion,perio
     file_conf.write("histdir    CAT2016_"+catversion+plottag+"\n")
     file_conf.write("# CONFIGURE_HISTOGRAMS\n")
     # CONFIGURE_HISTOGRAMS                                                                                                                                                  
-    file_conf.write("showdata   true \n")
+    if isblind == "true":
+        file_conf.write("showdata   false \n")
+    else:
+        file_conf.write("showdata   true \n")
     file_conf.write("usenp      false \n")
     file_conf.write("ylog       true \n")
     file_conf.write("# List_the_samples_to_be_includedv\n")
@@ -47,6 +50,7 @@ def  MakeConfFile(inputdir,jobname,datastream,analyzer,tag,tag2,catversion,perio
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-x", "--x", dest="x", default="TEST",help="tag")
+parser.add_option("-b", "--b", dest="b", default="false",help="tag")
 parser.add_option("-i", "--i", dest="i", default="123",help="tag")
 parser.add_option("-d", "--d", dest="d", default="",help="tag")
 parser.add_option("-s", "--s",  dest="s", default="",help="tag")
@@ -70,6 +74,7 @@ period=options.p
 cutlist=options.C
 plottag=options.c
 configinputfile=options.M
+isblind=options.b
 
 cap_file = open("caption.txt","r")
 text_caption=""
@@ -119,7 +124,6 @@ for line in input_config:
         elif ni == 2:
             legalias=i
     legend=legend[:-1]
-                    
     l_in_list=Truel_in_list=False
     for l in list_of_legends:
         if l == legend:
@@ -165,6 +169,10 @@ for i in list_of_legends:
                 elif skim == "SKTree_DiLepSkim":
                     tag="_SK"
                     tag2="_dilep"
+                elif skim == "SKTree_TriLepSkim":
+                    tag="_SK"
+                    tag2="_trilep"
+
 
                 prefix= analyzer + tag
                 postfix= tag2+"_cat_"+catversion+".root"
@@ -194,7 +202,7 @@ for i in empty_list_alias:
 
     
 
-plot_comfig_dir = str(os.getenv("LQANALYZER_DIR")) + "CATConfig/PlotConfig/"
+plot_comfig_dir = str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/PlotConfig/"
 
 path_macroC_file = str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/"+jobdir+"/MakeDataMCCompPlots.cpp" ;
 path_macroH_file = str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/"+jobdir+"/MakeDataMCCompPlots.h" ;
@@ -291,8 +299,11 @@ if  skim == "SKTree_LeptonSkim":
 elif skim == "SKTree_DiLepSkim":
     tag="_SK"
     tag2="_dilep"
+elif skim == "SKTree_TriLepSkim":
+    tag="_SK"
+    tag2="_trilep"
 
-MakeConfFile(inputdir,jobdir,stream,analyzer,tag,tag2,catversion,period,cutlist,list_of_legends_alias, plottag)
+MakeConfFile(inputdir,jobdir,stream,analyzer,tag,tag2,catversion,period,cutlist,list_of_legends_alias, plottag, isblind)
 
 os.system("source  " + str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/Code/runjob.sh " + jobdir)
 

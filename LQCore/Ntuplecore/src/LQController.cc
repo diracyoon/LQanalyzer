@@ -202,6 +202,7 @@ void LQController::SetChannel(TString ch){
     throw LQError( "This is because catversion was not set... Fix this    ",          LQError::StopExecution );
   }
   if     (ch == "DoubleMuon")  channel = "DoubleMuon";
+  else if     (ch == "DoubleMuon_CF")  channel = "DoubleMuon_CF";
   else if     (ch == "DoubleEG")  channel = "DoubleEG";
   else if     (ch == "MuonEG")  channel = "MuonEG";
   else if     (ch == "SingleMuon")      channel = "SingleMuon";
@@ -807,7 +808,7 @@ LQController::_catversion  LQController::GetCatVersion(std::string filepath) thr
   
   else cout << "WARNING CATVERSION cannot be found in input dir name... " << endl;
   //throw LQError( "CATVERSION cannot be found in input dir name... If you are running your own sample make give the input dir a name with /v-X-X-X/ corresponding to catversion you are using!",   LQError::StopExecution );
-
+  
 }
 
 float LQController::CalculateWeight() throw(LQError) {

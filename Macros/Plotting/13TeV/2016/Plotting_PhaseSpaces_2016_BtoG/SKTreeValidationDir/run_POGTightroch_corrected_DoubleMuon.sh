@@ -1,0 +1,10 @@
+cd SKTreeValidationDoubleMuon/ 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_DiMuon.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_DiMuon_dijet.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_DiMuon_IDW.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_DiMuon_noW.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_DiMuon_puW.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_DiMuon_Trigger.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_DiMuon_SSPreselection.txt 
+./MakeDataMCCompPlots Config/hnplots_periodCtoD_POGTightroch_corrected_ZMuon.txt 
+cd -

@@ -44,24 +44,26 @@ void FakeRateCalculator_Mu::InitialiseAnalysis() throw( LQError ) {
   // You can out put messages simply with Message function. Message( "comment", output_level)   output_level can be VERBOSE/INFO/DEBUG/WARNING 
   // You can also use m_logger << level << "comment" << int/double  << LQLogger::endmsg;
   //
-  
-  MakeCleverHistograms(sighist_ee, "SingleLooseElJet");
-  MakeCleverHistograms(sighist_ee, "SingleTightElJet");
 
-  MakeCleverHistograms(sighist_ee, "DiElectron");
-  MakeCleverHistograms(sighist_ee, "DiElectron_SingleLeg");
-  MakeCleverHistograms(sighist_ee, "Use40_loose");
-  MakeCleverHistograms(sighist_ee, "Use40_tight");
-
-  MakeCleverHistograms(sighist_ee, "SingleElectron_unprescaled");
-  MakeCleverHistograms(sighist_ee, "SingleElectron_prompt_unprescaled");
-  MakeCleverHistograms(sighist_ee, "SingleElectron_prompt_unprescaled2");
+  MakeCleverHistograms(sighist_m, "SingleMuonSNU_prompt");
+  MakeCleverHistograms(sighist_m, "SingleMuonGent_loose_prompt");
+  MakeCleverHistograms(sighist_m, "SingleMuonGent_tight_prompt");
   return;
 }
 
 
 void FakeRateCalculator_Mu::ExecuteEvents()throw( LQError ){
-    
+  
+  RunFakes("SNUTight","MUON_HN_Tight_FAKELOOSEST");
+  RunFakes("SNUMedium","MUON_HN_Medium_FAKELOOSEST");
+  RunFakes("POGTIGHT","MUON_POG_FAKETIGHT");
+  RunFakes("POGMEDIUM","MUON_POG_FAKEMEDIUM");
+  RunFakes("GENT","MUON_HNGENT_LOOSE");
+
+}
+
+void FakeRateCalculator_Mu::RunFakes(TString tag, TString ID){
+  
   //// Initial event cuts
   /// MET FIleters 
   if(!PassMETFilter()) return;     
@@ -69,30 +71,27 @@ void FakeRateCalculator_Mu::ExecuteEvents()throw( LQError ){
   /// Require good promary vertex 
   if (!eventbase->GetEvent().HasGoodPrimaryVertex()) return; //// Make cut on event wrt vertex  
   numberVertices = eventbase->GetEvent().nVertices();   
-
-  if (eventbase->GetEvent().MET(snu::KEvent::pfmet) > 20) return;
-
+  
+  //if (eventbase->GetEvent().MET(snu::KEvent::pfmet) > 20) return;
+  
+  bool singlemu = ((isData&&k_channel == "SingleMuon") || !isData);
+  bool doublemu = ((isData&&k_channel == "DoubleMuon") || !isData);
+  
+  
+  std::vector<snu::KMuon> tmploose_mu = GetMuons(ID,false);
+  
+  
+  
+  if(tmploose_mu.size() != 1) return;
   
 
-  /// These run on double electron dataset
-  if(isData || !isData){
 
-    // GetFakeRateAndPromptRates fills fake rate + prompt rate plots
-    // hist names are tagged with second argu
-    // dijet method
-
-    
-    /// ELECTRON_HN_FAKELOOSEST has no ID cuts
-    /// only pt/eta/chargeconst/looseIP/
-
-    std::vector<snu::KMuon> tmploose_mu = GetMuons("MUON_HN_FAKELOOSEST",false);
-    
-    if(tmploose_mu.size() != 1) return;
+  if(tag.Contains("SNU")){
     vector<float> vcut_dxy_b;
     vector<TString> vcut_dxy_b_s;
     
     for(unsigned int dxy_b=0;dxy_b < 10; dxy_b++){
-      float cut_dxy_b =  float(dxy_b)*0.005 + 0.01;
+      float cut_dxy_b =  float(dxy_b)*0.005 + 0.005;
       vcut_dxy_b.push_back(cut_dxy_b);
       stringstream ss;
       ss <<cut_dxy_b;
@@ -105,21 +104,20 @@ void FakeRateCalculator_Mu::ExecuteEvents()throw( LQError ){
     vcut_dxysig_b_s.push_back("3");
     vcut_dxysig_b_s.push_back("4");
     
-
-
+    
     vector<float> vcut_dz_b;
     vector<TString> vcut_dz_b_s;
     
     for(unsigned int dz_b=0;dz_b < 4; dz_b++){
-      float cut_dz_b =  float(dz_b)*0.02 + 0.04;
+      float cut_dz_b =  float(dz_b)*0.02 + 0.02;
       vcut_dz_b.push_back(cut_dz_b);
       stringstream ss;
       ss <<cut_dz_b;
       vcut_dz_b_s.push_back(TString(ss.str()));
     }   
-
     
-
+    
+    
     vector<float> vcut_iso_b;
     vector<TString> vcut_iso_b_s;
     for(unsigned int iso_b=0;iso_b < 5; iso_b++){
@@ -140,6 +138,7 @@ void FakeRateCalculator_Mu::ExecuteEvents()throw( LQError ){
 	    std::vector<snu::KMuon> tight_mu;
 	    for(unsigned int imu=0; imu<tmploose_mu.size(); imu++){
 	      float reliso = tmploose_mu[imu].RelIso04();
+	      
 	      if(fabs(tmploose_mu[imu].dZ()) > vcut_dz_b[dz_b]) continue;
 	      
 	      loose_mu.push_back(tmploose_mu[imu]);
@@ -148,26 +147,112 @@ void FakeRateCalculator_Mu::ExecuteEvents()throw( LQError ){
 	      if(fabs(tmploose_mu[imu].dXY()) > vcut_dxy_b[dxy_b]) continue;
 	      if(reliso > vcut_iso_b[iso_b]) continue;
 	      tight_mu.push_back(tmploose_mu[imu]);
+	    }
+	    
+	    if(vcut_iso_b_s[iso_b] == "0.05" && vcut_dxy_b_s[dxy_b] == "0.01" && vcut_dxysig_b_s[dxysig_b] == "3" && vcut_dz_b_s[dz_b] == "0.04"){
 	      
-	      GetFakeRateAndPromptRates(loose_mu,"dijet_"+vcut_iso_b_s[iso_b]+"_"+vcut_dxy_b_s[dxy_b]+"_"+vcut_dxysig_b_s[dxysig_b]+"_"+vcut_dz_b_s[dz_b],tight_mu,weight, vcut_iso_b[iso_b],true,  false);
+	            
+	      if(singlemu)GetFakeRateAndPromptRates(loose_mu,tag+"isodijet_"+vcut_iso_b_s[iso_b]+"_"+vcut_dxy_b_s[dxy_b]+"_"+vcut_dxysig_b_s[dxysig_b]+"_"+vcut_dz_b_s[dz_b],tight_mu,weight, vcut_iso_b[iso_b],true, true);
+	      if(doublemu)GetFakeRateAndPromptRates(loose_mu,tag+"dijet_"+vcut_iso_b_s[iso_b]+"_"+vcut_dxy_b_s[dxy_b]+"_"+vcut_dxysig_b_s[dxysig_b]+"_"+vcut_dz_b_s[dz_b],tight_mu,weight, vcut_iso_b[iso_b],true,  true);
+	      
+	      std::vector<snu::KJet> jetCollTight = GetJets("JET_HN");
+	      std::vector<snu::KElectron> elColl = GetElectrons("ELECTRON_HN_VETO");  // loose selection                                                                                                                                         
+	      
+	      if(loose_mu.size()==1){
+		if(elColl.size() == 0) {
+		  if(jetCollTight.size() >=1) {
+		    if(jetCollTight.at(0).Pt() > 40.){
+		      
+		      Double_t TMETdphi = TVector2::Phi_mpi_pi(loose_mu.at(0).Phi()- eventbase->GetEvent().METPhi(snu::KEvent::pfmet));
+		      Double_t TMT=sqrt(2.* loose_mu.at(0).Et()*eventbase->GetEvent().MET(snu::KEvent::pfmet) * (1 - cos( TMETdphi)));
+		      
+		      TString triggerslist_3="HLT_Mu3_PFJet40_v";
+		      TString triggerslist_8="HLT_Mu8_TrkIsoVVL_v";
+		      TString triggerslist_17="HLT_Mu17_TrkIsoVVL_v";
+		      
+		      float prescale_trigger =  GetPrescale(loose_mu,   PassTrigger(triggerslist_3),PassTrigger(triggerslist_8), PassTrigger(triggerslist_17),TargetLumi);
+		      if(eventbase->GetEvent().MET(snu::KEvent::pfmet)> 40 && (60. < TMT)  &&(TMT < 100.) &&(loose_mu[0].MCMatched() || isData)){
+			FillCLHist(sighist_m, tag+"SingleMuonSNU_loose_prompt", eventbase->GetEvent(), loose_mu, elColl,jetCollTight, weight*prescale_trigger);
+			FillCLHist(sighist_m, tag+"SingleMuonSNU_tight_prompt", eventbase->GetEvent(), tight_mu, elColl,jetCollTight, weight*prescale_trigger);
+		      }
+		      if(UseEvent(loose_mu , jetCollTight, 40., prescale_trigger, weight)){
+			FillCLHist(sighist_m, tag+"SingleMuonSNU_loose", eventbase->GetEvent(), loose_mu, elColl,jetCollTight, weight*prescale_trigger);
+			FillCLHist(sighist_m, tag+"SingleMuonSNU_tight", eventbase->GetEvent(), tight_mu, elColl,jetCollTight, weight*prescale_trigger);
+		      }
+		    }
+		  }
+		}
+	      }
+	    }
+	    else{
+	      
+	      if(singlemu)GetFakeRateAndPromptRates(loose_mu,tag+"isodijet_"+vcut_iso_b_s[iso_b]+"_"+vcut_dxy_b_s[dxy_b]+"_"+vcut_dxysig_b_s[dxysig_b]+"_"+vcut_dz_b_s[dz_b],tight_mu,weight, vcut_iso_b[iso_b],true,  false);
+	      if(doublemu)GetFakeRateAndPromptRates(loose_mu,tag+"dijet_"+vcut_iso_b_s[iso_b]+"_"+vcut_dxy_b_s[dxy_b]+"_"+vcut_dxysig_b_s[dxysig_b]+"_"+vcut_dz_b_s[dz_b],tight_mu,weight, vcut_iso_b[iso_b],true,  false);
+	      
 	    }
 	  }
-	}//iso
-      }//dz
-    }//dxy
+	}
+      }//iso
+    }//dz
   }
-  return;
+  
+  else if (tag=="POGTIGHT"){
+    std::vector<snu::KMuon> loose_mu = GetMuons("MUON_POG_FAKETIGHT",false);
+    std::vector<snu::KMuon> tight_mu = GetMuons("MUON_POG_TIGHT",false);
+    
+    if(singlemu)GetFakeRateAndPromptRates(loose_mu,tag+"isodijet_pogtight",tight_mu,weight, 0.15, true, false);
+    if(doublemu)GetFakeRateAndPromptRates(loose_mu,tag+"dijet_pogtight",tight_mu,weight, 0.15, true, false);
+    
+  }
+  else if (tag=="POGMEDIUM"){
+    std::vector<snu::KMuon> loose_mu = GetMuons("MUON_POG_FAKEMEDIUM",false);
+    std::vector<snu::KMuon> tight_mu = GetMuons("MUON_POG_MEDIUM",false);
+
+    if(singlemu)GetFakeRateAndPromptRates(loose_mu,tag+"isodijet_pogmedium",tight_mu,weight, 0.25, true, false);
+    if(doublemu)GetFakeRateAndPromptRates(loose_mu,tag+"dijet_pogmedium",tight_mu,weight, 0.25, true, false);
+  }
+  
+  else{
+    
+    std::vector<snu::KMuon> loose_mu = GetMuons("MUON_HNGENT_LOOSE",false);
+    std::vector<snu::KMuon> tight_mu = GetMuons("MUON_HNGENT_TIGHT",false);
+    
+    if(singlemu)GetFakeRateAndPromptRates(loose_mu,tag+"isodijet_gent",tight_mu,weight, 0.1, true, false);
+    if(doublemu)GetFakeRateAndPromptRates(loose_mu,tag+"dijet_gent",tight_mu,weight, 0.1, true, false);
+    
+    std::vector<snu::KJet> jetCollTight = GetJets("JET_HN");
+    std::vector<snu::KElectron> elColl = GetElectrons("ELECTRON_HN_VETO");  // loose selection                                                                                                                                         
+    
+    if(loose_mu.size()==1){
+      if(elColl.size() == 0) {
+	if(jetCollTight.size() >=1) {
+	  if(jetCollTight.at(0).Pt() > 40.){
+	    
+            Double_t TMETdphi = TVector2::Phi_mpi_pi(loose_mu.at(0).Phi()- eventbase->GetEvent().METPhi(snu::KEvent::pfmet));
+            Double_t TMT=sqrt(2.* loose_mu.at(0).Et()*eventbase->GetEvent().MET(snu::KEvent::pfmet) * (1 - cos( TMETdphi)));
+	    TString triggerslist_3="HLT_Mu3_PFJet40_v";
+	    TString triggerslist_8="HLT_Mu8_TrkIsoVVL_v";
+	    TString triggerslist_17="HLT_Mu17_TrkIsoVVL_v";
+	    float prescale_trigger =  GetPrescale(loose_mu,   PassTrigger(triggerslist_3),PassTrigger(triggerslist_8), PassTrigger(triggerslist_17),TargetLumi);
+
+            if(eventbase->GetEvent().MET(snu::KEvent::pfmet)> 40 && (60. < TMT)  &&(TMT < 100.) &&(loose_mu[0].MCMatched() || isData)){
+	      FillCLHist(sighist_m, "SingleMuonGent_loose_prompt", eventbase->GetEvent(), loose_mu, elColl,jetCollTight, weight*prescale_trigger);
+	      FillCLHist(sighist_m, "SingleMuonGent_tight_prompt", eventbase->GetEvent(), tight_mu, elColl,jetCollTight, weight*prescale_trigger);
+	    }
+	    
+	    if(UseEvent(loose_mu , jetCollTight, 40., prescale_trigger, weight)){
+	      FillCLHist(sighist_m, "SingleMuonGent_loose", eventbase->GetEvent(), loose_mu, elColl,jetCollTight, weight*prescale_trigger);
+	      FillCLHist(sighist_m, "SingleMuonGent_tight", eventbase->GetEvent(), tight_mu, elColl,jetCollTight, weight*prescale_trigger);
+	    }
+	    
+	  }
+	}
+      }
+    }
+  }
   
   
-  if((isData&&k_channel == "SingleElectron") || !isData){
-
-  }
 }
-
-void FakeRateCalculator_Mu::MakeSingleMuonCRPlots(TString looseid, TString eltag, TString tightid, float w, bool usepujetid){
-
-}
-
 
 void FakeRateCalculator_Mu::GetFakeRateAndPromptRates(std::vector<snu::KMuon> muonLooseColl, TString mutag, std::vector<snu::KMuon> muonTightColl, float w, float isocut, bool usepujetid, bool runall){
 
@@ -176,7 +261,7 @@ void FakeRateCalculator_Mu::GetFakeRateAndPromptRates(std::vector<snu::KMuon> mu
   if (!k_isdata) {
     w = w * MCweight * eventbase->GetEvent().PeriodPileUpWeight(GetMCPeriodRandom());
   }
-
+  
   TString triggerslist_3="HLT_Mu3_PFJet40_v";
   TString triggerslist_8="HLT_Mu8_TrkIsoVVL_v";
   TString triggerslist_17="HLT_Mu17_TrkIsoVVL_v";
@@ -199,10 +284,22 @@ void FakeRateCalculator_Mu::GetFakeRateAndPromptRates(std::vector<snu::KMuon> mu
   
    /// Get prescale for single el event. Returns 1. or 0. for data
   float prescale_trigger =  GetPrescale(muonLooseColl,   PassTrigger(triggerslist_3),PassTrigger(triggerslist_8), PassTrigger(triggerslist_17),TargetLumi);
+  if(mutag.Contains("isodijet")) {
+    if(muonLooseColl.size() ==1){
+      if(muonLooseColl[0].Pt() > 25.){
+	TString analysis_trigger_muon="HLT_IsoMu24_v";
+	TString analysis_trigger_tkmuon="HLT_IsoTkMu24_v";
+	if((PassTrigger(analysis_trigger_muon) || PassTrigger(analysis_trigger_tkmuon))){
+	  if(isData)   prescale_trigger = 1.;
+	  else prescale_trigger  = WeightByTrigger(analysis_trigger_muon, TargetLumi);
+	}
+      }
+    }
+  }
   
   /// Make standard plots for loose and tight collection dijet                                                                                                                   
-  if(muonLooseColl.size()==1)MakeFakeRatePlots("", mutag, muonTightColl ,muonLooseColl,  jetCollTight, jetColl,  prescale_trigger, isocut, w, true);
-  
+  if(muonLooseColl.size()==1)MakeFakeRatePlots("", mutag, muonTightColl ,muonLooseColl,  jetCollTight, jetColl,  prescale_trigger, w, isocut, true);
+
   if(!runall) return;
 
 
@@ -219,7 +316,7 @@ float FakeRateCalculator_Mu::GetPrescale( std::vector<snu::KMuon> muons,bool pas
     /// 10 - 20  HLT_Mu7
     /// 20 - INF  HLT_Mu17
     
-    if(muons.at(0).Pt() >= 20.){
+    if(muons.at(0).Pt() >= 25.){
       if((isData&&k_channel != "DoubleMuon")) return 0.;
 
       if(pass1){
@@ -231,7 +328,7 @@ float FakeRateCalculator_Mu::GetPrescale( std::vector<snu::KMuon> muons,bool pas
 	return 0;
       }
     }
-    else  if(muons.at(0).Pt() >= 10.){
+    else  if(muons.at(0).Pt() >= 12.){
       if((isData&&k_channel != "DoubleMuon")) return 0.;
 
       if(pass2){
@@ -244,7 +341,7 @@ float FakeRateCalculator_Mu::GetPrescale( std::vector<snu::KMuon> muons,bool pas
       }
     }
     else  if(muons.at(0).Pt() >= 5.){
-      if((isData&&k_channel != "SingleMuon")) return 0.;
+      if((isData&&k_channel != "DoubleMuon")) return 0.;
       if(pass3){
         if(isData) return 1.;
         prescale_trigger =  WeightByTrigger("HLT_Mu3_PFJet40_v", fake_total_lum) ; //// 20 + GeV bins                                                                         
@@ -299,14 +396,15 @@ void FakeRateCalculator_Mu::MakeFakeRatePlots(TString label, TString mutag,   st
 	if(useevent40)GetFakeRates(muons, muons_tight,label, jets, alljets,  label+"_40", (prescale_w * w),isocut,makebasicplots);
       }
       else{
-	//if(useevent20)GetFakeRates(muons, muons_tight,label, jets, alljets,  label+"_20", (prescale_w * w),makebasicplots);
-	//if(useevent30)GetFakeRates(muons, muons_tight,label, jets, alljets,  label+"_30", (prescale_w * w),makebasicplots);
+	if(useevent20)GetFakeRates(muons, muons_tight,label, jets, alljets,  label+"_20", (prescale_w * w),isocut,makebasicplots);
+	if(useevent30)GetFakeRates(muons, muons_tight,label, jets, alljets,  label+"_30", (prescale_w * w),isocut,makebasicplots);
 	if(useevent40)GetFakeRates(muons, muons_tight,label, jets, alljets,  label+"_40", (prescale_w * w),isocut,makebasicplots);
-	//if(useevent60)GetFakeRates(muons, muons_tight, label,jets, alljets,  label+"_60", (prescale_w * w),makebasicplots);
+	if(useevent60)GetFakeRates(muons, muons_tight, label,jets, alljets,  label+"_60", (prescale_w * w),isocut,makebasicplots);
       }
     }
   }
 }
+
 
 bool FakeRateCalculator_Mu::UseEvent(std::vector<snu::KMuon> muons,  std::vector< snu::KJet> jets, float awayjetcut, float precale_weight, float wt){
   
@@ -339,34 +437,94 @@ bool FakeRateCalculator_Mu::UseEvent(std::vector<snu::KMuon> muons,  std::vector
 }
 
 void FakeRateCalculator_Mu::GetFakeRates(std::vector<snu::KMuon> loose_mu, std::vector<snu::KMuon> tight_mu, TString tightlabel,  std::vector<snu::KJet> jets,  std::vector<snu::KJet> alljets, TString tag, double w, float isocut, bool basicplots){
-  
-   
-  Float_t ptbins[11] = { 5.,10., 15.,20.,25.,30.,35.,45.,60.,100., 200.};
-  Float_t ptbinsb[9] = { 5., 10., 15.,20.,30.,45.,60.,100., 200.};
+
+  Float_t ptbins[11] = { 5.,12., 15.,20.,25.,30.,35.,45.,60.,100., 200.};
+  Float_t ptbinsb[9] = { 5., 12., 15.,20.,30.,45.,60.,100., 200.};
   Float_t etabin[2] = { 0.,  2.5};
   Float_t etabins[4] = { 0., 0.8,1.479,  2.5};
   Float_t etabins2[5] = { 0.,0.8,  1.479, 2.,  2.5};
 
   /// for most cuts just plot pt_eta
-  if(basicplots){
-    
-    if(loose_mu.size() == 1 && jets.size() >= 1){
-      float el_pt = loose_mu.at(0).Pt();
-      float el_pt_corr = loose_mu.at(0).Pt()*(1+max(0.,(loose_mu.at(0).RelIso04()-isocut))) ; /// will need changing for systematics
-      
-      FillHist(("LooseMu" + tag + "_pt_eta").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
-      FillHist(("LooseMu" + tag + "_ptcorr_eta").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
-      
 
-      if( tight_mu.size() == 1){
-	FillHist(("TightMu" + tag + "_pt_eta").Data(), el_pt, fabs(tight_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
-	FillHist(("TightMu" + tag + "_ptcorr_eta").Data(), el_pt_corr, fabs(tight_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
-	
+  bool closebjet_l = false;                                                                                                                                                                                                       
+  bool closebjet_m = false;                                                                                                                                                                                                       
+  bool closebjet_t = false;                                                                                                                                                                                                       
+  for(unsigned int ij =0 ; ij < alljets.size() ; ij++){                                                                                                                                                                         
+    if(loose_mu.at(0).DeltaR(alljets.at(ij)) < 0.5) {                                                                                                                                                                         
+      if(alljets.at(ij).IsBTagged(snu::KJet::CSVv2, snu::KJet::Loose)) closebjet_l = true;                                                                                                                                       
+      if(alljets.at(ij).IsBTagged(snu::KJet::CSVv2, snu::KJet::Medium)) closebjet_m = true;                                                                                                                                       
+      if(alljets.at(ij).IsBTagged(snu::KJet::CSVv2, snu::KJet::Tight)) closebjet_t = true;                                                                                                                                       
+    }                                                                                                                                                                                                                           
+  }                                                                                                                                                                                                                    
+  
+  if(loose_mu.size() == 1 && jets.size() >= 1){
+    float el_pt = loose_mu.at(0).Pt();
+    float el_pt_corr = loose_mu.at(0).Pt()*(1+max(0.,(loose_mu.at(0).RelIso04()-isocut))) ; /// will need changing for systematics
+    
+    cout << el_pt << endl;
+    FillHist(("LooseMu" + tag + "_pt_eta").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+    FillHist(("LooseMu" + tag + "_ptcorr_eta").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+    
+    if(closebjet_l) {
+      FillHist(("LooseMu" + tag + "_pt_eta_cb_l").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+      FillHist(("LooseMu" + tag + "_ptcorr_eta_cb_l").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+    }
+    else {
+      FillHist(("LooseMu" + tag + "_pt_eta_ncb_l").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+      FillHist(("LooseMu" + tag + "_ptcorr_eta_ncb_l").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+
+    }
+    if(closebjet_m) {
+      FillHist(("LooseMu" + tag + "_pt_eta_cb_m").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+      FillHist(("LooseMu" + tag + "_ptcorr_eta_cb_m").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+    }
+    else {
+      FillHist(("LooseMu" + tag + "_pt_eta_ncb_m").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+      FillHist(("LooseMu" + tag + "_ptcorr_eta_ncb_m").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+
+    }
+    if(closebjet_t) {
+      FillHist(("LooseMu" + tag + "_pt_eta_cb_t").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+      FillHist(("LooseMu" + tag + "_ptcorr_eta_cb_t").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+    }
+    else{
+      FillHist(("LooseMu" + tag + "_pt_eta_ncb_t").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+      FillHist(("LooseMu" + tag + "_ptcorr_eta_ncb_t").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+    }
+    
+    if( tight_mu.size() == 1){
+      FillHist(("TightMu" + tag + "_pt_eta").Data(), el_pt, fabs(tight_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+      FillHist(("TightMu" + tag + "_ptcorr_eta").Data(), el_pt_corr, fabs(tight_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+      if(closebjet_l) {
+	FillHist(("TightMu" + tag + "_pt_eta_cb_l").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+	FillHist(("TightMu" + tag + "_ptcorr_eta_cb_l").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+      }
+      else{
+	FillHist(("TightMu" + tag + "_pt_eta_ncb_l").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+        FillHist(("TightMu" + tag + "_ptcorr_eta_ncb_l").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+      }
+      if(closebjet_m) {
+	FillHist(("TightMu" + tag + "_pt_eta_cb_m").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+	FillHist(("TightMu" + tag + "_ptcorr_eta_cb_m").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+      }
+      else{
+	FillHist(("TightMu" + tag + "_pt_eta_ncb_m").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+        FillHist(("TightMu" + tag + "_ptcorr_eta_ncb_m").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+
+      }
+      if(closebjet_t) {
+	FillHist(("TightMu" + tag + "_pt_eta_cb_t").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+	FillHist(("TightMu" + tag + "_ptcorr_eta_cb_t").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+      }
+      else{
+	FillHist(("TightMu" + tag + "_pt_eta_ncb_t").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+        FillHist(("TightMu" + tag + "_ptcorr_eta_ncb_t").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
+
       }
     }
-
-    return;
   }
+  
+  if(basicplots)     return;
   
   int nbjet(0);
   float tmp_deltaR=1000.;
@@ -395,7 +553,6 @@ void FakeRateCalculator_Mu::GetFakeRates(std::vector<snu::KMuon> loose_mu, std::
     FillHist(("TightMu" + tag + "_njets").Data(), jets.size(), w, 0.,5.,5);
     FillHist(("TightMu" + tag + "_nvertices").Data(), eventbase->GetEvent().nVertices(), w, 0., 30., 30);
     FillHist(("TightMu" + tag + "_nbjet").Data(), nbjet, w, 0., 4.,4); 
-    FillHist(("TightMu" + tag + "_pt_eta").Data(), el_pt, fabs(tight_mu.at(0).Eta()),  w, ptbins, 9 , etabins2, 4);
    
     if(nbjet > 0){
       FillHist(("TightMu" + tag + "_bjet_eta").Data(), tight_mu.at(0).Eta(), w, -2.5, 2.5,50);
@@ -417,7 +574,6 @@ void FakeRateCalculator_Mu::GetFakeRates(std::vector<snu::KMuon> loose_mu, std::
     FillHist(("LooseMu" + tag + "_njets").Data(), jets.size(), w, 0.,5.,5);
     FillHist(("LooseMu" + tag + "_nvertices").Data(), eventbase->GetEvent().nVertices(), w, 0., 30., 30);
     FillHist(("LooseMu" + tag + "_nbjet").Data(), nbjet, w, 0., 4.,4);
-    FillHist(("LooseMu" + tag + "_pt_eta").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 9 , etabins2, 4);
 
     if(nbjet > 0){
       FillHist(("LooseMu" + tag + "_bjet_eta").Data(), loose_mu.at(0).Eta(), w, -2.5, 2.5,50);

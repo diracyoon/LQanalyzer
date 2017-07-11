@@ -1,0 +1,24 @@
+# Specify_location_of_data/mc
+mcpath          /data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/HNDiLepton/periodBtoH/
+datapath          /data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/HNDiLepton/periodBtoH/HNDiLepton_data_DoubleMuon_cat_v8-0-7.root
+datadrivenpath          /data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/HNDiLepton/periodBtoH/
+# Specify_the_list_of_hists_to_plot 
+plottingpath    dat/histfile.txt 
+cutpath         dat/cutfile.txt
+# file_prefix
+prefix          HNDiLepton_SK
+postfix           _dilep_cat_v8-0-7.root
+# NAME_THE_OUTPUT_DIR
+outputdir  HN13TeV_HNDiLepton_v8-0-7_periodBtoH_SSMM_CR
+histdir    CAT2016_v8-0-7newIDMeeting
+# CONFIGURE_HISTOGRAMS
+showdata   true 
+usenp      false 
+ylog       true 
+# List_the_samples_to_be_includedv
+samples    DoubleMuon_SKnonprompt
+samples    Higgs
+samples    diboson
+samples    top
+samples    triv
+END

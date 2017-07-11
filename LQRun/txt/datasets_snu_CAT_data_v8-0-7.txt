@@ -57,6 +57,7 @@ SinglePhoton              H_v3        /data7/DATA/cattoflat/Data/v8-0-7/SinglePh
 
 #### Single lepton skims: SKTrees
 
+SKDoubleMuon_CF                B      /data7/DATA/CatNtuples/v8-0-7/SKTrees/Data/DoubleMuon_CF/periodB/
 SKSingleMuon                B        /data7/DATA/CatNtuples/v8-0-7/SKTrees/Data/SingleMuon/periodB/
 SKSingleMuon                C        /data7/DATA/CatNtuples/v8-0-7/SKTrees/Data/SingleMuon/periodC/
 SKSingleMuon                D        /data7/DATA/CatNtuples/v8-0-7/SKTrees/Data/SingleMuon/periodD/

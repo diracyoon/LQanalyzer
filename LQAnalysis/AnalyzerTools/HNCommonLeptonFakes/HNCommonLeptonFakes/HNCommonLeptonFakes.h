@@ -39,6 +39,8 @@ class HNCommonLeptonFakes {
 
 
   float get_dilepton_mm_eventweight(TString fakerates, bool geterr, std::vector<TLorentzVector> muons, bool isT1, bool isT2, TString ID);
+  float get_dilepton_mm_eventweight(TString fakerates, bool geterr, std::vector<TLorentzVector> muons, bool isT1, bool isT2, TString ID1,TString ID2, bool c1, bool c2, TString method, float ptcorr1, float ptcorr2,bool checkcj);
+							 
 
   float get_dilepton_em_eventweight(bool geterr,std::vector<TLorentzVector> muons, std::vector<TLorentzVector> electron, bool ismu1tight, bool isel1tight);
 
@@ -52,6 +54,7 @@ class HNCommonLeptonFakes {
 
   float getFakeRate_electron(int sys, float pt,  float eta);
   float getEfficiency_electron(int sys,float pt, float eta);
+  float getPromptRate_electron(int sys,float pt, float eta, TString cut);
 
   float getFakeRate_mc_muon(TString tag, float pt, float eta);
 
@@ -129,13 +132,15 @@ class HNCommonLeptonFakes {
   //==== get weight
   float get_dilepton_mm_eventweight(bool geterr, std::vector<TLorentzVector> muons, bool isT1, bool isT2);
   float get_trilepton_mmm_eventweight(bool geterr, std::vector<TLorentzVector> muons, bool isT1, bool isT2, bool isT3);
-  float get_eventweight(bool geterr, std::vector<TLorentzVector> muons, TString muid, std::vector<TLorentzVector> electrons, std::vector<TString> elid, std::vector<bool> isT);
+  float get_eventweight(bool geterr, std::vector<TLorentzVector> muons, TString muid, std::vector<TLorentzVector> electrons, std::vector<TString> elid, std::vector<bool> isT, int HalfSampleErrorDir=0);
 
   //==== Large dXYSig working poins
   std::vector<double> GetdXYMins();
   std::vector<double> GetRelIsoMaxs();
   //==== After runing get_eventweight, we have # of Loose but not Tight
   int GetNLooseNotTight();
+
+  void SetUsePtCone(bool b);
 
  private:
   /// vector for storing FakeCR strings
@@ -181,6 +186,7 @@ class HNCommonLeptonFakes {
   int n_jet, n_bjet;
   std::vector<double> dXYMins, RelIsoMaxs;
   int n_Loose_not_Tight;
+  bool UsePtCone;
 
 };
 #endif

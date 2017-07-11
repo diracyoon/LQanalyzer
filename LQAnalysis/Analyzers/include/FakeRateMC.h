@@ -19,8 +19,8 @@ class FakeRateMC : public AnalyzerCore {
   virtual void ClearOutputVectors()throw( LQError );
   
 
-  void ExecuteEventsMuon(TString idloose, TString idtight, TString tag, float iso);
-  void ExecuteEventsElectron(TString idloose, TString idtight, TString tag, float iso);
+  void ExecuteEventsMuon(TString idloose, TString idtight, TString tag, float iso, double w);
+  void ExecuteEventsElectron(TString idloose, TString idtight, TString tag, float iso, double w);
 
   void InitialiseAnalysis() throw( LQError );
   void MakeHistograms();
@@ -33,6 +33,16 @@ class FakeRateMC : public AnalyzerCore {
 
   void GetFakeRates(std::vector<snu::KMuon> loose_el, std::vector<snu::KMuon> tight_el,TString tightlabel,  std::vector<snu::KJet> jets,std::vector<snu::KJet> alljets, TString tag, double w, float isocut,bool makebasicplots);
   
+
+  int CloseJetType(snu::KElectron el, std::vector<snu::KJet> jets);
+  int CloseJetType(snu::KMuon mu, std::vector<snu::KJet> jets);
+  int CloseJetTypeHAD(snu::KElectron el, std::vector<snu::KJet> jets);
+  int AwayJetType(snu::KElectron el, std::vector<snu::KJet> jets);
+
+
+  void MakeMCFakes(std::vector<snu::KElectron> fake_electrons, TString tag, std::vector<snu::KJet> jets,  std::vector<snu::KJet> alljets, TString tightid, float w);
+  
+
   void MakeMCFakeratePlots(TString label, bool pass_single_trigger, std::vector<snu::KMuon> muons, std::vector<snu::KJet> jets, std::vector<snu::KJet> alljets, double w);
   void MakePlotsMCAwaJetPt(TString label,float awayjetptcut, std::vector<snu::KMuon>, std::vector<snu::KJet> jets , std::vector<snu::KJet> alljets, double w);
 

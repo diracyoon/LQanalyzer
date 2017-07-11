@@ -1,0 +1,4 @@
+cd $LQANALYZER_OUTPUT_PATH/Electron/ 
+rm ExampleAnalyzerDiElectron_data_SKegamma_5_3_8.root 
+hadd ExampleAnalyzerDiElectron_data_SKegamma_5_3_8.root  ExampleAnalyzerDiElectron_period*
+cd -

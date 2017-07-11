@@ -1,0 +1,24 @@
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lr@{\hspace{0.5mm}}c@{\hspace{0.5mm}}c@{\hspace{0.5mm}}l}
+\hline
+\hline
+Source & \multicolumn{4}{c}{} \\
+\hline
+DY$\rightarrow$ ee&753.4& $\pm$& 108.5&$^{+113.0}_{-113.0}$\\
+Diboson&1237.9& $\pm$& 91.7&$^{+122.6}_{-122.6}$\\
+Higgs&3.3& $\pm$& 0.1&$^{+0.7}_{-0.7}$\\
+Misid. Lepton Background&3467.0& $\pm$& 27.9&$^{+1178.8}_{-1178.8}$\\
+Triboson&16.6& $\pm$& 0.8&$^{+4.0}_{-4.0}$\\
+\hline
+Total&5478.2& $\pm$&144.8&$^{+1190.5}_{-1190.5}$\\
+\hline
+Data&  \multicolumn{4}{c}{$13142.0$}\\
+\hline
+Signficance&  \multicolumn{4}{c}{$+6.4\sigma$}\\
+\hline
+\hline
+\end{tabular}
+\caption{ Number of events with two opposite sign electrons (POG tight) with Z peak removed.}
+\end{center}
+\end{table}

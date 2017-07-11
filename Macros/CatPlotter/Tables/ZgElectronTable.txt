@@ -1,0 +1,24 @@
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lr@{\hspace{0.5mm}}c@{\hspace{0.5mm}}c@{\hspace{0.5mm}}l}
+\hline
+\hline
+Source & \multicolumn{4}{c}{} \\
+\hline
+DY$\rightarrow$ ee&132.2& $\pm$& 37.4&$^{+19.8}_{-19.8}$\\
+Higgs&0.8& $\pm$& 0.0&$^{+0.2}_{-0.2}$\\
+WZ&3.3& $\pm$& 0.5&$^{+0.6}_{-0.6}$\\
+Z$\gamma$&149.3& $\pm$& 10.2&$^{+22.4}_{-22.4}$\\
+ZZ&29.9& $\pm$& 0.5&$^{+5.9}_{-5.9}$\\
+\hline
+Total&315.5& $\pm$&38.8&$^{+30.5}_{-30.5}$\\
+\hline
+Data&  \multicolumn{4}{c}{$103.0$}\\
+\hline
+Signficance&  \multicolumn{4}{c}{$-4.2\sigma$}\\
+\hline
+\hline
+\end{tabular}
+\caption{ Selection for Z$\gamma$ events. Requiring three electron (POG tight) .}
+\end{center}
+\end{table}

@@ -1,0 +1,12 @@
+fcol	870	  
+zcol	64
+wcol	92
+wwcol   68
+zzcol   80
+wzcol   74
+ttvcol  88
+tcol    88 
+ttcol   97
+END 
+#Sherpa Alpgen Herwig
+# 629

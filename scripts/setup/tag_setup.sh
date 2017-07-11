@@ -15,6 +15,10 @@ echo "Setting up environment for compiling/running CATAnalzer with SKTree"
 
 setupok=False
 
+function killbkg {
+    python $LQANALYSER_DIR/python/killbkg.py -i $1
+}
+
 while read line
   do
   if [[ $line == *"LANG"* ]]; then

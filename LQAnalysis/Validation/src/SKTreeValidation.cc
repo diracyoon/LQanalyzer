@@ -562,7 +562,7 @@ void SKTreeValidation::MakeDiMuonValidationPlots(TString muid, float w, float pu
   //cout << trigger_ps << " " << w << " " << trigger_sf << " " << id_iso_sf << " " << pu_reweight << " " << trig_pass << endl;
   if(k_running_nonprompt){
     ev_weight=1.; /// In case... should not be needed
-    ev_weight      *=  m_datadriven_bkg->Get_DataDrivenWeight_MM(false,muons,muid, "dijet");
+    //ev_weight      *=  m_datadriven_bkg->Get_DataDrivenWeight_MM(false,muons,muid, "dijet");
 
 
   }

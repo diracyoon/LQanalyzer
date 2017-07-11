@@ -1,0 +1,25 @@
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lr@{\hspace{0.5mm}}c@{\hspace{0.5mm}}c@{\hspace{0.5mm}}l}
+\hline
+\hline
+Source & \multicolumn{4}{c}{} \\
+\hline
+Higgs&0.6& $\pm$& 0.0&$^{+0.1}_{-0.1}$\\
+Misid. Lepton Background&38.6& $\pm$& 2.6&$^{+13.1}_{-13.1}$\\
+Top&-0.0& $\pm$& 0.0&$^{+0.0}_{-0.0}$\\
+WZ&3.7& $\pm$& 0.6&$^{+0.7}_{-0.7}$\\
+Z$\gamma$&127.2& $\pm$& 8.9&$^{+19.1}_{-19.1}$\\
+ZZ&25.7& $\pm$& 0.5&$^{+5.1}_{-5.1}$\\
+\hline
+Total&195.8& $\pm$&9.3&$^{+23.7}_{-23.7}$\\
+\hline
+Data&  \multicolumn{4}{c}{$176.0$}\\
+\hline
+Signficance&  \multicolumn{4}{c}{$-0.7\sigma$}\\
+\hline
+\hline
+\end{tabular}
+\caption{ Selection for Z$\gamma$ events. Requiring three electron (POG tight) .}
+\end{center}
+\end{table}

@@ -1,0 +1,23 @@
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lr@{\hspace{0.5mm}}c@{\hspace{0.5mm}}c@{\hspace{0.5mm}}l}
+\hline
+\hline
+Source & \multicolumn{4}{c}{} \\
+\hline
+DY$\rightarrow$ ee&10820489.0& $\pm$& 13606.8&$^{+1623073.4}_{-1623073.4}$\\
+Diboson&18261.5& $\pm$& 19.9&$^{+2222.2}_{-2222.2}$\\
+Top&89792.6& $\pm$& 198.5&$^{+17958.5}_{-17958.5}$\\
+Triboson&80.1& $\pm$& 1.4&$^{+14.9}_{-14.9}$\\
+\hline
+Total&10928623.0& $\pm$&13608.3&$^{+1623174.2}_{-1623174.2}$\\
+\hline
+Data&  \multicolumn{4}{c}{$0.0$}\\
+\hline
+Signficance&  \multicolumn{4}{c}{$-6.7\sigma$}\\
+\hline
+\hline
+\end{tabular}
+\caption{ Number of events with two opposite sign electrons (POG tight) with Z peak removed.}
+\end{center}
+\end{table}

@@ -1,0 +1,23 @@
+h_LeptonPt  2 10. 500.
+h_leadingLeptonPt  2 10. 500.
+h_secondLeptonPt  2 10. 250.
+h_thirdLeptonPt  2 10. 150.
+h_LeptonEta 4 -2.5 2.5
+h_leadingLeptonEta 4 -2.5 2.5
+h_secondLeptonEta 4 -2.5 2.5
+h_thirdLeptonEta 4 -2.5 2.5
+h_Njets 1 0 6
+h_PFMET 2 0. 250.
+h_nVertices 1 0. 40.
+h_Nbjets 1 0 3
+h_osllmass   2 50. 500.
+END
+
+h_Nbjets 1 0 3
+h_bTag 2 -1. 1.
+h_jets_pt 2 0. 105.
+h_dijetsmass  5 0. 200.
+h_l1jjmass   2 50. 400.
+h_l2jjmass   2 50. 400.
+h_lljjmass   2 50. 500.
+END

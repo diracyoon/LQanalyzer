@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     int a =MakeCutFlow_Plots(configfile);
   }
   
-  system(("scp -r " + output_path + " jalmond@lxplus066.cern.ch:~/www/SNU/CATAnalyzerPlots/").c_str());
+  system(("scp -r " + output_path + " jalmond@lxplus080.cern.ch:~/www/SNU/CATAnalyzerPlots/").c_str());
 
   cout << "Open plots in " << output_index_path << endl;
   cout << "Local directory = ~/CATAnalyzerPlots/" + path +  "/histograms/" + histdir  << endl;
@@ -211,7 +211,7 @@ int MakePlots(string hist) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MakeCutFlow(string type){
-
+  return;
   
   vector<string> cut_label;  
   vector<pair<pair<vector<pair<TString,float> >, int >, TString > > cfsamples;  
@@ -309,8 +309,8 @@ void MakeCutFlow(string type){
       
       if(sample.Contains("Z#gamma")) sample = "Z$\\gamma$";
       if(sample.Contains("W#gamma")) sample = "W$\\gamma$";
-      if(sample.Contains("DY #rightarrow ee (m < 50)    ")) sample = "DY $\\rightarrow$ ll (m < 50)    ";
-      if(sample.Contains("DY #rightarrow ee")) sample = "DY$\\rightarrow$ ee";
+      if(sample.Contains("DY #rightarrow ll (m < 50)    ")) sample = "DY $\\rightarrow$ ll (m < 50)    ";
+      if(sample.Contains("DY #rightarrow ll")) sample = "DY$\\rightarrow$ ee";
       if(sample.Contains("DY #rightarrow #tau#tau")) sample = "DY$\\rightarrow$ $\\tau\\tau$";
       cout << sample << " background = " << mapit->second<< " +- " << mapit_stat->second << " + " << mapit_up->second << " - " << mapit_down->second <<  endl;      
    
@@ -385,7 +385,7 @@ void MakeCutFlow(string type){
       if(sample.Contains("Z#gamma")) sample = "Z$\\gamma$";
       if(sample.Contains("W#gamma")) sample = "W$\\gamma$";
       if(sample.Contains("DY #rightarrow ll (m < 50)    ")) sample = "DY $\\rightarrow$ ll (m < 50)    ";
-      if(sample.Contains("DY #rightarrow ee")) sample = "DY$\\rightarrow$ ee";
+      if(sample.Contains("DY #rightarrow ll")) sample = "DY$\\rightarrow$ ee";
       if(sample.Contains("DY #rightarrow #tau#tau")) sample = "DY$\\rightarrow$ $\\tau\\tau$";
 
       if(mapit->second!=0.0){
@@ -641,7 +641,7 @@ THStack* MakeStack(vector<pair<pair<vector<pair<TString,float> >, int >, TString
     if(type.Contains("Nominal")) fileloc = mcloc;
         
     if(!type.Contains("Nominal")) {
-      if(it->first.first.at(0).first.Contains("DoubleEG_SKnonprompt"))fileloc=mcloc;
+      if(it->first.first.at(0).first.Contains("DoubleMuon_SKnonprompt"))fileloc=mcloc;
     }    
     
     CheckSamples( it->first.first.size() );
@@ -809,6 +809,25 @@ TH1* MakeSumHist(THStack* thestack){
   return hsum;
 }
 
+TH1* MakeSumHist3(THStack* thestack){
+
+  TH1* hsum=0;
+  TList* list = thestack->GetHists();
+  TIter it(list, true);
+  TObject* obj=0;
+  while( (obj = it.Next()) ) {
+    TH1* h = dynamic_cast<TH1*>(obj);
+
+    if(!hsum) hsum = (TH1*)h->Clone( (string(h->GetName()) + "_bind").c_str() );
+    else {
+      hsum->Add(h, 1.0);
+    }
+  }//hist loop                                                                                                                                                                                                                                              
+
+  return hsum;
+}
+
+
 
 void SetErrors(TH1* hist, float normerr, bool includestaterr ){
 
@@ -916,7 +935,7 @@ float  GetMaximum(TH1* h_data, TH1* h_up, bool ylog, string name, float xmax, fl
     }
   }
   
-  if(name.find("llmass")!=string::npos) yscale*=1.3;
+  if(name.find("llmass")!=string::npos) yscale*=0.2;
   
   if(ylog){
     float scale_for_log=1.;
@@ -957,7 +976,7 @@ float  GetMaximum(TH1* h_data, TH1* h_up, bool ylog, string name, float xmax, fl
   if(name.find("bTag")!=string::npos) yscale*=2.5;
   if(name.find("emujj")!=string::npos) yscale*=1.3;
   if(name.find("dijetmass")!=string::npos) yscale*=1.5;
-  if(name.find("LeptonPt")!=string::npos) yscale*=0.7;
+  if(name.find("LeptonPt")!=string::npos) yscale*=0.2;
   if(name.find("secondElectronPt")!=string::npos) yscale*=1.2;
   
   
@@ -1161,7 +1180,7 @@ float GetSyst(TString cut, TString syst, pair<vector<pair<TString,float> >,TStri
 
 float Calculate(TString cut, TString variance, pair<vector<pair<TString,float> >,TString > samples ){
   
-  if(samples.second.Contains("DoubleEG_SKnonprompt")){
+  if(samples.second.Contains("DoubleMuon_SKnonprompt")){
     if(variance.Contains("Normal"))  return GetTotal(cut,samples.first) ;  
     if(variance.Contains("StatErr")) return GetStatError(cut,samples.first) ;  
   }
@@ -1315,8 +1334,8 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
   if(!TString(hname).Contains("Tri")) {
     //if(!TString(hname).Contains("SSE")) {
       
-    if(TString(hname).Contains("llmass") && ! TString(hname).Contains("lllmass") ){canvas_log->SetLogy();canvas->SetLogy();}
-      if(TString(hname).Contains("LeptonPt")){canvas_log->SetLogy();canvas->SetLogy();}
+    //if(TString(hname).Contains("llmass") && ! TString(hname).Contains("lllmass") ){canvas_log->SetLogy();canvas->SetLogy();}
+    //if(TString(hname).Contains("LeptonPt")){canvas_log->SetLogy();canvas->SetLogy();}
       //}
   }
   
@@ -1334,7 +1353,9 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
   
   // draw data hist to get axis settings
   hdata->GetYaxis()->SetTitleOffset(1.4);
+  if(!showdata)hdata = h_nominal;
   hdata->Draw("p9hist");
+
   TLatex label;
   label.SetTextSize(0.04);
   label.SetTextColor(2);
@@ -1739,8 +1760,8 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX )
   latex.SetTextSize(lumiTextSize*t);
   latex.DrawLatex(1-r,1-t+lumiTextOffset*t,lumiText);
 
-  if(iPosX==2)  latex.DrawLatex(1-r-0.22,1-t+lumiTextOffset*t, "ee ch.,");
-  else  latex.DrawLatex(1-r-0.4,1-t+lumiTextOffset*t, "ee ch.,");
+  if(iPosX==2)  latex.DrawLatex(1-r-0.22,1-t+lumiTextOffset*t, "#mu#mu ch.,");
+  else  latex.DrawLatex(1-r-0.4,1-t+lumiTextOffset*t, "#mu#mu ch.,");
 
   
 
