@@ -1,0 +1,87 @@
+#**************************************************************************************
+# cut POGTIGHTWZElectron
+# samples HNDiElectron/hndiel_os_config_vv.txt
+# skim SKTree_DiLepSkim
+# stream DoubleEG
+# analyzer HNDiElectron
+# periodtag periodBtoH
+# plottag mayNewID
+# caption Number of events with three electrons (POG tight) with one Z-candidtaes peak as well as a b-jet veto (Medium working point) ...
+#
+#  histname          rebin minx maxx xtitle
+#____________________________________________________________________
+## h_osllmass           5 20. 400. "ll invariant mass (GeV)"
+## h_leadingLeptonPt  2 10. 200. "Leading lepton p_{T} (GeV)"
+## h_secondLeptonPt   2 10. 200. "Second lepton p_{T} (GeV)"
+## h_LeptonEta        2 -2.5 2.5 "Lepton  #eta"
+## h_MTlepton_EB1         2 0 300.   "m_{T}(W) (GeV)"
+## h_Njets            1 0 6      "Number of jets"
+## h_PFMET            2 0. 300.  "E^{miss}_{T} (GeV)"
+## h_lllmass          5 0 400.    "m_{3e} (GeV)"
+## h_nVertices        1 0. 30.   "Number of vertices"
+## h_Nelectrons       1 0 5      "Number of electrons"
+## h_Nmuons           1 0 5      "Number of muons"
+## h_Nbjets           1 0 3      "Number of b-jets"
+## h_bTag             2 -1. 1.   "CSVInclV2"
+## h_jets_pt          2 0. 105.  "Jet p_{T} (GeV)"
+## h_dijetsmass       5 0. 200.  "m(j_{1}j_{2}) (GeV)"
+#######################################################################################
+#**************************************************************************************
+#**************************************************************************************
+# cut MVATIGHTWZElectron
+# samples HNDiElectron/hndiel_os_config_vv.txt
+# skim SKTree_DiLepSkim
+# stream DoubleEG
+# analyzer HNDiElectron
+# periodtag periodBtoH
+# plottag mayNewID
+# caption Number of events with three electrons (POG tight) with one Z-candidtaes peak as well as a b-jet veto (Medium working point) ...
+#
+#  histname          rebin minx maxx xtitle
+#____________________________________________________________________
+## h_osllmass           5 20. 400. "ll invariant mass (GeV)"
+## h_leadingLeptonPt  2 10. 200. "Leading lepton p_{T} (GeV)"
+## h_secondLeptonPt   2 10. 200. "Second lepton p_{T} (GeV)"
+## h_LeptonEta        2 -2.5 2.5 "Lepton  #eta"
+## h_MTlepton_EB1         2 0 300.   "m_{T}(W) (GeV)"
+## h_Njets            1 0 6      "Number of jets"
+## h_PFMET            2 0. 300.  "E^{miss}_{T} (GeV)"
+## h_lllmass          5 0 400.    "m_{3e} (GeV)"
+## h_nVertices        1 0. 30.   "Number of vertices"
+## h_Nelectrons       1 0 5      "Number of electrons"
+## h_Nmuons           1 0 5      "Number of muons"
+## h_Nbjets           1 0 3      "Number of b-jets"
+## h_bTag             2 -1. 1.   "CSVInclV2"
+## h_jets_pt          2 0. 105.  "Jet p_{T} (GeV)"
+## h_dijetsmass       5 0. 200.  "m(j_{1}j_{2}) (GeV)"
+#######################################################################################
+#**************************************************************************************
+#**************************************************************************************
+# cut HNTIGHTWZElectron
+# samples HNDiElectron/hndiel_os_config_vv.txt
+# skim SKTree_DiLepSkim
+# stream DoubleEG
+# analyzer HNDiElectron
+# periodtag periodBtoH
+# plottag mayNewID
+# caption Number of events with three electrons (POG tight) with one Z-candidtaes peak as well as a b-jet veto (Medium working point) ...
+#
+#  histname          rebin minx maxx xtitle
+#____________________________________________________________________
+## h_osllmass           5 20. 400. "ll invariant mass (GeV)"
+## h_leadingLeptonPt  2 10. 200. "Leading lepton p_{T} (GeV)"
+## h_secondLeptonPt   2 10. 200. "Second lepton p_{T} (GeV)"
+## h_LeptonEta        2 -2.5 2.5 "Lepton  #eta"
+## h_MTlepton_EB1         2 0 300.   "m_{T}(W) (GeV)"
+## h_Njets            1 0 6      "Number of jets"
+## h_PFMET            2 0. 300.  "E^{miss}_{T} (GeV)"
+## h_lllmass          5 0 400.    "m_{3e} (GeV)"
+## h_nVertices        1 0. 30.   "Number of vertices"
+## h_Nelectrons       1 0 5      "Number of electrons"
+## h_Nmuons           1 0 5      "Number of muons"
+## h_Nbjets           1 0 3      "Number of b-jets"
+## h_bTag             2 -1. 1.   "CSVInclV2"
+## h_jets_pt          2 0. 105.  "Jet p_{T} (GeV)"
+## h_dijetsmass       5 0. 200.  "m(j_{1}j_{2}) (GeV)"
+#######################################################################################
+#**************************************************************************************

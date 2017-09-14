@@ -16,7 +16,7 @@
 
 ClassImp( LQCycleBaseNTuple);
 
-LQCycleBaseNTuple::LQCycleBaseNTuple() : LQCycleBaseBase(), m_outputFile(0),m_outputTrees(),m_outputVarPointers(), k_isdata(false) ,k_running_nonprompt(false), k_running_chargeflip(false),k_running_taudecays(false), k_sample_name(""), k_classname(""),k_skim(""), sample_entries(-999), output_interval(10000), events_to_process(-1), k_mcperiod(0) {
+LQCycleBaseNTuple::LQCycleBaseNTuple() : LQCycleBaseBase(), m_outputFile(0),m_outputTrees(),m_outputVarPointers(), k_isdata(false) ,k_running_nonprompt(false), k_running_chargeflip(false),k_running_taudecays(false), k_sample_name(""), k_tag_name(""),k_classname(""),k_skim(""), sample_entries(-999), output_interval(10000), events_to_process(-1), k_mcperiod(0) {
 
 
  
@@ -110,7 +110,9 @@ void LQCycleBaseNTuple::SetCFStatus( bool type){
 void LQCycleBaseNTuple::SetSampleName( TString name){
   k_sample_name = name;
 }
-
+void LQCycleBaseNTuple::SetTagName( TString name){
+  k_tag_name= name;
+}
 void LQCycleBaseNTuple::SetAnalyzerClassName( TString c){
   k_classname= c;
 }
@@ -181,7 +183,6 @@ void  LQCycleBaseNTuple::CloseFiles(){
   
   m_logger << INFO << "Closing output file  " << m_outputFile->GetName() << LQLogger::endmsg;
   m_outputFile->SaveSelf( kTRUE ); /// is this needed 
-  m_outputFile->Write();
   m_outputFile->Close();
   delete m_outputFile;
   m_outputFile = 0;

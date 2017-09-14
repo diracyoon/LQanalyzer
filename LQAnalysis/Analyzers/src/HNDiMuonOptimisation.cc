@@ -290,7 +290,7 @@ void HNDiMuonOptimisation::OptimiseID(bool isss, bool dilep, bool isdileptrig, f
 		  }
 		  else{
 		    if(loose_mu.size() ==2){
-		      float ev_weight=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, loose_mu, tight1, tight2,muonTag+fake_tag1, muonTag+fake_tag2,cb_1,cb_2 ,"ptcorr_eta", vcut_iso_b[iso_b],vcut_iso_b[iso_e],false, true);
+		      float ev_weight=1.;//m_datadriven_bkg->Get_DataDrivenWeight_MM(false, loose_mu, tight1, tight2,muonTag+fake_tag1, muonTag+fake_tag2,cb_1,cb_2 ,"ptcorr_eta", vcut_iso_b[iso_b],vcut_iso_b[iso_e],false, true);
 		      if(CheckSignalRegion(true,loose_mu,el, jets,alljets,"Low", ev_weight))FillHist(("LowIDREFSNU"+muonTag+"_single"),ncut,ev_weight, 0.,1000., 1000);
 		      if(CheckSignalRegion(true,loose_mu,el, jets,alljets,"", ev_weight))FillHist(("MediumIDREFSNU"+muonTag+"_single") ,ncut,ev_weight, 0.,1000., 1000);
 		      if(CheckSignalRegion(true,loose_mu,el, jets,alljets,"High", ev_weight))FillHist(("HighIDREFSNU"+muonTag+"_single"),ncut,ev_weight, 0.,1000., 1000);
@@ -308,7 +308,7 @@ void HNDiMuonOptimisation::OptimiseID(bool isss, bool dilep, bool isdileptrig, f
 		  }
 		  else{
 		    if(loose_mu.size()==2){
-		      float ev_weight=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, loose_mu, tight1, tight2,muonTag+fake_tag1, muonTag+fake_tag2 , cb_1, cb_2,"ptcorr_eta", vcut_iso_b[iso_b],vcut_iso_b[iso_e],false, false);
+		      float ev_weight=1.;//m_datadriven_bkg->Get_DataDrivenWeight_MM(false, loose_mu, tight1, tight2,muonTag+fake_tag1, muonTag+fake_tag2 , cb_1, cb_2,"ptcorr_eta", vcut_iso_b[iso_b],vcut_iso_b[iso_e],false, false);
 		      
 		      if(CheckSignalRegion(true,loose_mu,el, jets,alljets,"Low", ev_weight))FillHist(("LowIDREFSNU"+muonTag+"_double"), ncut,ev_weight, 0.,1000., 1000);
 		      if(CheckSignalRegion(true,loose_mu,el, jets,alljets,"", ev_weight))FillHist(("MediumIDREFSNU"+muonTag+"_double") ,ncut,ev_weight, 0.,1000., 1000);
@@ -509,7 +509,7 @@ void HNDiMuonOptimisation::OptimiseID(bool isss, bool dilep, bool isdileptrig, f
       bool cb_2(false);
       
       if(passtrigcuts_single_pogm){
-	float ev_weight_med=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogmedium_loose, PassID(pogmedium_loose[0],"MUON_POG_MEDIUM"),  PassID(pogmedium_loose[1],"MUON_POG_MEDIUM"), "pogmedium","pogmedium", cb_1, cb_2,"ptcorr_eta",0.25,0.25,false,true);
+	float ev_weight_med=1.;//m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogmedium_loose, PassID(pogmedium_loose[0],"MUON_POG_MEDIUM"),  PassID(pogmedium_loose[1],"MUON_POG_MEDIUM"), "pogmedium","pogmedium", cb_1, cb_2,"ptcorr_eta",0.25,0.25,false,true);
 	
 	if(CheckSignalRegion(true,pogmedium_loose,el, jets,alljets,"Low", w))FillHist(("LowIDREFsingle"),0 ,ev_weight_med, 0.,4., 4);
 	if(CheckSignalRegion(true,pogmedium_loose,el, jets,alljets,"", w))FillHist(("MediumIDREFsingle"),0 ,ev_weight_med, 0.,4., 4);
@@ -518,7 +518,7 @@ void HNDiMuonOptimisation::OptimiseID(bool isss, bool dilep, bool isdileptrig, f
       }
       if(passtrigcuts_single_pogt){
 	
-	float ev_weight_tight=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogtight_loose, PassID(pogtight_loose[0],"MUON_POG_TIGHT"),  PassID(pogtight_loose[1],"MUON_POG_TIGHT"), "pogtight","pogtight",cb_1, cb_2, "ptcorr_eta",0.15,0.15,false,true);
+	float ev_weight_tight=1.;//m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogtight_loose, PassID(pogtight_loose[0],"MUON_POG_TIGHT"),  PassID(pogtight_loose[1],"MUON_POG_TIGHT"), "pogtight","pogtight",cb_1, cb_2, "ptcorr_eta",0.15,0.15,false,true);
 	if(CheckSignalRegion(true,pogtight_loose,el, jets,alljets,"Low", w))FillHist(("LowIDREFsingle"),1 ,ev_weight_tight, 0.,4., 4);
 	if(CheckSignalRegion(true,pogtight_loose,el, jets,alljets,"", w))FillHist(("MediumIDREFsingle"),1 ,ev_weight_tight, 0.,4., 4);
 	if(CheckSignalRegion(true,pogtight_loose,el, jets,alljets,"High", w))FillHist(("HighIDREFsingle") ,1,ev_weight_tight, 0.,4., 4);
@@ -528,7 +528,7 @@ void HNDiMuonOptimisation::OptimiseID(bool isss, bool dilep, bool isdileptrig, f
       }
       if(passtrigcuts_single_gent){
 	
-	float ev_weight_gent=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, gent_loose, PassID(gent_loose[0],"MUON_HNGENT_TIGHT"),  PassID(gent_loose[1],"MUON_HNGENT_TIGHT"), "gent","gent",cb_1, cb_2, "ptcorr_eta",0.1,0.1,false,true);  
+	float ev_weight_gent=1.;//m_datadriven_bkg->Get_DataDrivenWeight_MM(false, gent_loose, PassID(gent_loose[0],"MUON_HNGENT_TIGHT"),  PassID(gent_loose[1],"MUON_HNGENT_TIGHT"), "gent","gent",cb_1, cb_2, "ptcorr_eta",0.1,0.1,false,true);  
 	
 	if(CheckSignalRegion(true,gent_loose,el, jets,alljets,"Low", w))FillHist(("LowIDREFsingle") ,2,ev_weight_gent, 0.,4., 4);
 	if(CheckSignalRegion(true,gent_loose,el, jets,alljets,"", w))FillHist(("MediumIDREFsingle") ,2,ev_weight_gent, 0.,4., 4);
@@ -536,7 +536,7 @@ void HNDiMuonOptimisation::OptimiseID(bool isss, bool dilep, bool isdileptrig, f
       }
       if(passtrigcuts_single_hn){
 
-        float ev_weight_hn=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, hn_loose, PassID(hn_loose[0],"MUON_HN_TIGHT"),  PassID(hn_loose[1],"MUON_HN_TIGHT"), "Tight0.09_0.005_3_0.04","Tight0.09_0.005_3_0.04",cb_1, cb_2, "ptcorr_eta",0.09,0.09,false,true);
+        float ev_weight_hn=1.;//m_datadriven_bkg->Get_DataDrivenWeight_MM(false, hn_loose, PassID(hn_loose[0],"MUON_HN_TIGHT"),  PassID(hn_loose[1],"MUON_HN_TIGHT"), "Tight0.09_0.005_3_0.04","Tight0.09_0.005_3_0.04",cb_1, cb_2, "ptcorr_eta",0.09,0.09,false,true);
 
         if(CheckSignalRegion(true,hn_loose,el, jets,alljets,"Low", w))FillHist(("LowIDREFsingle") ,3,ev_weight_hn, 0.,4., 4);
         if(CheckSignalRegion(true,hn_loose,el, jets,alljets,"", w))FillHist(("MediumIDREFsingle") ,3,ev_weight_hn, 0.,4., 4);
@@ -545,7 +545,7 @@ void HNDiMuonOptimisation::OptimiseID(bool isss, bool dilep, bool isdileptrig, f
       
       
       if(passtrigcuts_double_pogm){
-	float ev_weight_med=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogmedium_loose, PassID(pogmedium_loose[0],"MUON_POG_MEDIUM"),  PassID(pogmedium_loose[1],"MUON_POG_MEDIUM"), "pogmedium","pogmedium", cb_1, cb_2,"ptcorr_eta",0.25,0.25,false,false);
+	float ev_weight_med=1.;//m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogmedium_loose, PassID(pogmedium_loose[0],"MUON_POG_MEDIUM"),  PassID(pogmedium_loose[1],"MUON_POG_MEDIUM"), "pogmedium","pogmedium", cb_1, cb_2,"ptcorr_eta",0.25,0.25,false,false);
 	if(CheckSignalRegion(true,pogmedium_loose,el, jets,alljets,"Low", w))FillHist(("LowIDREFdouble"),0 ,ev_weight_med, 0.,4., 4);
 	if(CheckSignalRegion(true,pogmedium_loose,el, jets,alljets,"", w))FillHist(("MediumIDREFdouble"),0 ,ev_weight_med, 0.,4., 4);
 	if(CheckSignalRegion(true,pogmedium_loose,el, jets,alljets,"High", w))FillHist(("HighIDREFdouble") ,0,ev_weight_med, 0.,4., 4);
@@ -558,7 +558,7 @@ void HNDiMuonOptimisation::OptimiseID(bool isss, bool dilep, bool isdileptrig, f
 	
 
 	
-	float ev_weight_tight=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogtight_loose, PassID(pogtight_loose[0],"MUON_POG_TIGHT"),  PassID(pogtight_loose[1],"MUON_POG_TIGHT"), "pogtight","pogtight",cb_1, cb_2, "ptcorr_eta",0.15,0.15,false,false);
+	float ev_weight_tight=1.;//m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogtight_loose, PassID(pogtight_loose[0],"MUON_POG_TIGHT"),  PassID(pogtight_loose[1],"MUON_POG_TIGHT"), "pogtight","pogtight",cb_1, cb_2, "ptcorr_eta",0.15,0.15,false,false);
 
 	if(CheckSignalRegion(true,pogtight_loose,el, jets,alljets,"Low", w))FillHist(("LowIDREFdouble"),1 ,ev_weight_tight, 0.,4., 4);
 	if(CheckSignalRegion(true,pogtight_loose,el, jets,alljets,"", w))FillHist(("MediumIDREFdouble"),1 ,ev_weight_tight, 0.,4., 4);
@@ -592,7 +592,7 @@ void HNDiMuonOptimisation::OptimiseID(bool isss, bool dilep, bool isdileptrig, f
 
       if(passtrigcuts_double_gent){
 	
-	float ev_weight_gent=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, gent_loose, PassID(gent_loose[0],"MUON_HNGENT_TIGHT"),  PassID(gent_loose[1],"MUON_HNGENT_TIGHT"), "gent","gent",cb_1, cb_2, "ptcorr_eta",0.1,0.1,false,false);
+	float ev_weight_gent=1.;//m_datadriven_bkg->Get_DataDrivenWeight_MM(false, gent_loose, PassID(gent_loose[0],"MUON_HNGENT_TIGHT"),  PassID(gent_loose[1],"MUON_HNGENT_TIGHT"), "gent","gent",cb_1, cb_2, "ptcorr_eta",0.1,0.1,false,false);
 	
 	if(CheckSignalRegion(true,gent_loose,el, jets,alljets,"Low", w))FillHist(("LowIDREFdouble") ,2,ev_weight_gent, 0.,4., 4);
 	if(CheckSignalRegion(true,gent_loose,el, jets,alljets,"", w))FillHist(("MediumIDREFdouble") ,2,ev_weight_gent, 0.,4., 4);
@@ -604,7 +604,7 @@ void HNDiMuonOptimisation::OptimiseID(bool isss, bool dilep, bool isdileptrig, f
       if(passtrigcuts_double_hn){
 	
 	if(hn_loose.size() ==2){
-	  float ev_weight_hn=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, hn_loose, PassID(hn_loose[0],"MUON_HN_TIGHT"),  PassID(hn_loose[1],"MUON_HN_TIGHT"), "Tight0.07_0.005_3_0.04","Tight0.07_0.005_3_0.04",cb_1, cb_2, "ptcorr_eta",0.07,0.07,false,false);
+	  float ev_weight_hn=1.;//m_datadriven_bkg->Get_DataDrivenWeight_MM(false, hn_loose, PassID(hn_loose[0],"MUON_HN_TIGHT"),  PassID(hn_loose[1],"MUON_HN_TIGHT"), "Tight0.07_0.005_3_0.04","Tight0.07_0.005_3_0.04",cb_1, cb_2, "ptcorr_eta",0.07,0.07,false,false);
 	  
 	  if(CheckSignalRegion(true,hn_loose,el, jets,alljets,"Low", w))FillHist(("LowIDREFdouble") ,3,ev_weight_hn, 0.,4., 4);
 	  if(CheckSignalRegion(true,hn_loose,el, jets,alljets,"", w))FillHist(("MediumIDREFdouble") ,3,ev_weight_hn, 0.,4., 4);

@@ -1,0 +1,30 @@
+## alias                 |   Legend                                            |  Legend alias     |  Color  | uncert. |
+DoubleMuon_SKnonprompt    |   Misid. Lepton Background                          |  DoubleMuon_SKnonprompt | 870  | 0.3 |
+ZZTo4L_powheg             |   Diboson                                                |  diboson             |  kGreen     | 0.20     |
+WZTo3LNu_powheg		  |  Diboson                                                |  diboson             |  kGreen     | 0.20     |
+ggZZto4mu                 |   Diboson                                                |  diboson             |  kGreen     | 0.20     |
+WpWpQCD                   |    Diboson                                                |  diboson             |  kGreen     |     0.15     |
+WpWpEWK                   |    Diboson                                                |  diboson             |  kGreen     |     0.15     |
+ww_ds                     |   Diboson                                           |  diboson               |  kGreen    | 0.15     |
+ZGto2LG                   |   Diboson                                           |  zg               |  kGreen     | 0.15     |
+WGtoLNuG                  |   Diboson                                           |  wg               |  kGreen     | 0.15     |
+ttZToLL_M-10		  |   Top						|  top			| kRed | 0.2 | 
+tZq			  |   Top                                               |  top                  | kRed | 0.2 |
+TTG                       |   Top             |  top              |  kRed     |       0.2     |
+ttWToLNu		  |   Top             |  top              |  kRed     |       0.2     |
+ttZToLL_M-1to10		  |   Top             |  top              |  kRed     |       0.2     |
+ttH_bb			  |   Top             |  top              |  kRed     |       0.2     |
+ttH_nonbb                 |   Top           |  top              |  kRed     |   0.2     |
+WWW                       |   Triboson                                          |  triv              |  kSpring+2    |      0.3     |
+ZZZ                       |   Triboson                                          |  triv              |  kSpring+2   |      0.3     |
+WWZ                       |   Triboson                                         |  triv              |  kSpring+2    |      0.3     |
+WZZ                       |   Triboson                                          |  triv               |  kSpring+2    | 0.3     |
+WWG                       |   Triboson                                          |  triv               |  kSpring+2   | 0.3     |
+WZG                       |   Triboson                                          |  triv               |  kSpring+2    | 0.3     |
+GG_HToMuMu                |   Higgs                                             |  higgs            |  800    | 0.2     |
+VBF_HToMuMu               |   Higgs                                             |  higgs            |  800    | 0.2     |
+ggHtoWW                   |   Higgs                                             |  higgs            |  800    | 0.2     |
+ggHtoZZ                   |   Higgs                                             |  higgs            |  800    | 0.2     |
+vbfHtoWW                   |   Higgs                                             |  higgs            |  800    | 0.2     |
+vbfHtoZZ                   |   Higgs                                             |  higgs            |  800    | 0.2     |
+END

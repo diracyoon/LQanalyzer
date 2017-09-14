@@ -1353,6 +1353,10 @@ while [ "$1" != "" ]; do
 				listavailable
                                 exit 1
                                 ;;
+        -t)                     shift
+                                submit_dir_tag=$1
+                                ;;
+
         -tagdiff)		shift
 	                        submit_cat_tag=$1
 				submit_cat_tag2=$2

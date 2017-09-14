@@ -1,0 +1,27 @@
+### alias                 |   Legend                                            |  Legend alias     |  Color  | uncert. |
+DYJets_10to50		  |   DY#rightarrow ll; 10 < m(ll) < 50                 |  DYlow            |  632     | 0.15    |
+DYJets			  |   DY#rightarrow ll; m(ll) > 50		   	|  DYhigh           |  64     |	0.15    |
+#GG_HToMuMu		  |   Higgs	  	      				|  higgs            |  800    |	0.2     |
+#VBF_HToMuMu               |   Higgs						|  higgs            |  800    |	0.2     |
+#SingleTop_s               |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V		|  top              |  88     |	0.2     |    
+#SingleTbar_t              |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V 		|  top              |  88     |	0.2     |
+#SingleTop_t               |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V		|  top              |  88     |	0.2     |
+#SingleTbar_tW             |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V		|  top              |  88     |	0.2     |
+#SingleTop_tW              |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V		|  top              |  88     |	0.2     |
+TTJets_MG5                 |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V		|  top              |  88     |	0.2     |
+#ttH_nonbb                 |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V           |  top              |  88     |	0.2     |
+#ttH_bb                    |    t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V          |  top              |  88     |	0.2     |
+#ttW                       |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V           |  top              |  88     |	0.2     |
+#ttZ                       |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V           |  top              |  88     |	0.2     |
+#ttbb                      |   t#bar{t},t/#bar{t},t/#bar{t}W,t#bar{t}V           |  top              |  88     |	0.2     |
+#WJets                     |   W+Jets						|  wjet             |  92     |	0.2     |
+#WWZ                       |   Triboson						|  vvv              |  433    |	0.2     |     
+#WW                        |   Diboson						|  vv               |  74     | 0.2     |
+#WZZ                       |   Triboson						|  vv               |  74     | 0.2     |
+WZ                        |   Diboson						|  vv               |  74     | 0.2     |
+ZZ                        |   Diboson						|  vv               |  74     | 0.2     |
+#WpWpQCD			  |   Diboson						|  vv               |  74     | 0.2     |
+#WpWpEWK			  |   Diboson						|  vv               |  74     | 0.2     |
+#ZGto2LG			  |   Diboson						|  vv               |  74     | 0.2     |
+#WGtoLNuG		  |   Diboson 						|  vv               |  74     | 0.2     |
+END

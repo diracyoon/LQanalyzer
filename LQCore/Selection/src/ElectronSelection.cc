@@ -88,6 +88,16 @@ bool ElectronSelection::ElectronPass(snu::KElectron el, TString elid, TString el
 }
 
 
+float ElectronSelection::IsoCutValue(snu::KElectron electron,TString elid){
+
+  float isomax_b =AccessFloatMap("isomax03_b",elid);
+  float isomax_ec = AccessFloatMap("isomax03_e",elid);
+  if(fabs(electron.Eta()) < 1.5) return isomax_b;
+  else return isomax_ec;
+}
+
+
+
 bool ElectronSelection::ElectronPass(snu::KElectron el, TString elid, vector<pair<TString, TString> > vids, vector<pair<TString, float> > vidf, double ptcut, double etacut){
 
   //// This is new function that inputs vector instead of searching in map

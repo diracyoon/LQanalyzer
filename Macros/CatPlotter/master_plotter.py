@@ -71,12 +71,16 @@ xmaxlist=[]
 cutlist=[]
 skim=""
 periodtag=""
+datetag=""
 analyzer=""
 stream=""
 isblind="false"
 plottag="Default"
 outputlist=[]
+sigfile=""
+histfile=""
 input_configfile = open(configinputfile,"r")
+
 for line in input_configfile:
     if "*********************" in line:
         continue
@@ -88,6 +92,10 @@ for line in input_configfile:
         sline = line.split()
         if sline[2] == "true":
             isblind="true"
+    elif "hists:" in line:
+        sline = line.split()
+        histfile=sline[2]
+            
     elif "samples" in line and "# " in line:
         sline = line.split()
         inputfile = str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/PlotConfig/"+sline[2]
@@ -98,6 +106,12 @@ for line in input_configfile:
     elif "periodtag" in line:
         sline = line.split()
         periodtag  =sline[2]
+    elif "datetag" in line:
+        sline = line.split()
+        datetag  =sline[2]
+    elif "DrawSig" in line:
+        sline = line.split()
+        sigfile  =sline[2]
     elif "analyzer" in line:
         sline = line.split()
         analyzer  =sline[2]
@@ -113,25 +127,33 @@ for line in input_configfile:
         cap= open("caption.txt","w")
         cap.write(sline)
         cap.close()
-    elif "## h" in line:
-        sline = line.split()
-        histlist.append(sline[1])
-        binlist.append(sline[2])
-        xminlist.append(sline[3])
-        xmaxlist.append(sline[4])
 
     elif "#################" in line:
         if len(cutlist) == 0:
             continue
-        inputdir="/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/"+ analyzer +"/"+periodtag
+        inputdir="/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/"+ analyzer +"/"+periodtag+"/"+datetag
+
+        readhists=open(str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/PlotConfig/"+histfile,"r")
+        for rline in readhists:
+            if "END" in rline:
+                break
+            if "##" in rline:
+                sline = rline.split()
+                histlist.append(sline[1])
+                binlist.append(sline[2])
+                xminlist.append(sline[3])
+                xmaxlist.append(sline[4])
+        readhists.close()
+
         MakeHistFile(histlist, binlist,xminlist, xmaxlist,jobdir)
+
 
         if not os.path.exists("~/CATAnalyzerPlots/"):
             os.system("mkdir ~/CATAnalyzerPlots/")
-        outputlist.append("https://jalmond.web.cern.ch/jalmond/SNU/CATAnalyzerPlots/HN13TeV_" + analyzer+"_"+os.getenv("CATVERSION")+"_"+periodtag+"_"+cut+"/histograms/CAT2016_"+os.getenv("CATVERSION")+plottag+"/indexCMS.html")
+        outputlist.append("https://jalmond.web.cern.ch/jalmond/SNU/CATAnalyzerPlots/HN13TeV_" + analyzer+"_"+os.getenv("CATVERSION")+"_"+periodtag+"_"+datetag+"_"+cut+"/histograms/CAT2016_"+os.getenv("CATVERSION")+plottag+"/indexCMS.html")
 
     
-        os.system('python  ' + os.getenv("LQANALYZER_DIR") + '/Macros/CatPlotter/setupplotter.py -i ' + inputfile + ' -d ' + inputdir + ' -x ' + jobdir + ' -s ' + stream + ' -a ' + analyzer + ' -S ' + skim + ' -p ' + periodtag + ' -C ' + cutlist[0] + ' -M ' + configinputfile + ' -c ' + plottag + ' -b ' + isblind)
+        os.system('python  ' + os.getenv("LQANALYZER_DIR") + '/Macros/CatPlotter/setupplotter.py -i ' + inputfile + ' -d ' + inputdir + ' -x ' + jobdir + ' -s ' + stream + ' -a ' + analyzer + ' -S ' + skim + ' -p ' + periodtag + ' -D ' + datetag  + ' -C ' + cutlist[0] + ' -M ' + configinputfile + ' -c ' + plottag + ' -b ' + isblind + ' -t ' + sigfile)
         histlist=[]
         binlist=[]
         xminlist=[]

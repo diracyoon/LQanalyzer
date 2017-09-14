@@ -162,9 +162,14 @@ if not os.path.exists(tag_dir):
     if os.path.exists(old_lib_machine_6):
         os.system("rm -r " + old_lib_machine_6)
 
+    if not os.path.exists("/data1/LQAnalyzer_rootfiles_for_analysis/EventComparisons/"):
+        os.system("mkdir /data1/LQAnalyzer_rootfiles_for_analysis/EventComparisons/ " + os.getenv("USER"))
+
     print "using branch for first time: All codes are being recompiled"
     os.system("source bin/Make/make_clean_newbranch.sh")
     
+
+
 
 fakelib = os.getenv("LQANALYZER_LIB_PATH") + "/libHNCommonLeptonFakes.so"
 

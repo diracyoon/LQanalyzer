@@ -37,12 +37,14 @@ class EventBase;
 
 // local includes
 #include "HNCommonLeptonFakes/HNCommonLeptonFakes/HNCommonLeptonFakes.h"
+#include "HNCommonLeptonFakes/HNCommonLeptonFakesTriLep/HNCommonLeptonFakesTriLep.h"
 
 class DataDrivenBackgrounds{
 
  public:
     
   DataDrivenBackgrounds();
+  DataDrivenBackgrounds(bool setupown);
   ~DataDrivenBackgrounds();
 
   void SetMCPeriod(int mcperiod);
@@ -51,6 +53,9 @@ class DataDrivenBackgrounds{
 
   void SetEventBase(EventBase* ev);
   void CheckEventBase();
+
+  bool  SetupFake(TString path, std::map<TString, std::pair<std::pair<TString,TString>  ,std::pair<float,TString> > >fake_hist_config);
+  bool  SetupFake();
 
   //// Charge flip HN
   float WeightCFEvent(std::vector<snu::KElectron> electrons, bool runchargeflip);
@@ -62,13 +67,18 @@ class DataDrivenBackgrounds{
   /// Fake Backgrounds e+m HN
 
   /// == Dilepton
-  float Get_DataDrivenWeight_EE(bool geterr, std::vector<snu::KElectron> k_electrons);
-  float Get_DataDrivenWeight_EEmva(bool geterr,std::vector<snu::KElectron> k_electrons, bool tight1, bool tight2, TString key1, TString key2);
-  float Get_DataDrivenWeight_EE(bool geterr, std::vector<snu::KElectron> k_electrons, TString IDloose,TString IDtight, TString method, bool isedileptrig=true);
-  float Get_DataDrivenWeight_MM(bool geterr, std::vector<snu::KMuon> k_muons);
-  float Get_DataDrivenWeight_MM(bool geterr, std::vector<snu::KMuon> k_muons,  bool tight1, bool tight2, TString ID1,TString ID2, bool cl1, bool cl2, TString method, float isocut1, float isocut2, bool useclosej, bool singletrig);
+  float Get_DataDrivenWeight_EE(bool geterr, std::vector<snu::KElectron> k_electrons, TString ID, TString variable,TString tag, int FakeType=0);
+  float Get_DataDrivenWeight_MM(bool geterr, std::vector<snu::KMuon> k_muons, TString ID, TString variable, TString tag, int FakeType=0);
 
-  float Get_DataDrivenWeight_EM(bool geterr,std::vector<snu::KMuon> k_muons, std::vector<snu::KElectron> k_electrons,  TString IDe, TString IDm,  TString method);
+  float Get_DataDrivenWeight_EM(bool geterr, std::vector<snu::KElectron> k_electrons,  std::vector<snu::KMuon> k_muons,  TString IDe, TString IDm, TString variable, TString tage,TString tagm, int FakeType=0);
+
+
+  float Get_DataDrivenWeight_LL(bool geterr, std::vector<snu::KElectron> k_electrons, TString ID, float var1, float var2,TString tag, int FakeType=0);
+  float Get_DataDrivenWeight_LL(bool geterr, std::vector<snu::KMuon> k_muons, TString ID, float var1, float var2, TString tag, int FakeType=0);
+
+  float Get_DataDrivenWeight_LL(bool geterr,std::vector<snu::KElectron> k_electrons, std::vector<snu::KMuon> k_muons,  TString IDe, TString IDm, float var1, float var2, TString tage,TString tagm, int FakeType=0);
+			
+
 
   float GetFakeRateEl(float pt, float eta, TString cut);
 
@@ -108,7 +118,11 @@ class DataDrivenBackgrounds{
   bool corr_isdata;
   double k_mcperiod;
 
+  float _electron_isocone;
+  float _muon_isocone;
   HNCommonLeptonFakes* m_fakeobj;
+  HNCommonLeptonFakesTriLep* m_fakeobjtrilep;
+
   EventBase* dd_eventbase;
   bool UsePtCone;
 

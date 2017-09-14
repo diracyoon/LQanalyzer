@@ -506,13 +506,13 @@ void HNDiElectronOptimisation::OptimiseID(bool isss, bool dilep, bool removed0, 
 
 			  if(CheckSignalRegion(isss,loose_el, jets,"Low", w)) {
 
-			    float ee_weight_mva =  m_datadriven_bkg->Get_DataDrivenWeight_EEmva(false, loose_el, tight1,tight2,mvakey+"_iso" +isokey+"_dxy"+dxykey+"_dz"+vcut_dz_b_s[dz_b], mvakey2+"_iso" +isokey2+"_dxy"+dxykey2+"_dz"+vcut_dz_b_s[dz_b]); 															
+			    float ee_weight_mva =  1.;//m_datadriven_bkg->Get_DataDrivenWeight_EEmva(false, loose_el, tight1,tight2,mvakey+"_iso" +isokey+"_dxy"+dxykey+"_dz"+vcut_dz_b_s[dz_b], mvakey2+"_iso" +isokey2+"_dxy"+dxykey2+"_dz"+vcut_dz_b_s[dz_b]); 															
 			    FillHist(("LowIDREF_"+ptlabel+"_"+vcut_mva_s[imva1]+"iso"+vcut_iso_b_s[iso_b]+"_"+vcut_iso_b_s[iso_e]+"_dxy"+vcut_dxy_b_s[dxy_b]+ vcut_dxy_b_s[dxy_e]+"_dz"+vcut_dz_b_s[dz_b]),vcut_mva[imva2],vcut_mva[imva3] , ee_weight_mva, mvabins,28,mvabins,28);
 			  }
 			  
 			  if(CheckSignalRegion(isss,loose_el, jets,"", w)) {
 			    
-                            float ee_weight_mva =  m_datadriven_bkg->Get_DataDrivenWeight_EEmva(false, loose_el, tight1,tight2,mvakey+"_iso" +isokey+"_dxy"+dxykey+"_dz"+vcut_dz_b_s[dz_b], mvakey2+"_iso" +isokey2+"_dxy"+dxykey2+"_dz"+vcut_dz_b_s[dz_b]);
+                            float ee_weight_mva = 1.;// m_datadriven_bkg->Get_DataDrivenWeight_EEmva(false, loose_el, tight1,tight2,mvakey+"_iso" +isokey+"_dxy"+dxykey+"_dz"+vcut_dz_b_s[dz_b], mvakey2+"_iso" +isokey2+"_dxy"+dxykey2+"_dz"+vcut_dz_b_s[dz_b]);
 												
 			    
                             FillHist(("MidIDREF_"+ptlabel+"_"+vcut_mva_s[imva1]+"iso"+vcut_iso_b_s[iso_b]+"_"+vcut_iso_b_s[iso_e]+"_dxy"+vcut_dxy_b_s[dxy_b]+ vcut_dxy_b_s[dxy_e]+"_dz"+vcut_dz_b_s[dz_b]),vcut_mva[imva2],vcut_mva[imva3] , ee_weight_mva, mvabins,28,mvabins,28);
@@ -520,7 +520,7 @@ void HNDiElectronOptimisation::OptimiseID(bool isss, bool dilep, bool removed0, 
                           }
 			  if(CheckSignalRegion(isss,loose_el, jets,"High", w)) {
 
-                            float ee_weight_mva =  m_datadriven_bkg->Get_DataDrivenWeight_EEmva(false, loose_el, tight1,tight2,mvakey+"_iso" +isokey+"_dxy"+dxykey+"_dz"+vcut_dz_b_s[dz_b], mvakey2+"_iso" +isokey2+"_dxy"+dxykey2+"_dz"+vcut_dz_b_s[dz_b]); 
+                            float ee_weight_mva = 1.;// m_datadriven_bkg->Get_DataDrivenWeight_EEmva(false, loose_el, tight1,tight2,mvakey+"_iso" +isokey+"_dxy"+dxykey+"_dz"+vcut_dz_b_s[dz_b], mvakey2+"_iso" +isokey2+"_dxy"+dxykey2+"_dz"+vcut_dz_b_s[dz_b]); 
 												
 			    
                             FillHist(("HighIDREF_"+ptlabel+"_"+vcut_mva_s[imva1]+"iso"+vcut_iso_b_s[iso_b]+"_"+vcut_iso_b_s[iso_e]+"_dxy"+vcut_dxy_b_s[dxy_b]+ vcut_dxy_b_s[dxy_e]+"_dz"+vcut_dz_b_s[dz_b]),vcut_mva[imva2],vcut_mva[imva3] , ee_weight_mva, mvabins,28,mvabins,28);

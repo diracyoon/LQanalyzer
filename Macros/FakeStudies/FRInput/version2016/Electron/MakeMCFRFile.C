@@ -23,7 +23,7 @@ bool CheckHist(TH2* h);
 
 void MakeFRRootFile(){
   
-  TString path= "/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/FakeRateMC/periodBtoH/FakeRateMC_SKQCDMu_cat_v8-0-7.root";
+  TString path= "/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/FakeRateMC/periodBtoH/2017-08-22/FakeRateMC_QCD.root";
 
   TFile * fmc = new TFile(path);
   if (!fmc) cout << "No MC" << endl;
@@ -36,19 +36,18 @@ void MakeFRRootFile(){
   fout->cd();
 
   std::vector<TString> fakes40;
-  //fakes40.push_back("_el_pt");
-  //fakes40.push_back("_el_ptcorr");
-  fakes40.push_back("_mu_pt");
-  fakes40.push_back("_mu_ptcorr");
-  fakes40.push_back("_mu_cj_pt");
-  fakes40.push_back("_mu_cj_ptcorr");
-  fakes40.push_back("_mu_ncj_pt");
-  fakes40.push_back("_mu_ncj_ptcorr");
+  fakes40.push_back("_mu_etapt");
+  fakes40.push_back("_mu_etaptcorr");
+  fakes40.push_back("_mu_cj_etapt");
+  fakes40.push_back("_mu_cj_etaptcorr");
+  fakes40.push_back("_mu_ncj_etapt");
+  fakes40.push_back("_mu_ncj_etaptcorr");
   
 
   std::vector<TString> ids;
+  ids.push_back("HNNoWeight_");
   ids.push_back("HN_");
-  ids.push_back("GENT_");
+
 
   for(vector<TString>::iterator it = ids.begin(); it!=ids.end(); ++it){
     

@@ -150,6 +150,13 @@ void MuonSelection::Selection( std::vector<KMuon>& leptonColl, bool applyrochest
 }  
 
 
+float MuonSelection::IsoCutValue(snu::KMuon muon,TString muid){
+  
+  float isomax_b = AccessFloatMap("isomax04_b",muid);
+  float isomax_ec = AccessFloatMap("isomax04_ec",muid);
+  if(fabs(muon.Eta()) < 1.5) return isomax_b;
+  else return isomax_ec;
+}
 
 bool MuonSelection::MuonPass(snu::KMuon muon, TString muid, float ptcut, float etacut){
 

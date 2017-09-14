@@ -1,0 +1,18 @@
+#**************************************************************************************
+# cut POGTIGHTOSDiElectronDiJet2b
+# samples HNDiElectron/hndiel_os_config_allmc.txt
+# skim SKTree_DiLepSkim
+# stream DoubleEG
+# analyzer HNDiElectron
+# periodtag periodBtoH
+# plottag TT
+# caption Number of events with two opposite sign electrons (POG tight) with Z peak removed...
+#
+#
+#  histname          rebin minx maxx xtitle
+#____________________________________________________________________
+## h_llmass           5 20. 400. "ll invariant mass (GeV/c^{2})"
+## h_leadingLeptonPt  2 10. 200. "Leading lepton p_{T} (GeV/c)"
+## h_secondLeptonPt   2 10. 200. "Second lepton p_{T} (GeV/c)"
+## h_LeptonEta        2 -2.5 2.5 "Lepton  #eta"
+#######################################################################################

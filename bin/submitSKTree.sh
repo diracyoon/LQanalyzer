@@ -54,6 +54,7 @@ submit_draw="False"
 submit_sk_message=""
 submit_skflag=""
 submit_skinput=true
+submit_dir_tag="NULL"
 changed_skinput=false
 changed_submit_version_tag=false
 changed_job_output_dir=false
@@ -888,6 +889,49 @@ if [[  $job_cycle != "SKTreeMaker"* ]];
 fi
 
 outputdir_mc=${outputdir_analyzer}"/"${dir_tag}
+
+
+if [[ $USER == "jalmond" ]];
+    then
+    
+    if [[  $job_cycle != "SKTreeMaker"* ]];
+    then
+	
+	if [[ ! -d "${outputdir_mc}" ]]; then
+            mkdir ${outputdir_mc}
+            echo "Making " + ${outputdir_mc}
+	fi
+    fi
+    DATE=`date +%Y-%m-%d`
+    if [[ $submit_dir_tag != "NULL" ]]; then
+	dir_tag=${dir_tag}$submit_dir_tag"/"
+    else
+	dir_tag=${dir_tag}${DATE}"/"
+    fi
+    outputdir_mc=${outputdir_analyzer}"/"${dir_tag}
+
+
+    if [[  $job_cycle != "SKTreeMaker"* ]];
+    then
+	
+        if [[ ! -d "${outputdir_mc}" ]]; then
+            mkdir ${outputdir_mc}
+            echo "Making " + ${outputdir_mc}
+        fi
+    fi
+ 
+    if [[  $job_cycle != "SKTreeMaker"* ]];
+    then
+
+        if [[ ! -d "${outputdir_mc}" ]]; then
+            mkdir ${outputdir_mc}
+            echo "Making " + ${outputdir_mc}
+        fi
+	echo "Copying "
+	cp -r $LQANALYZER_DIR/LQAnalysis/ $outputdir_mc
+    fi
+fi
+
 outputdir_data=${outputdir_mc}"Data/"
 outputdir_np=${outputdir_mc}"Fake/"
 
@@ -1612,7 +1656,6 @@ if [[ $runDATA  == "true" ]];
           tagger=$RANDOM
       fi
       
-
       
       ### set all inputs to default in functions.sh
       source functions.sh

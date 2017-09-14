@@ -14,7 +14,7 @@ def  MakeCutFile(cutlist, jobname):
 
 
 
-def  MakeConfFile(inputdir,jobname,datastream,analyzer,tag,tag2,catversion,periodtag,cut,leglist, plottag, isblind):
+def  MakeConfFile(inputdir,jobname,datastream,analyzer,tag,tag2,catversion,periodtag,filedate,cut,leglist, plottag, isblind):
 
     if not os.path.exists(str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/"+jobname +"/Config/"):
         os.system("mkdir " +  str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/"+jobname +"/Config/")
@@ -30,7 +30,7 @@ def  MakeConfFile(inputdir,jobname,datastream,analyzer,tag,tag2,catversion,perio
     file_conf.write("prefix          " + analyzer + tag+"\n")
     file_conf.write("postfix           " + tag2+"_cat_"+catversion+".root\n")
     file_conf.write("# NAME_THE_OUTPUT_DIR\n")
-    file_conf.write("outputdir  HN13TeV_"+analyzer+"_"+catversion+"_"+periodtag+"_"+cut+"\n")
+    file_conf.write("outputdir  HN13TeV_"+analyzer+"_"+catversion+"_"+periodtag+"_"+filedate+"_"+cut+"\n")
     file_conf.write("histdir    CAT2016_"+catversion+plottag+"\n")
     file_conf.write("# CONFIGURE_HISTOGRAMS\n")
     # CONFIGURE_HISTOGRAMS                                                                                                                                                  
@@ -53,6 +53,7 @@ parser.add_option("-x", "--x", dest="x", default="TEST",help="tag")
 parser.add_option("-b", "--b", dest="b", default="false",help="tag")
 parser.add_option("-i", "--i", dest="i", default="123",help="tag")
 parser.add_option("-d", "--d", dest="d", default="",help="tag")
+parser.add_option("-D", "--D", dest="D", default="",help="tag")
 parser.add_option("-s", "--s",  dest="s", default="",help="tag")
 parser.add_option("-a", "--a",  dest="a", default="",help="tag")
 parser.add_option("-S", "--S",  dest="S", default="",help="tag")
@@ -60,6 +61,7 @@ parser.add_option("-c", "--c",  dest="c", default="",help="tag")
 parser.add_option("-p", "--p",  dest="p", default="",help="tag")
 parser.add_option("-C", "--C",  dest="C", default="",help="tag")
 parser.add_option("-M", "--M",  dest="M", default="",help="tag")
+parser.add_option("-t", "--t",  dest="t", default="",help="tag")
 
 
 (options, args) = parser.parse_args()
@@ -71,10 +73,17 @@ analyzer = options.a
 skim = options.S
 catversion=str(os.getenv("CATVERSION"))
 period=options.p
+filedate=options.D
 cutlist=options.C
 plottag=options.c
 configinputfile=options.M
 isblind=options.b
+siginputfile=options.t
+
+nodata=False
+if isblind =="true":
+    nodata=True
+
 
 cap_file = open("caption.txt","r")
 text_caption=""
@@ -201,6 +210,54 @@ for i in empty_list_alias:
     list_of_legends_alias.remove(i)
 
     
+sigscales=[]
+#sig1scale=0.
+#sig2scale=0.
+nsig=[]
+#sig1=False
+#sig2=False
+sigpaths=[]
+#sig1path=""
+#sig2path=""
+siglegsig=[]
+#legsig1=""
+#legsig2=""
+ns=-1
+drawsig=False
+print "siginputfile = " + siginputfile
+
+siginputfile="/home/jalmond/HeavyNeutrino/13TeV/LQAnalyzer_cat/LQanalyzer/Macros/CatPlotter/PlotConfig/"+siginputfile
+siginput_configtmp = open(siginputfile,"r")
+
+if siginputfile!="":
+    drawsig=True
+    siginput_config = open(siginputfile,"r")
+    for line in siginput_config:
+        if "END" in line:
+            break
+        if "###" in line :
+            continue
+        legsig=""
+        ns=ns+1
+        nsig.append(True)
+        sline = line.split()
+        nss=0
+        for s in sline:
+            if "|" == s:
+                nss=nss+1
+                continue
+            if nss==0:
+                sigpaths.append(s)
+            if nss==1:
+                sigscales.append(s)
+            if nss==2:
+                if s != "|":
+                    legsig = legsig + s
+                    legsig = legsig + " "
+                    
+        print legsig
+        siglegsig.append(legsig)
+
 
 plot_comfig_dir = str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/PlotConfig/"
 
@@ -235,12 +292,70 @@ for line in skeleton_macroC:
         new_macroC.write(line+"\n")
         for i in list_of_legends:
             new_macroC.write('legorder.push_back("' + i + '");\n')
+
+    elif "  //removedata" in line:
+        if nodata:
+            new_macroC.write('hdata= dynamic_cast<TH1*>((h_nominal)->Clone((string(h_nominal->GetName())+"data").c_str()));;\n')
+            new_macroC.write('hdata->GetXaxis()->SetRangeUser(xmin, xmax);;\n')
+            new_macroC.write('hdata->GetYaxis()->SetRangeUser(ymin, ymax);;\n')
+            new_macroC.write('SetTitles(hdata, hname);\n')
+            new_macroC.write('showdata=false;\n')
+              
+              
     elif "//// SET TITLES" in line:
         new_macroC.write(line+"\n")
         for x in range(0,len(xtitlelist)):
             new_macroC.write('if(name.find("' + histlist[x] + '")!=string::npos) xtitle='+xtitlelist[x] +';\n')
 
 
+    elif "/// SIGNAL" in line:
+        new_macroC.write(line+"\n")
+        new_macroC.write('')
+        
+        new_macroC.write('vector<TH1*> hsig ;\n' )   
+        new_macroC.write('float int_bkg = hup->Integral()/2.; \n')
+        for x in range (0, len(nsig)):
+            if nsig[x]:
+                new_macroC.write('TFile* file_sig'+str(x)+' =  TFile::Open(("'+sigpaths[x]+'")); \n')
+                new_macroC.write('TH1* hsig'+str(x)+' = dynamic_cast<TH1*> ((file_sig'+str(x)+'->Get(name.c_str()))->Clone()); \n')
+                new_macroC.write('hsig'+str(x)+'->Rebin(rebin); \n')
+                new_macroC.write('hsig'+str(x)+'->Scale('+sigscales[x]+'); \n')
+                new_macroC.write('FixOverUnderFlows(hsig'+str(x)+', xmax); \n')
+                new_macroC.write('ymax = GetMaximum(hsig'+str(x)+', hsig'+str(x)+', ylog, name, xmax, xmin); \n')
+
+                new_macroC.write('hsig'+str(x)+'->SetLineColor('+str(x+2)+'); \n')
+
+                new_macroC.write('hsig'+str(x)+'->SetLineWidth(3.); \n')
+                new_macroC.write('hsig'+str(x)+'->GetXaxis()->SetRangeUser(xmin,xmax); \n')
+                new_macroC.write('hsig'+str(x)+'->GetYaxis()->SetRangeUser(ymin,ymax); \n')
+            else:
+                new_macroC.write('TH1* hsig1;\n');
+
+            new_macroC.write('hsig.push_back(hsig'+str(x)+');\n')
+            
+    elif "bool drawsig" in line:
+        if drawsig:
+             new_macroC.write('bool drawsig=true;\n')
+        else:
+            new_macroC.write('bool drawsig=false;\n')
+    elif "/// Draw sig" in line:
+        new_macroC.write(line+"\n")
+        for x in range (0, len(nsig)):
+            new_macroC.write('hsigs['+str(x)+']->Draw("hist9same"); \n')
+            new_macroC.write('legend->AddEntry(hsigs['+str(x)+'], "'+siglegsig[x]+'","l");\n')
+            
+            
+    elif "/// Draw sig(1)" in line:
+        new_macroC.write(line+"\n")
+        for x in range (0, len(nsig)):
+            new_macroC.write('hsigs['+str(x)+']->Draw("hist9same"); \n')
+
+    elif "/// Draw(2) sig"in line:
+        new_macroC.write(line+"\n")
+        for x in range (0, len(nsig)):
+            new_macroC.write('hsigs['+str(x)+']->Draw("hist9same"); \n')
+
+                         
     elif "caption=" in line:
         new_macroC.write('caption="' + text_caption + '\n')
 
@@ -303,7 +418,7 @@ elif skim == "SKTree_TriLepSkim":
     tag="_SK"
     tag2="_trilep"
 
-MakeConfFile(inputdir,jobdir,stream,analyzer,tag,tag2,catversion,period,cutlist,list_of_legends_alias, plottag, isblind)
+MakeConfFile(inputdir,jobdir,stream,analyzer,tag,tag2,catversion,period,filedate,cutlist,list_of_legends_alias, plottag, isblind)
 
 os.system("source  " + str(os.getenv("LQANALYZER_DIR")) + "/Macros/CatPlotter/Code/runjob.sh " + jobdir)
 

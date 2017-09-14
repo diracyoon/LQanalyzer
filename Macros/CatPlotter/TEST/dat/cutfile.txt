@@ -1,2 +1,2 @@
-SSMM_CR
+SSMM_1Jet
 END

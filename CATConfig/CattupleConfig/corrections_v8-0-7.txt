@@ -8,6 +8,7 @@
 ### ID_ELECTRON_POG_VETO  IDFILEDIR egammaEffi.txt_EGM2D_veto.root EGamma_SF2D TH2F
 ### ID_ELECTRON_MVA_90   IDFILEDIR mva90.root  EGamma_SF2D TH2F
 ### ID_ELECTRON_MVA_80   IDFILEDIR mva80.root  EGamma_SF2D TH2F
+### ID_ELECTRON_HN_TIGHTv4   IDFILEDIR HN_MVA.root  EGamma_SF2D TH2F 
 ### ID_BCDEF_MUON_POG_LOOSE IDFILEDIR EfficienciesAndSF_BCDEF.root MC_NUM_LooseID_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio TH2F
 ### ID_BCDEF_MUON_POG_MEDIUM IDFILEDIR EfficienciesAndSF_BCDEF.root MC_NUM_MediumID_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio TH2F
 ### ID_BCDEF_MUON_POG_TIGHT IDFILEDIR EfficienciesAndSF_BCDEF.root MC_NUM_TightID_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio TH2F

@@ -153,6 +153,7 @@ def makeConfigFile(log,sample, input, tree, cycle, ver, output_tmp, output, neve
     else :
         config+='   analysis.SetLQInput(true);\n'
     config+='   analysis.SetJobName("' + sample + "_" + cycle+'");\n'
+    config+='   analysis.SetTagName("' +tmplibdir +'");\n'
     config+='   analysis.SetInputList(TString(filename));\n'
     config+='   analysis.SetTreeName("'+ tree +'");\n'
     config+='   analysis.SetCycleName("' + cycle + '");\n'

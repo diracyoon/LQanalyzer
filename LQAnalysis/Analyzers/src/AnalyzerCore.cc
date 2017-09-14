@@ -25,7 +25,7 @@
 #include <TFile.h>
 #include "TStyle.h"
 
-AnalyzerCore::AnalyzerCore() : LQCycleBase(), n_cutflowcuts(0), MCweight(-999.),reset_lumi_mask(false),changed_target_lumi(false), k_reset_period(false), a_mcperiod(-1) {
+AnalyzerCore::AnalyzerCore() : LQCycleBase(), n_cutflowcuts(0), MCweight(-999.),reset_lumi_mask(false),changed_target_lumi(false), k_reset_period(false), a_mcperiod(-1),comp_file_firstev(true) {
 
   k_debugmode=false;
   IDSetup=false;  
@@ -36,6 +36,10 @@ AnalyzerCore::AnalyzerCore() : LQCycleBase(), n_cutflowcuts(0), MCweight(-999.),
   k_usetruth=true;
   k_usephotons=true;
   k_usefatjet=true;
+
+  fake_path="";
+  fake_configured=true;
+  self_configured=false;
 
   TH1::SetDefaultSumw2(true);  
   /// clear list of triggers stored in KTrigger
@@ -77,6 +81,7 @@ AnalyzerCore::AnalyzerCore() : LQCycleBase(), n_cutflowcuts(0), MCweight(-999.),
 
   cout << "##################################################" << endl;
   compmap.clear();
+  compmap2.clear();
   
   if((TString(getenv("USER")) == "jskim" || TString(getenv("USER")) =="shjeon")){
     //==== HN Gen Matching Class
@@ -88,51 +93,124 @@ AnalyzerCore::AnalyzerCore() : LQCycleBase(), n_cutflowcuts(0), MCweight(-999.),
 
 }
 
-
-bool AnalyzerCore::CheckEventComparison(TString user, TString label){
+bool AnalyzerCore::CheckEventComparison(TString user, TString label, TString user2, TString label2, bool switchorder){
   
-  if(compmap.size() ==0){
-    ifstream comp(( "/data1/LQAnalyzer_rootfiles_for_analysis/EventComparisons/"+  user+"/" + label + ".txt"));
-    if(!comp) {
-      exit(EXIT_FAILURE);
-    }
-    
-    string lline;
-    while(getline(comp,lline) ){
-      std::istringstream is( lline );
-      TString blank;
-      int run;
-      TString tmp;
-      int ev;
-      is >>blank;
-      is >> run;
-      is >> tmp;
-      is >> ev;
-      if(blank!=user) break;
-      
-      compmap[ev] = run;
-      continue;
+  if(!switchorder){
+    if(compmap.size() ==0) compmap=CheckEventComparisonList(user, label, user2, label2);
+  }
+  else  if(compmap2.size() ==0) compmap2=CheckEventComparisonList(user2, label2, user, label);
+
+  if(!switchorder){
+    for(map<int,int>::iterator mit = compmap.begin(); mit != compmap.end(); mit++){
+      if(mit->second == eventbase->GetEvent().RunNumber() && mit->first == eventbase->GetEvent().EventNumber() ) return true;
     }
   }
-  
-  for(map<int,int>::iterator mit = compmap.begin(); mit != compmap.end(); mit++){
-    if(mit->first == eventbase->GetEvent().RunNumber() && mit->second == eventbase->GetEvent().EventNumber() ) return true;
+  else{
+    for(map<int,int>::iterator mit = compmap2.begin(); mit != compmap2.end(); mit++){
+      if(mit->second == eventbase->GetEvent().RunNumber() && mit->first == eventbase->GetEvent().EventNumber() ) return true;
+    }
+
   }
   
   return false;
 }
+
+map<int, int> AnalyzerCore::CheckEventComparisonList(TString user, TString label, TString user2, TString label2){
+
+    map<int, int> diffmap;
+    map<int, int> list1;
+    map<int, int> list2;
+
+    if(1){
+      ifstream comp(( "/data1/LQAnalyzer_rootfiles_for_analysis/EventComparisons/"+  user+"/" + label + ".txt"));
+      if(!comp) {
+	cout << "file " << "/data1/LQAnalyzer_rootfiles_for_analysis/EventComparisons/"+  user+"/" + label + ".txt not found" << endl;
+	exit(EXIT_FAILURE);
+      }
+      
+      string lline;
+      while(getline(comp,lline) ){
+	std::istringstream is( lline );
+	TString blank1;
+	TString blank2;
+	int run;
+	TString tmp;
+	int ev;
+	float met;
+	is >>blank1;
+	is >>blank2;
+	is >> run;
+	is >> tmp;
+	is >> ev;
+	is >> met;
+	is >> tmp;
+	if(blank2!=user) break;
+	
+	list1[ev] =run;
+	continue;
+      }
+    }
+    if(1){
+      ifstream comp(( "/data1/LQAnalyzer_rootfiles_for_analysis/EventComparisons/"+  user2+"/" + label2 + ".txt"));
+      if(!comp) {
+	cout << "file " << "/data1/LQAnalyzer_rootfiles_for_analysis/EventComparisons/"+  user2+"/" + label2 + ".txt not found" << endl;
+	exit(EXIT_FAILURE);
+      }
+      
+      string lline;
+      while(getline(comp,lline) ){
+	std::istringstream is( lline );
+	TString blank1;
+	TString blank2;
+	int run;
+	TString tmp;
+	int ev;
+	float met;
+	is >>blank1;
+	is >>blank2;
+	is >> run;
+	is >> tmp;
+	is >> ev;
+	is >> met;
+	is >> tmp;
+	if(blank2!=user) break;
+	
+	list2[ev] =run;
+	continue;
+      }
+    }
+    
+    for(map<int,int>::iterator mit = list1.begin(); mit != list1.end(); mit++){
+      bool found=false;
+      for(map<int,int>::iterator mit2 = list2.begin(); mit2 != list2.end(); mit2++){
+	if(mit2->first == mit->first && mit2->second==mit2->second) found=true;
+      }
+      if(found) diffmap[mit->first] = mit->second;
+    }
+
+
+    return diffmap;
+}
+
 void AnalyzerCore::FillEventComparisonFile(TString label){
   
   //// Make TEX file                                                                                                                                                        
   ofstream ofile_tex;
   string lqdir = getenv("LQANALYZER_DIR");
 
+  label = label + k_tag_name +"_" +k_sample_name;
+  //label = label + k_sample_name;
   string compfile = "/data1/LQAnalyzer_rootfiles_for_analysis/EventComparisons/"+  string(getenv("USER")) + "/"+string(label)+ ".txt";     
 
-  ofile_tex.open(compfile.c_str());
-  ofile_tex.setf(ios::fixed,ios::floatfield);
-  ofile_tex <<getenv("USER") << " " << eventbase->GetEvent().RunNumber() << " : " << eventbase->GetEvent().EventNumber() << endl;
+  //if(comp_file_firstev)    ofile_tex.open(compfile.c_str());
+  // else
+  ofile_tex.open(compfile.c_str(),ios::out | ios::app);
 
+  ofile_tex.setf(ios::fixed,ios::floatfield);
+  ofile_tex << "[ "<<getenv("USER") << " " << eventbase->GetEvent().RunNumber() << " : " << eventbase->GetEvent().EventNumber() << " " <<  eventbase->GetEvent().MET()<<" ]"<< endl;
+  ofile_tex.close();
+  comp_file_firstev=false;
+  
 }
 
 vector<TString >  AnalyzerCore::GetHNDiLepElTriggers(){
@@ -343,6 +421,23 @@ bool  AnalyzerCore::Check(float val){
   return true;
 }
 
+float AnalyzerCore::MC_CR_Correction(TString ID){
+  if(ID == "MUON_HN_TIGHT"){
+    if(k_sample_name.Contains("")) return 1.;
+  }
+  if(ID== "ELECTRON_HN_TIGHTv5"){
+    if(k_sample_name.Contains("")) return 1.;
+  }
+  //...... This function needs filling 
+  return 1.;
+}
+
+float AnalyzerCore::GetTriggerPrescaleCorrection(TString triggername){
+  float corr_trig=1.;
+  if(triggername== "HLT_Mu3_PFJet40") corr_trig = 0.728;
+  if(triggername== "HLT_Mu8_TrkIsoVVL") corr_trig = 1.399;
+  return corr_trig;
+}
 
 
 float AnalyzerCore::GetKFactor(){
@@ -519,16 +614,16 @@ float AnalyzerCore::CorrectedMETJER(vector<snu::KJet> jetall, int sys){
     px_orig+= jetall.at(ij).Px();
     py_orig+= jetall.at(ij).Py();
     if(sys==1){
-      px_shifted += jetall.at(ij).Px()*jetall.at(ij).SmearedResUp();
-      py_shifted += jetall.at(ij).Py()*jetall.at(ij).SmearedResUp();
-
+      px_shifted += jetall.at(ij).Px()*(jetall.at(ij).SmearedResUp() / jetall.at(ij).SmearedRes()  );
+      py_shifted += jetall.at(ij).Py()*(jetall.at(ij).SmearedResUp() / jetall.at(ij).SmearedRes() );
+      
     }
     if(sys==-1){
-      px_shifted += jetall.at(ij).Px()*jetall.at(ij).SmearedResDown();
-      py_shifted += jetall.at(ij).Py()*jetall.at(ij).SmearedResDown();
-
+      px_shifted += jetall.at(ij).Px()*(jetall.at(ij).SmearedResDown()/jetall.at(ij).SmearedRes() );
+      py_shifted += jetall.at(ij).Py()*(jetall.at(ij).SmearedResDown()/jetall.at(ij).SmearedRes()) ;
+      
     }
-
+    
   }
   met_x = met_x + px_orig - px_shifted;
   met_y = met_y + py_orig - py_shifted;
@@ -1302,6 +1397,71 @@ float AnalyzerCore::GetDiLepMass(std::vector<snu::KMuon> muons){
   return p.M();
 }
 
+float AnalyzerCore::GetMasses(TString svariable, std::vector<snu::KMuon> muons, std::vector<snu::KJet> jets, vector<int> ijets, bool lowmass){
+  
+  if(muons.size() != 2) return 0.;
+  if(jets.size() == 0) return 0.;
+
+  // variable 1 = lljj
+  // variable 2 = l1jj
+  // variable 3 = l2jj
+  // variable 4 = llj
+  // variable 5 = jj
+  // variable 6 = contra JJ mass
+
+  int variable (-1);
+  if(svariable == "lljj") variable = 1;
+  else if(svariable == "l1jj") variable = 2;
+  else if(svariable == "l2jj") variable = 3;
+  else if(svariable == "llj") variable = 4;
+  else if(svariable == "jj") variable = 5;
+  else if(svariable == "contMT") variable = 6;
+  else return -999.;
+
+  if(variable==4) return (muons[0] + muons[1] + jets[0]).M();
+
+  if(jets.size() < 2) return -999.;
+
+
+  float dijetmass_tmp=999.;
+  float dijetmass=9990000.;
+  int m=-999;
+  int n=-999;
+  for(UInt_t emme=0; emme<jets.size(); emme++){
+    for(UInt_t enne=1; enne<jets.size(); enne++) {
+      if(emme == enne) continue;
+      if(lowmass)   dijetmass_tmp = (jets[emme]+jets[enne]+muons[0] + muons[1]).M();
+      else dijetmass_tmp = (jets[emme]+jets[enne]).M();
+      if ( fabs(dijetmass_tmp-80.4) < fabs(dijetmass-80.4) ) {
+	dijetmass = dijetmass_tmp;
+	m = emme;
+	n = enne;
+      }
+    }
+  }
+  
+  if(ijets.size() ==2){
+    if(ijets[0] != 0){
+      ijets.push_back(m);
+      ijets.push_back(n);
+    }
+  }
+
+  if(variable==1) return (muons[0] + muons[1] + jets[m]+jets[n]).M();
+  if(variable==2) return (muons[0]  + jets[m]+jets[n]).M();
+  if(variable==3) return (muons[1] + jets[m]+jets[n]).M();
+  if(variable==5) return (jets[m]+jets[n]).M();
+  if(variable==6) {
+    float dPhi = fabs(TVector2::Phi_mpi_pi(jets[m].Phi() - jets[n].Phi()));
+    float contramass=2*jets[m].Pt()*jets[n].Pt()*(1+cos(dPhi));
+    contramass=sqrt(contramass);
+    return contramass;
+  }
+  
+  return 0.;
+}
+
+
 
 bool AnalyzerCore::EtaRegion(TString reg,  std::vector<snu::KElectron> electrons){
   if(electrons.size() != 2) return false;
@@ -1797,7 +1957,8 @@ float AnalyzerCore::WeightByTrigger(TString triggername, float tlumi){
   /// In v766 path lumi is corrected for removal of bad beamspot LS
   // https://github.com/vallot/CATTools/commit/aae3e60b194b1bacf2595a33c8fa27f411dac16b
   for(map<TString, float>::iterator mit = trigger_lumi_map_cat2016.begin(); mit != trigger_lumi_map_cat2016.end(); mit++){
-    if(triggername.Contains(mit->first)) return (mit->second / tlumi);
+    float corr_trig = GetTriggerPrescaleCorrection(triggername);
+    if(triggername.Contains(mit->first)) return (corr_trig*mit->second / tlumi);
   }
   m_logger << ERROR << "Error in getting weight for trigger  " << triggername << "  prescale. Trigname is not correct or not in map"  << LQLogger::endmsg; exit(0);
 
@@ -1956,12 +2117,41 @@ void AnalyzerCore::SetupID(){
 
 }
 
+void AnalyzerCore::ConfigureFake(){
+  
+  /// switch
+  if(!k_running_nonprompt) return;
+  self_configured=true;
+  fake_configured = false;
+}
+
+
+bool AnalyzerCore::ConfigureFakeHists(TString path, std::map<TString, std::pair<std::pair<TString,TString>  ,std::pair<float,TString> > > fake_hists){
+
+  if(!k_running_nonprompt) return false;
+  if(fake_configured) return false;
+
+  fake_configured=true;
+  fake_path=path;
+
+  bool setupok= m_datadriven_bkg->SetupFake(path, fake_hists);
+  if(setupok) return true;
+  else{
+    cerr << "Trying to configure fakes using ConfigureFakeHists, but fake code is already setup" << endl;
+    exit(EXIT_FAILURE);
+
+  }
+  return true;
+}
+
+
 void AnalyzerCore::SetupDDBkg(){
-  if(k_running_nonprompt || k_running_chargeflip)m_datadriven_bkg = new DataDrivenBackgrounds();
+
+  if(k_running_nonprompt || k_running_chargeflip)m_datadriven_bkg = new DataDrivenBackgrounds(self_configured);
+
   setupDDBkg=true;
   
   /// setup correction class at teh same time
-  
   /// not needed for sktreemaker
   // save time as code does not need to setup and save files
   
@@ -2041,10 +2231,14 @@ void AnalyzerCore::SetupDDBkg(){
 
 void AnalyzerCore::SetUpEvent(Long64_t entry, float ev_weight) throw( LQError ) {
   
-
   if(!IDSetup)   SetupID();
   if(!setupDDBkg)SetupDDBkg();
   
+  if(k_running_nonprompt&&fake_configured &&!self_configured){
+    cout << "Setting up fakes(Def)" << endl;
+    m_datadriven_bkg->SetupFake();self_configured=true; }
+
+
 
   Message("In SetUpEvent(Long64_t entry) " , DEBUG);
   m_logger << DEBUG << "This is entry " << entry << LQLogger::endmsg;
@@ -2151,6 +2345,7 @@ void AnalyzerCore::SetUpEvent(Long64_t entry, float ev_weight) throw( LQError ) 
   }
   
   
+
 }
 
 
@@ -2244,6 +2439,16 @@ float AnalyzerCore::SumPt( std::vector<snu::KFatJet> particles){
 }
 
   
+float AnalyzerCore::GetLT(std::vector<snu::KMuon> muons){
+  float lt=0.;
+  for(unsigned int i = 0; i < muons.size(); i++){
+    lt+= muons[i].Pt();
+  }
+  
+  return lt;
+}
+
+
 bool AnalyzerCore::IsDiEl(){
   if(isData) return false;
   int iel(0);
@@ -2363,6 +2568,7 @@ bool AnalyzerCore::TruthMatched(snu::KMuon mu){
   if(mu.GetType() ==6) pass=true;
   if(mu.GetType() ==8) pass=true;
   if(mu.GetType() ==9) pass=true;
+  if(mu.GetType() ==10) pass=true; // Virtual photon(m<5) to dimuon. FR > 0.4
   if(mu.GetType() ==12) pass=true;
   if(mu.GetType() ==25) pass=true;  //// HAS CHANGED AFTER SKTREE were remade
   //if(mu.GetType() ==28) pass=true;
@@ -2473,6 +2679,56 @@ void AnalyzerCore::TruthPrintOut(){
   for(unsigned int ig=0; ig < eventbase->GetTruth().size(); ig++){
 
     if(eventbase->GetTruth().at(ig).IndexMother() <= 0)continue;
+    //if(eventbase->GetTruth().at(ig).IndexMother() >= int(eventbase->GetTruth().size()))continue;                                                                                                                                                                              
+    if (eventbase->GetTruth().at(ig).PdgId() == 2212)  cout << ig << " | " << eventbase->GetTruth().at(ig).PdgId() << "  |               |         |        |         |       |         |" << endl;
+    if(eventbase->GetTruth().at(ig).IndexMother() >= int(eventbase->GetTruth().size())){
+      cout << ig << " |  " <<  eventbase->GetTruth().at(ig).PdgId() << " |  " << eventbase->GetTruth().at(ig).GenStatus() << " |  ---  |   " << eventbase->GetTruth().at(ig).Eta() << " | " << eventbase->GetTruth().at(ig).Pt() << " | " << eventbase->GetTruth().at(ig).Phi()	   << " |  --- |" << eventbase->GetTruth().at(ig).ReadStatusFlag(7) <<  endl;
+
+    }
+    else{
+      cout << ig << " |  " <<  eventbase->GetTruth().at(ig).PdgId() << " |  " << eventbase->GetTruth().at(ig).GenStatus() << " |  " << eventbase->GetTruth().at(eventbase->GetTruth().at(ig).IndexMother()).PdgId()<< " |   " << eventbase->GetTruth().at(ig).Eta() << " | " <<	eventbase->GetTruth().at(ig).Pt() << " | " << eventbase->GetTruth().at(ig).Phi()<< " |   " << eventbase->GetTruth().at(ig).IndexMother()  << " " << eventbase->GetTruth().at(ig).ReadStatusFlag(7) <<  endl;
+    }
+  }
+
+}
+
+void AnalyzerCore::TruthPrintOut(snu::KMuon muon){
+  if(isData) return;
+  m_logger << INFO<< "RunNumber/Event Number = "  << eventbase->GetEvent().RunNumber() << " : " << eventbase->GetEvent().EventNumber() << LQLogger::endmsg;
+  cout << "Particle Index |  PdgId  | GenStatus   | Mother PdgId |  Part_Eta | Part_Pt | Part_Phi | Mother Index |   " << endl;
+
+
+
+  for(unsigned int ig=0; ig < eventbase->GetTruth().size(); ig++){
+
+    if(eventbase->GetTruth().at(ig).IndexMother() <= 0)continue;
+    //if(eventbase->GetTruth().at(ig).IndexMother() >= int(eventbase->GetTruth().size()))continue;                                                                                                                                                                              
+    if (eventbase->GetTruth().at(ig).PdgId() == 2212)  cout << ig << " | " << eventbase->GetTruth().at(ig).PdgId() << "  |               |         |        |         |       |         |" << endl;
+    double dr = sqrt( pow(fabs(  muon.Eta() - eventbase->GetTruth().at(ig).Eta()),2.0) +  pow( fabs(TVector2::Phi_mpi_pi( muon.Phi() - eventbase->GetTruth().at(ig).Phi())),2.0));											
+    if(eventbase->GetTruth().at(ig).IndexMother() >= int(eventbase->GetTruth().size())){
+
+      
+      if(dr < 0.4)  cout << "MATCHE TO MUON: " << ig << " |  " <<  eventbase->GetTruth().at(ig).PdgId() << " |  " << eventbase->GetTruth().at(ig).GenStatus() << " |  ---  |   " << eventbase->GetTruth().at(ig).Eta() << " | " << eventbase->GetTruth().at(ig).Pt() << " | " << eventbase->GetTruth().at(ig).Phi()	   << " |  --- |" << eventbase->GetTruth().at(ig).ReadStatusFlag(7) <<  endl;
+      else cout << ig << " |  " <<  eventbase->GetTruth().at(ig).PdgId() << " |  " << eventbase->GetTruth().at(ig).GenStatus() << " |  ---  |   " << eventbase->GetTruth().at(ig).Eta() << " | " << eventbase->GetTruth().at(ig).Pt() << " | " << eventbase->GetTruth().at(ig).Phi()	   << " |  --- |" << eventbase->GetTruth().at(ig).ReadStatusFlag(7) <<  endl; 
+      
+    }
+    else{
+      if(dr < 0.4)  cout << "MATCHE TO MUON: " << ig << " |  " <<  eventbase->GetTruth().at(ig).PdgId() << " |  " << eventbase->GetTruth().at(ig).GenStatus() << " |  " << eventbase->GetTruth().at(eventbase->GetTruth().at(ig).IndexMother()).PdgId()<< " |   " << eventbase->GetTruth().at(ig).Eta() << " | " <<	eventbase->GetTruth().at(ig).Pt() << " | " << eventbase->GetTruth().at(ig).Phi()<< " |   " << eventbase->GetTruth().at(ig).IndexMother()  << " " << eventbase->GetTruth().at(ig).ReadStatusFlag(7) <<  endl;
+      else cout << ig << " |  " <<  eventbase->GetTruth().at(ig).PdgId() << " |  " << eventbase->GetTruth().at(ig).GenStatus() << " |  " << eventbase->GetTruth().at(eventbase->GetTruth().at(ig).IndexMother()).PdgId()<< " |   " << eventbase->GetTruth().at(ig).Eta() << " | " <<	eventbase->GetTruth().at(ig).Pt() << " | " << eventbase->GetTruth().at(ig).Phi()<< " |   " << eventbase->GetTruth().at(ig).IndexMother()  << " " << eventbase->GetTruth().at(ig).ReadStatusFlag(7) <<  endl;
+    }
+  }
+}
+
+void AnalyzerCore::TruthPrintOut(snu::KElectron electron){
+  if(isData) return;
+  m_logger << INFO<< "RunNumber/Event Number = "  << eventbase->GetEvent().RunNumber() << " : " << eventbase->GetEvent().EventNumber() << LQLogger::endmsg;
+  cout << "Particle Index |  PdgId  | GenStatus   | Mother PdgId |  Part_Eta | Part_Pt | Part_Phi | Mother Index |   " << endl;
+
+
+
+  for(unsigned int ig=0; ig < eventbase->GetTruth().size(); ig++){
+
+    if(eventbase->GetTruth().at(ig).IndexMother() <= 0)continue;
     //if(eventbase->GetTruth().at(ig).IndexMother() >= int(eventbase->GetTruth().size()))continue;
     if (eventbase->GetTruth().at(ig).PdgId() == 2212)  cout << ig << " | " << eventbase->GetTruth().at(ig).PdgId() << "  |               |         |        |         |       |         |" << endl;
     if(eventbase->GetTruth().at(ig).IndexMother() >= int(eventbase->GetTruth().size())){
@@ -2499,6 +2755,11 @@ bool AnalyzerCore::isPrompt(long pdgid) {
 
 void AnalyzerCore::EndEvent()throw( LQError ){
   
+  if(self_configured && !fake_configured) {
+    cerr << "Setting up own fake files but no hists given" << endl;
+    exit(EXIT_FAILURE);
+  }
+
   delete eventbase;                                                                                                            
 
 }
@@ -3194,30 +3455,57 @@ void AnalyzerCore::WriteHists(){
 
   for(map<TString, TH1*>::iterator mapit = maphist.begin(); mapit != maphist.end(); mapit++){
     
-    
-    
-    if(mapit->first.Contains("closejet")){
-      if(!m_outputFile->GetDirectory( "closejet" )){
-	Dir = m_outputFile->mkdir("closejet");
-	m_outputFile->cd( Dir->GetName() );
+    if(mapit->first.Contains("cutflow")){
+      mapit->second->Write();
+    }
+    else{
+      TDirectory *dir = m_outputFile->GetDirectory("Hists");
+   
+      if (dir) {
+	m_outputFile->cd("Hists");
+	mapit->second->Write();
+	m_outputFile->cd();
       }
-      else  m_outputFile->cd("closejet");
+      else{
+	Dir = m_outputFile->mkdir("Hists");
+	m_outputFile->cd( Dir->GetName() );
+	mapit->second->Write();
+	m_outputFile->cd();
+      }
+    }
+  }
+  for(map<TString, TH2*>::iterator mapit = maphist2D.begin(); mapit != maphist2D.end(); mapit++){
+    
+    TDirectory *dir = m_outputFile->GetDirectory("Hists2D");
+
+    if (dir) {
+      m_outputFile->cd("Hists2D");
+      mapit->second->Write();
+      m_outputFile->cd();
+    }
+    else{
+      Dir = m_outputFile->mkdir("Hists2D");
+      m_outputFile->cd( Dir->GetName() );
+      mapit->second->Write();
+      m_outputFile->cd();
+    }
+  }
+  
+  for(map<TString, TH3*>::iterator mapit = maphist3D.begin(); mapit != maphist3D.end(); mapit++){
+    TDirectory *dir = m_outputFile->GetDirectory("Hists3D");
+
+    if (dir) {
+      m_outputFile->cd("Hists3D");
+      mapit->second->Write();
+      m_outputFile->cd();
+    }
+    else{
+      Dir = m_outputFile->mkdir("Hists3D");
+      m_outputFile->cd( Dir->GetName() );
       mapit->second->Write();
       m_outputFile->cd();
     }
 
-    
-    
-    else {
-      mapit->second->Write();
-    }
-  }
-  
-  for(map<TString, TH2*>::iterator mapit = maphist2D.begin(); mapit != maphist2D.end(); mapit++){
-    mapit->second->Write();
-  }
-  for(map<TString, TH3*>::iterator mapit = maphist3D.begin(); mapit != maphist3D.end(); mapit++){
-    mapit->second->Write();
   }
 
   //==== HN Gen Matching
@@ -3426,50 +3714,66 @@ bool AnalyzerCore::OppositeCharge(std::vector<snu::KElectron> electrons, bool ru
   return false;
 }
 
-float AnalyzerCore::GetCFweight(std::vector<snu::KElectron> electrons, bool apply_sf, TString el_ID){
+std::vector<snu::KElectron> AnalyzerCore::ShiftElectronEnergy(std::vector<snu::KElectron> beforeshift, TString el_ID, bool applyshift){
+
+  if(el_ID != "ELECTRON_HN_TIGHTv4") return beforeshift;
+  if(!applyshift) return beforeshift;
+
+  std::vector<snu::KElectron> aftershift;
+  double shiftrate = -999.;
+  if(beforeshift.size() == 1) shiftrate = (1-0.024);
+  if(beforeshift.size() == 2) shiftrate = (1-0.015);
+  if(beforeshift.size() > 2) shiftrate = (-999.);
+   
+
+   for(unsigned int i=0; i < beforeshift.size(); i++){
+     beforeshift.at(i).SetPtEtaPhiM(beforeshift.at(i).Pt()*shiftrate, beforeshift.at(i).Eta(), beforeshift.at(i).Phi(), 0.511e-3);
+     aftershift.push_back(beforeshift.at(i));
+   }
+   return aftershift;
+ }
+
+float AnalyzerCore::GetCFweight(int syst, std::vector<snu::KElectron> electrons, bool apply_sf, TString el_ID){
 
   if(el_ID != "ELECTRON_HN_TIGHTv4") return 0.;
-  if(electrons.size() != 2) return 0.;
+  if(electrons.size() > 2) return 0.;
 
-  snu::KElectron lep[2];
-  lep[0] = electrons.at(0);
-  lep[1] = electrons.at(1);
+  std::vector<snu::KElectron> lep;
+  for(int i=0; i<electrons.size(); i++){
+    lep.push_back(electrons.at(i));
+  }
 
-  if(lep[0].Charge() == lep[1].Charge()) return 0.;
+  if(lep.size()==2){
+    if(lep.at(0).Charge() == lep.at(1).Charge()) return 0.;
+  }
 
-  double CFrate[2] = {0.,}, CFweight[2] = {0.,};
-  CFrate[0] = GetCFRates(lep[0].Pt(), lep[0].SCEta(), el_ID);
-  CFrate[1] = GetCFRates(lep[1].Pt(), lep[1].SCEta(), el_ID);
+  std::vector<double> CFrate, CFweight, sf;
+  for(int i=0; i<lep.size(); i++){
+    CFrate.push_back(GetCFRates(lep.at(i).Pt(), lep.at(i).SCEta(), el_ID));
+    CFweight.push_back( (CFrate.at(i)/(1-CFrate.at(i))) );
+  }
 
-  CFweight[0] = CFrate[0] / (1-CFrate[0]);
-  CFweight[1] = CFrate[1] / (1-CFrate[1]);
-
-  double sf[2] = {1., 1.};
-  int sys = 0;  // temporary
-
-  if(apply_sf){
-    if(sys == 0){//Z mass window 15 GeV (76 ~ 106 GeV)
-      for(int i=0; i<2; i++){
-        if (fabs(lep[i].SCEta()) < 1.4442) sf[i] = 0.759713941;
-        else sf[i] = 0.784052036;
+  for(int i=0; i<lep.size(); i++){
+    if(apply_sf){
+      if(fabs(lep.at(i).SCEta()) < 1.4442){
+        sf.push_back(0.691722 + (syst*0.691722*0.13));
+      }
+      else{
+        sf.push_back(0.68301 + (syst*0.68301*0.09));
       }
     }
-    else if(sys == 1){//Z mass window 20 GeV
-      for(int i=0; i<2; i++){
-        if (fabs(lep[i].SCEta()) < 1.4442) sf[i] = 0.723099195;
-        else sf[i] = 0.757193848;
-      }
-    }
-    else if(sys == -1){//Z mass window 10 GeV
-      for(int i=0; i<2; i++){
-        if (fabs(lep[i].SCEta()) < 1.4442) sf[i] = 0.75362822;
-        else sf[i] = 0.821682654;
-      }
+    else{
+      sf.push_back( 1 );
     }
   }
 
-  return (CFweight[0]*sf[0] + CFweight[1]*sf[1]);
+  double cfweight = 0.;
+  for(int i=0; i<lep.size(); i++){
+    cfweight += (sf.at(i)) * (CFweight.at(i));
+  }
+  return cfweight;
 }
+
 
 float AnalyzerCore::GetCFRates(double el_pt, double el_eta, TString el_ID){
   if(el_ID != "ELECTRON_HN_TIGHTv4") return 0.;
@@ -3480,42 +3784,18 @@ float AnalyzerCore::GetCFRates(double el_pt, double el_eta, TString el_ID){
   double invPt = 1./el_pt;
   double a = 999., b= 999.;
   if(el_eta < 0.9){
-    if(invPt< 0.023){
-      a=(-0.00138635);
-      b=(4.35054e-05);
-    }
-    else{
-      a=(0.00114356);
-      b=(-1.55941e-05);
-    }
+    if(invPt< 0.023){a=(-0.00138148); b=(4.33442e-05);}
+    else{a=(0.00101034); b=(-1.14551e-05);}
   }
   else if(el_eta < 1.4442){
-    if(invPt < 0.016){
-      a=(-0.0369937);
-      b=(0.000797434);
-    }
-    else if(invPt < 0.024){
-      a=(-0.0159017);
-      b=(0.00046038);
-    }
-    else{
-      a=(-0.00214657);
-      b=(0.000147245);
-    }
+    if(invPt< 0.015){a=(-0.042964); b=(0.000866971);}
+    else if(invPt< 0.023){a=(-0.0152852); b=(0.000452217);}
+    else{a=(-0.00154575); b=(0.000127211);}
   }
   else{
-    if(invPt< 0.012){
-      a=(-0.4293);
-      b=(0.00641511);
-    }
-    else if(invPt< 0.020){
-      a=(-0.104796);
-      b=(0.00256146);
-    }
-    else{
-      a=(-0.0161499);
-      b=(0.00076872);
-    }
+    if(invPt< 0.012){a=(-0.423831); b=(0.00636555);}
+    else if(invPt< 0.020){a=(-0.103982); b=(0.00254955);}
+    else{a=(-0.0160296); b=(0.000767227);}
   }
 
   double rate = (a)*invPt + (b);
@@ -3784,10 +4064,6 @@ vector<snu::KElectron> AnalyzerCore::GetTruePrompt(vector<snu::KElectron> electr
       else{
 	
 	bool ismatched = TruthMatched(electrons.at(i),  keep_chargeflip);                                                                                                                            
-	//electrons.at(i).MCMatched();                                                                                                                                                                         
-	//TruthMatched(electrons.at(i),  keep_chargeflip);
-	//electrons.at(i).MCMatched();
-	if(electrons.at(i).MCFromTau()) ismatched=false;
 	if(keepfake&&keep_chargeflip) prompt_electrons.push_back(electrons.at(i));
 	else if(keep_chargeflip&& ismatched) prompt_electrons.push_back(electrons.at(i));
 	else if(keepfake&&! MCIsCF(electrons.at(i))) prompt_electrons.push_back(electrons.at(i)); 

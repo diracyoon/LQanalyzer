@@ -29,7 +29,7 @@
 
 
 
-LQController::LQController():inputType(NOTSET), outputLevelString("INFO"), CycleName("Analyzer"),skimName(""), jobName("Test"), treeName("rootTupleTree/tree"),filelist(""), fullfilelist(""), completename(""),runnp(false), runcf(false), runtau(false), m_logger( "LQCycleController") , target_luminosity(1.),  sample_crosssection(-999.), effective_luminosity(1.), n_total_event(-1.),  nevents_to_process(-1), m_isInitialized( kFALSE ), n_ev_to_skip(0), v_libnames(0),v_user_flags(0), list_to_run(0),single_ev(0), run_single_event(false), total_events_beforeskim(0), total_events_afterskim(0),output_step(10000), channel(""), k_period("NOTSET"), kLQInput(true) {
+LQController::LQController():inputType(NOTSET), outputLevelString("INFO"), CycleName("Analyzer"),skimName(""), jobName("Test"), tagName(""),treeName("rootTupleTree/tree"),filelist(""), fullfilelist(""), completename(""),runnp(false), runcf(false), runtau(false), m_logger( "LQCycleController") , target_luminosity(1.),  sample_crosssection(-999.), effective_luminosity(1.), n_total_event(-1.),  nevents_to_process(-1), m_isInitialized( kFALSE ), n_ev_to_skip(0), v_libnames(0),v_user_flags(0), list_to_run(0),single_ev(0), run_single_event(false), total_events_beforeskim(0), total_events_afterskim(0),output_step(10000), channel(""), k_period("NOTSET"), kLQInput(true) {
   
   catversion_lq = none;
   chain = NULL;
@@ -251,6 +251,11 @@ void LQController::SetJobName(TString name){
 }
   
 
+void LQController::SetTagName(TString name){
+  tagName = name;
+}
+
+
 
 void LQController::SetInputList(TString list) throw( LQError ){
   filelist = list;
@@ -464,6 +469,15 @@ void LQController::ExecuteCycle() throw( LQError ) {
       else if(inputType == mc) cycle->SetDataType(false);
       else throw LQError( "InputType is wrongly configured",LQError::SkipCycle);
     }
+    cycle->SetFlags(v_user_flags);
+
+    cycle->SetNPStatus(runnp);
+    cycle->SetTauStatus(runtau);
+    cycle->SetCFStatus(runcf);
+    cycle->SetSampleName(jobName);
+    cycle->SetTagName(tagName);
+
+
     cycle->BeginCycle();
 
     cycle->ClearOutputVectors();
@@ -533,7 +547,7 @@ void LQController::ExecuteCycle() throw( LQError ) {
 
     cycle->SetTargetLumi(target_luminosity);
 
-   cycle->SetFlags(v_user_flags);
+
     //// Connect chain to Data class                                                                                                                                        
     if(inputType!=NOTSET) {
       if(inputType == data) cycle->SetLQNtupleInputType(1 );
@@ -570,13 +584,6 @@ void LQController::ExecuteCycle() throw( LQError ) {
       GetMemoryConsumption("Accessed branch to specify isData");
     }
 
-
-    cycle->SetNPStatus(runnp);
-    cycle->SetTauStatus(runtau);
-    cycle->SetCFStatus(runcf);
-    cycle->SetSampleName(jobName);
-    
-    
     Long64_t nentries = cycle->GetNEntries(); /// This is total number of events in Input list    
     if(n_ev_to_skip > nentries) n_ev_to_skip =0;
     
@@ -743,7 +750,7 @@ void LQController::ExecuteCycle() throw( LQError ) {
     //timer.Start();
     m_logger << INFO << "Execute time = " << timer.RealTime() << " s" << LQLogger::endmsg;
     FillMemoryHists("FullExecute");
-
+    
     cycle->SaveOutputTrees(cycle->GetOutputFile());
     cycle->EndCycle();
     cycle->WriteHistograms();/// writes all histograms declared in the cycle to the output file

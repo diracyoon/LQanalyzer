@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     int a =MakeCutFlow_Plots(configfile);
   }
   
-  system(("scp -r " + output_path + " jalmond@lxplus080.cern.ch:~/www/SNU/CATAnalyzerPlots/").c_str());
+  system(("scp -r " + output_path + " jalmond@lxplus003.cern.ch:~/www/SNU/CATAnalyzerPlots/").c_str());
 
   cout << "Open plots in " << output_index_path << endl;
   cout << "Local directory = ~/CATAnalyzerPlots/" + path +  "/histograms/" + histdir  << endl;
@@ -158,15 +158,6 @@ int MakePlots(string hist) {
 	
 	cout << "Final Background Integral = " <<  MakeSumHist(mstack)->Integral() << " : Up = " << hup->Integral() << " : Down= " << hdown->Integral() << endl;
 	
-	/// Make data histogram
-	ylog=false;
-	if(TString(name).Contains("llmass")){ylog=true;}
-	if(TString(name).Contains("lllmass")){ylog=false;}
-	
-	if(TString(name).Contains("LeptonPt")){ylog=true;}
-	
-	if(TString(name).Contains("Tri")) {ylog=false;}
-        //if(TString(name).Contains("SSE")) {ylog=false;}
 
 	TH1* hdata = MakeDataHist(name, xmin, xmax, hup, ylog, rebin);
 	CheckHist(hdata);	
@@ -177,6 +168,44 @@ int MakePlots(string hist) {
 	if(showdata)cout << "Total data = " <<  hdata->Integral() << endl;
 	scale = 1.;
 
+
+	/// SIGNAL 
+
+vector<TH1*> hsig ;
+float int_bkg = hup->Integral()/2.; 
+TFile* file_sig0 =  TFile::Open(("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/HNDiLepton/periodBtoH/HNDiLepton_HNMumMum_40_cat_v8-0-7.root")); 
+TH1* hsig0 = dynamic_cast<TH1*> ((file_sig0->Get(name.c_str()))->Clone()); 
+hsig0->Rebin(rebin); 
+hsig0->Scale(0.01); 
+FixOverUnderFlows(hsig0, xmax); 
+ymax = GetMaximum(hsig0, hsig0, ylog, name, xmax, xmin); 
+hsig0->SetLineColor(2); 
+hsig0->SetLineWidth(3.); 
+hsig0->GetXaxis()->SetRangeUser(xmin,xmax); 
+hsig0->GetYaxis()->SetRangeUser(ymin,ymax); 
+hsig.push_back(hsig0);
+TFile* file_sig1 =  TFile::Open(("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/HNDiLepton/periodBtoH/HNDiLepton_HNMumMum_60_cat_v8-0-7.root")); 
+TH1* hsig1 = dynamic_cast<TH1*> ((file_sig1->Get(name.c_str()))->Clone()); 
+hsig1->Rebin(rebin); 
+hsig1->Scale(0.05); 
+FixOverUnderFlows(hsig1, xmax); 
+ymax = GetMaximum(hsig1, hsig1, ylog, name, xmax, xmin); 
+hsig1->SetLineColor(3); 
+hsig1->SetLineWidth(3.); 
+hsig1->GetXaxis()->SetRangeUser(xmin,xmax); 
+hsig1->GetYaxis()->SetRangeUser(ymin,ymax); 
+hsig.push_back(hsig1);
+TFile* file_sig2 =  TFile::Open(("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/HNDiLepton/periodBtoH/HNDiLepton_HNMumMum_80_cat_v8-0-7.root")); 
+TH1* hsig2 = dynamic_cast<TH1*> ((file_sig2->Get(name.c_str()))->Clone()); 
+hsig2->Rebin(rebin); 
+hsig2->Scale(0.3); 
+FixOverUnderFlows(hsig2, xmax); 
+ymax = GetMaximum(hsig2, hsig2, ylog, name, xmax, xmin); 
+hsig2->SetLineColor(4); 
+hsig2->SetLineWidth(3.); 
+hsig2->GetXaxis()->SetRangeUser(xmin,xmax); 
+hsig2->GetYaxis()->SetRangeUser(ymin,ymax); 
+hsig.push_back(hsig2);
 
 	unsigned int outputWidth = 1200;
 	unsigned int outputHeight = 1200;
@@ -189,7 +218,7 @@ int MakePlots(string hist) {
 	vstack.push_back(mstack_nostat);   	
 
 	
-	TCanvas* c = CompDataMC(hdata,vstack,hup,hdown, hup_nostat, legend,name,rebin,xmin,xmax, ymin,ymax, path, histdir,ylog, showdata, channel);      	
+	TCanvas* c = CompDataMC(hdata,hsig,vstack,hup,hdown, hup_nostat, legend,name,rebin,xmin,xmax, ymin,ymax, path, histdir,ylog, showdata, channel);      	
 
 	string canvasname = c->GetName();
 	canvasname.erase(0,4);
@@ -211,7 +240,6 @@ int MakePlots(string hist) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MakeCutFlow(string type){
-  return;
   
   vector<string> cut_label;  
   vector<pair<pair<vector<pair<TString,float> >, int >, TString > > cfsamples;  
@@ -490,6 +518,26 @@ TLegend* MakeRatioLegend( TH1* h1, TH1* h2){
   
   return legendH;
 }
+
+/*TLegend* MakePunziLegend( TGraphAsymmErrors* h1, TGraphAsymmErrors* h2){
+  double x1 = 0.7;
+  double y1 = 0.21;
+  double x2 = 0.95;
+  double y2 = 0.24;
+
+  TLegend* legendH = new TLegend(x1,y1,x2,y2);
+  legendH->SetFillColor(kWhite);
+  legendH->SetTextFont(42);
+
+  legendH->SetBorderSize(0);
+  legendH->SetTextSize(0.02);
+  legendH->SetNColumns(2);
+
+  return legendH;
+
+
+}
+*/
 TLegend* MakeLegend( map<TString, TH1*> map_legend,TH1* hlegdata,  bool rundata , bool logy, float ymax, float xmax){
   
   double x1 = 0.5;
@@ -535,10 +583,10 @@ TLegend* MakeLegend( map<TString, TH1*> map_legend,TH1* hlegdata,  bool rundata 
   vector<TString> legorder;
 
 legorder.push_back("Misid. Lepton Background");
-legorder.push_back("Higgs");
 legorder.push_back("Diboson");
 legorder.push_back("Top");
 legorder.push_back("Triboson");
+legorder.push_back("Higgs");
   map<double, TString> order_hists;
   for(map<TString, TH1*>::iterator it = map_legend.begin(); it!= map_legend.end(); it++){
     order_hists[it->second->Integral()] = it->first;
@@ -609,10 +657,6 @@ vector<pair<TString,float> >  InitSample (TString sample){
   vector<pair<TString,float> > list;  
 
 if(sample.Contains("DoubleMuon_SKnonprompt")){    list.push_back(make_pair("DoubleMuon_SKnonprompt",0.3));
-}if(sample.Contains("Higgs")){    list.push_back(make_pair("ggHtoZZ",0.2));
-    list.push_back(make_pair("VBF_HToMuMu",0.2));
-    list.push_back(make_pair("ggHtoWW",0.2));
-    list.push_back(make_pair("ggHtoZZ",0.2));
 }if(sample.Contains("diboson")){    list.push_back(make_pair("ZZTo4L_powheg",0.20));
     list.push_back(make_pair("WZTo3LNu_powheg",0.20));
     list.push_back(make_pair("ggZZto4mu",0.20));
@@ -621,8 +665,6 @@ if(sample.Contains("DoubleMuon_SKnonprompt")){    list.push_back(make_pair("Doub
     list.push_back(make_pair("ww_ds",0.15));
     list.push_back(make_pair("ZGto2LG",0.15));
     list.push_back(make_pair("WGtoLNuG",0.15));
-    list.push_back(make_pair("ZGto2LG",0.2));
-    list.push_back(make_pair("WGtoLNuG",0.2));
 }if(sample.Contains("top")){    list.push_back(make_pair("ttZToLL_M-10",0.2));
     list.push_back(make_pair("tZq",0.2));
     list.push_back(make_pair("TTG",0.2));
@@ -635,6 +677,9 @@ if(sample.Contains("DoubleMuon_SKnonprompt")){    list.push_back(make_pair("Doub
     list.push_back(make_pair("WZZ",0.3));
     list.push_back(make_pair("WWG",0.3));
     list.push_back(make_pair("WZG",0.3));
+}if(sample.Contains("higgs")){    list.push_back(make_pair("VBF_HToMuMu",0.2));
+    list.push_back(make_pair("ggHtoWW",0.2));
+    list.push_back(make_pair("ggHtoZZ",0.2));
 }  
 
 
@@ -901,98 +946,9 @@ void SetTitles(TH1* hist, string name){
   }
   //// SET TITLES
 
-if(name.find("h_llmass")!=string::npos) xtitle="ll invariant mass (GeV/c^{2})";
-if(name.find("h_leadingLeptonPt")!=string::npos) xtitle="Leading lepton p_{T} (GeV/c)";
-if(name.find("h_secondLeptonPt")!=string::npos) xtitle="Second lepton p_{T} (GeV/c)";
-if(name.find("h_LeptonEta")!=string::npos) xtitle="Lepton #eta";
-if(name.find("h_Njets")!=string::npos) xtitle="Number of jets";
-if(name.find("h_Nbjets_m")!=string::npos) xtitle="Number of b-jets";
-if(name.find("h_PFMET")!=string::npos) xtitle="E^{miss}_{T} (GeV)";
-if(name.find("h_nVertices")!=string::npos) xtitle="Number of vertices";
-if(name.find("h_Nelectrons")!=string::npos) xtitle="Number of electrons";
-if(name.find("h_bTag")!=string::npos) xtitle="CSVInclV2";
-if(name.find("h_jets_pt")!=string::npos) xtitle="Jet p_{T} (GeV)";
-if(name.find("h_dijetsmass")!=string::npos) xtitle="m(j_{1}j_{2}) (GeV/c^{2})";
-if(name.find("h_l1jjmass")!=string::npos) xtitle="l_{1}jj invariant mass (GeV/c^{2})";
-if(name.find("h_l2jjmass")!=string::npos) xtitle="l_{2}jj invariant mass (GeV/c^{2})";
-if(name.find("h_lljjmass")!=string::npos) xtitle="l^{#pm}l^{#pm}jj invariant mass (GeV/c^{2})";
-if(name.find("h_llmass")!=string::npos) xtitle="ll invariant mass (GeV/c^{2})";
-if(name.find("h_leadingLeptonPt")!=string::npos) xtitle="Leading lepton p_{T} (GeV/c)";
-if(name.find("h_secondLeptonPt")!=string::npos) xtitle="Second lepton p_{T} (GeV/c)";
-if(name.find("h_LeptonEta")!=string::npos) xtitle="Lepton #eta";
-if(name.find("h_Njets")!=string::npos) xtitle="Number of jets";
-if(name.find("h_Nbjets_m")!=string::npos) xtitle="Number of b-jets";
-if(name.find("h_PFMET")!=string::npos) xtitle="E^{miss}_{T} (GeV)";
-if(name.find("h_nVertices")!=string::npos) xtitle="Number of vertices";
-if(name.find("h_Nelectrons")!=string::npos) xtitle="Number of electrons";
-if(name.find("h_bTag")!=string::npos) xtitle="CSVInclV2";
-if(name.find("h_jets_pt")!=string::npos) xtitle="Jet p_{T} (GeV)";
-if(name.find("h_dijetsmass")!=string::npos) xtitle="m(j_{1}j_{2}) (GeV/c^{2})";
-if(name.find("h_l1jjmass")!=string::npos) xtitle="l_{1}jj invariant mass (GeV/c^{2})";
-if(name.find("h_l2jjmass")!=string::npos) xtitle="l_{2}jj invariant mass (GeV/c^{2})";
-if(name.find("h_lljjmass")!=string::npos) xtitle="l^{#pm}l^{#pm}jj invariant mass (GeV/c^{2})";
-if(name.find("h_llmass")!=string::npos) xtitle="ll invariant mass (GeV/c^{2})";
-if(name.find("h_leadingLeptonPt")!=string::npos) xtitle="Leading lepton p_{T} (GeV/c)";
-if(name.find("h_secondLeptonPt")!=string::npos) xtitle="Second lepton p_{T} (GeV/c)";
-if(name.find("h_LeptonEta")!=string::npos) xtitle="Lepton #eta";
-if(name.find("h_Njets")!=string::npos) xtitle="Number of jets";
-if(name.find("h_Nbjets_m")!=string::npos) xtitle="Number of b-jets";
-if(name.find("h_PFMET")!=string::npos) xtitle="E^{miss}_{T} (GeV)";
-if(name.find("h_nVertices")!=string::npos) xtitle="Number of vertices";
-if(name.find("h_Nelectrons")!=string::npos) xtitle="Number of electrons";
-if(name.find("h_bTag")!=string::npos) xtitle="CSVInclV2";
-if(name.find("h_jets_pt")!=string::npos) xtitle="Jet p_{T} (GeV)";
-if(name.find("h_dijetsmass")!=string::npos) xtitle="m(j_{1}j_{2}) (GeV/c^{2})";
-if(name.find("h_l1jjmass")!=string::npos) xtitle="l_{1}jj invariant mass (GeV/c^{2})";
-if(name.find("h_l2jjmass")!=string::npos) xtitle="l_{2}jj invariant mass (GeV/c^{2})";
-if(name.find("h_lljjmass")!=string::npos) xtitle="l^{#pm}l^{#pm}jj invariant mass (GeV/c^{2})";
-if(name.find("h_llmass")!=string::npos) xtitle="ll invariant mass (GeV/c^{2})";
-if(name.find("h_leadingLeptonPt")!=string::npos) xtitle="Leading lepton p_{T} (GeV/c)";
-if(name.find("h_secondLeptonPt")!=string::npos) xtitle="Second lepton p_{T} (GeV/c)";
-if(name.find("h_LeptonEta")!=string::npos) xtitle="Lepton #eta";
-if(name.find("h_Njets")!=string::npos) xtitle="Number of jets";
-if(name.find("h_Nbjets_m")!=string::npos) xtitle="Number of b-jets";
-if(name.find("h_PFMET")!=string::npos) xtitle="E^{miss}_{T} (GeV)";
-if(name.find("h_nVertices")!=string::npos) xtitle="Number of vertices";
-if(name.find("h_Nelectrons")!=string::npos) xtitle="Number of electrons";
-if(name.find("h_bTag")!=string::npos) xtitle="CSVInclV2";
-if(name.find("h_jets_pt")!=string::npos) xtitle="Jet p_{T} (GeV)";
-if(name.find("h_dijetsmass")!=string::npos) xtitle="m(j_{1}j_{2}) (GeV/c^{2})";
-if(name.find("h_l1jjmass")!=string::npos) xtitle="l_{1}jj invariant mass (GeV/c^{2})";
-if(name.find("h_l2jjmass")!=string::npos) xtitle="l_{2}jj invariant mass (GeV/c^{2})";
-if(name.find("h_lljjmass")!=string::npos) xtitle="l^{#pm}l^{#pm}jj invariant mass (GeV/c^{2})";
-if(name.find("h_llmass")!=string::npos) xtitle="ll invariant mass (GeV/c^{2})";
-if(name.find("h_leadingLeptonPt")!=string::npos) xtitle="Leading lepton p_{T} (GeV/c)";
-if(name.find("h_secondLeptonPt")!=string::npos) xtitle="Second lepton p_{T} (GeV/c)";
-if(name.find("h_LeptonEta")!=string::npos) xtitle="Lepton #eta";
-if(name.find("h_Njets")!=string::npos) xtitle="Number of jets";
-if(name.find("h_PFMET")!=string::npos) xtitle="E^{miss}_{T} (GeV)";
-if(name.find("h_nVertices")!=string::npos) xtitle="Number of vertices";
-if(name.find("h_Nelectrons")!=string::npos) xtitle="Number of electrons";
-if(name.find("h_bTag")!=string::npos) xtitle="CSVInclV2";
-if(name.find("h_jets_pt")!=string::npos) xtitle="Jet p_{T} (GeV)";
-if(name.find("h_dijetsmass")!=string::npos) xtitle="m(j_{1}j_{2}) (GeV/c^{2})";
-if(name.find("h_l1jjmass")!=string::npos) xtitle="l_{1}jj invariant mass (GeV/c^{2})";
-if(name.find("h_l2jjmass")!=string::npos) xtitle="l_{2}jj invariant mass (GeV/c^{2})";
-if(name.find("h_lljjmass")!=string::npos) xtitle="l^{#pm}l^{#pm}jj invariant mass (GeV/c^{2})";
-if(name.find("h_llmass")!=string::npos) xtitle="ll invariant mass (GeV/c^{2})";
-if(name.find("h_leadingLeptonPt")!=string::npos) xtitle="Leading lepton p_{T} (GeV/c)";
-if(name.find("h_secondLeptonPt")!=string::npos) xtitle="Second lepton p_{T} (GeV/c)";
-if(name.find("h_LeptonEta")!=string::npos) xtitle="Lepton #eta";
-if(name.find("h_Njets")!=string::npos) xtitle="Number of jets";
-if(name.find("h_PFMET")!=string::npos) xtitle="E^{miss}_{T} (GeV)";
-if(name.find("h_nVertices")!=string::npos) xtitle="Number of vertices";
-if(name.find("h_Nelectrons")!=string::npos) xtitle="Number of electrons";
-if(name.find("h_bTag")!=string::npos) xtitle="CSVInclV2";
-if(name.find("h_jets_pt")!=string::npos) xtitle="Jet p_{T} (GeV)";
-if(name.find("h_dijetsmass")!=string::npos) xtitle="m(j_{1}j_{2}) (GeV/c^{2})";
-if(name.find("h_l1jjmass")!=string::npos) xtitle="l_{1}jj invariant mass (GeV/c^{2})";
-if(name.find("h_l2jjmass")!=string::npos) xtitle="l_{2}jj invariant mass (GeV/c^{2})";
-if(name.find("h_lljjmass")!=string::npos) xtitle="l^{#pm}l^{#pm}jj invariant mass (GeV/c^{2})";
 
 
-
-  hist->GetXaxis()->SetTitle(xtitle.c_str());
+  if(TString(xtitle) != "")  hist->GetXaxis()->SetTitle(xtitle.c_str());
   hist->GetYaxis()->SetTitle(ytitle.c_str());
 
   hist->GetXaxis()->SetTitleSize(0.04);
@@ -1058,20 +1014,7 @@ float  GetMaximum(TH1* h_data, TH1* h_up, bool ylog, string name, float xmax, fl
     }
   }
   
-  if(name.find("llmass")!=string::npos) yscale*=0.2;
   
-  if(ylog){
-    float scale_for_log=1.;
-    if(h_data->GetMaximum() > 100000) scale_for_log = 10;
-    else if(h_data->GetMaximum() > 10000) scale_for_log = 10;
-    else if(h_data->GetMaximum() > 1000) scale_for_log = 10;
-    yscale*=scale_for_log;
-    if(scale_up) yscale*= 10;
-  }
-  else{
-
-    yscale=1.2;
-  }
 
   if(name.find("Tri")!=string::npos) {
     yscale*=1.5;
@@ -1085,24 +1028,6 @@ float  GetMaximum(TH1* h_data, TH1* h_up, bool ylog, string name, float xmax, fl
   if(max_data > max_bkg) return max_data;
   else return max_bkg;
 
-  
-  if(name.find("eemass")!=string::npos) yscale*=1.3;
-  if(name.find("eta")!=string::npos) yscale*=2.5;
-  if(name.find("Eta")!=string::npos) yscale*=1.75;
-  if(name.find("nVert")!=string::npos) yscale*=1.75;
-  if(name.find("MET")!=string::npos) yscale*=1.2;
-  if(name.find("e1jj")!=string::npos) yscale*=1.2;
-  if(name.find("Nje")!=string::npos) yscale*=1.2;
-  if(name.find("l2jj")!=string::npos) yscale*=1.3;
-  if(name.find("charge")!=string::npos) yscale*=1.5;
-  if(name.find("deltaR")!=string::npos) yscale*=1.5;
-  if(name.find("bTag")!=string::npos) yscale*=2.5;
-  if(name.find("emujj")!=string::npos) yscale*=1.3;
-  if(name.find("dijetmass")!=string::npos) yscale*=1.5;
-  if(name.find("LeptonPt")!=string::npos) yscale*=0.2;
-  if(name.find("secondElectronPt")!=string::npos) yscale*=1.2;
-  
-  
   return -1000.;
 }
 
@@ -1398,23 +1323,23 @@ void  SetUpConfig(vector<pair<pair<vector<pair<TString,float> >, int >, TString 
 /// NP is nonprompt 
 vector<pair<TString,float> > np;
 np.push_back(make_pair("DoubleMuon_SKnonprompt",0.34));
-vector<pair<TString,float> >  Higgs = InitSample(" Higgs"); 
 vector<pair<TString,float> >  diboson = InitSample(" diboson"); 
 vector<pair<TString,float> >  top = InitSample(" top"); 
 vector<pair<TString,float> >  triv = InitSample(" triv"); 
+vector<pair<TString,float> >  higgs = InitSample(" higgs"); 
 
 
   for( unsigned int i = 0; i < listofsamples.size(); i++){
    if(listofsamples.at(i) =="DoubleMuon_SKnonprompt")samples.push_back(make_pair(make_pair(np,870),"Misid. Lepton Background"));
-   if(listofsamples.at(i) =="Higgs")samples.push_back(make_pair(make_pair(Higgs,800),"Higgs"));
-   if(listofsamples.at(i) =="diboson")samples.push_back(make_pair(make_pair(diboson,74),"Diboson"));
+   if(listofsamples.at(i) =="diboson")samples.push_back(make_pair(make_pair(diboson,kGreen),"Diboson"));
    if(listofsamples.at(i) =="top")samples.push_back(make_pair(make_pair(top,kRed),"Top"));
    if(listofsamples.at(i) =="triv")samples.push_back(make_pair(make_pair(triv,kSpring+2),"Triboson"));
+   if(listofsamples.at(i) =="higgs")samples.push_back(make_pair(make_pair(higgs,800),"Higgs"));
 
   }
 
   ///// Fix cut flow code
-caption=" Number of events with two opposite sign muons.";
+caption=" Number of events with two same-sign muon and two jets.";
 
   hist = "/h_Nelectrons";
   columnname="";
@@ -1424,7 +1349,7 @@ caption=" Number of events with two opposite sign muons.";
 }
 
 
-TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH1* hup_nostat,TLegend* legend, const string hname, const  int rebin, double xmin, double xmax,double ymin, double ymax,string path , string folder, bool logy, bool usedata, TString channel) {
+TCanvas* CompDataMC(TH1* hdata,  vector<TH1*> hsigs ,vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH1* hup_nostat,TLegend* legend, const string hname, const  int rebin, double xmin, double xmax,double ymin, double ymax,string path , string folder, bool logy, bool usedata, TString channel) {
   
   ymax = GetMaximum(hdata, hup, ylog, hname, xmax, xmin);
   
@@ -1489,9 +1414,19 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
   
   // draw data hist to get axis settings
   hdata->GetYaxis()->SetTitleOffset(1.4);
-  if(!showdata)hdata = h_nominal;
-  hdata->Draw("p9hist");
+ 
+  showdata=true;
 
+
+  //hdata= dynamic_cast<TH1*>((h_nominal)->Clone((string(h_nominal->GetName())+"data").c_str()));
+
+
+ 
+  if(!showdata) hdata->GetYaxis()->SetTitleOffset(2.);
+  else hdata->GetYaxis()->SetTitleOffset(1.5); 
+  hdata->Draw("p9hist");
+  
+  
   TLatex label;
   label.SetTextSize(0.04);
   label.SetTextColor(2);
@@ -1507,6 +1442,24 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
   // draw axis on same canvas
   hdata->Draw("axis same");
   errorband->Draw("E2same");  
+
+
+bool drawsig=true;
+  
+  if(!hsigs[0]) drawsig=false;
+  if(!hsigs[1]) drawsig=false;
+  if(drawsig){
+    /// Draw sig                                                                                                                                                                     
+
+hsigs[0]->Draw("hist9same"); 
+legend->AddEntry(hsigs[0], "m_{N} = 40 GeV, |V_{#muN}|^{2} = 5 #times 10^{-4} ","l");
+hsigs[1]->Draw("hist9same"); 
+legend->AddEntry(hsigs[1], "m_{N} = 60 GeV, |V_{#muN}|^{2} = 1 #times 10^{-3} ","l");
+hsigs[2]->Draw("hist9same"); 
+legend->AddEntry(hsigs[2], "m_{N} = 80 GeV, |V_{#muN}|^{2} = 3 #times 10^{-3} ","l");
+
+  }
+  
 
   vector<float> err_up_tmp;
   vector<float> err_down_tmp;
@@ -1568,19 +1521,33 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
   canvas_log->SetLogy();     
   
   gPad->SetLogz(1);
+  
   //// %%%%%%%%%% TOP HALF OF PLOT %%%%%%%%%%%%%%%%%%
   
-  float scale_for_log = 1.;
-  if(!ylog){
-    ymax = GetMaximum(hdata, hup, !ylog, hname, xmax,xmin);
-    hdata->GetYaxis()->SetRangeUser(2., ymax*scale_for_log);
-  }
-  hdata->GetYaxis()->SetTitleOffset(1.5);
+  float scale_for_log = 1000.;
+  ymax = GetMaximum(hdata, hup, !ylog, hname, xmax,xmin);
+  hdata->GetYaxis()->SetRangeUser(0.1, ymax*scale_for_log);
+
+
+  hdata->GetYaxis()->SetLabelSize(0.035);
+  hdata->GetYaxis()->SetTitleSize(0.035);
+  if(!showdata) hdata->GetYaxis()->SetTitleOffset(2.);
+  else hdata->GetYaxis()->SetTitleOffset(1.5);
+
+  //  if(!showdata) hdata->SetMarkerSize(0.);
   hdata->Draw("p9hist");
   
   mcstack.at(0)->Draw("9HIST same");
 
   hdata->Draw("9samep9hist");
+
+  if(drawsig){
+    /// Draw(1) sig
+    //for(int i =0; i < hsigs.size();i++){
+    //hsig[i]->Draw("hist9same");
+    //}
+  }
+  
   hdata->Draw("axis same");
   errorband->Draw("E2same");
 
@@ -1588,8 +1555,17 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
 
 
   g->Draw(" p0" );
-
   
+  if(drawsig){
+    /// Draw(2) sig                                                                                                                                                                     
+
+hsigs[0]->Draw("hist9same"); 
+hsigs[1]->Draw("hist9same"); 
+hsigs[2]->Draw("hist9same"); 
+    //for(int i =0; i < hsigs.size();i++){
+    //hsig[i]->Draw("hist9same");
+    //}
+  }
   legend->Draw();
   
   /// Make significance hist
@@ -1647,79 +1623,176 @@ TCanvas* CompDataMC(TH1* hdata, vector<THStack*> mcstack,TH1* hup, TH1* hdown,TH
     }
   } 
   
-  
-  for (Int_t i=1;i<=hdev->GetNbinsX()+1;i++) {
-    if(h_nominal->GetBinContent(i) > 0 &&  hdev->GetBinContent(i) > 0){
-      hdev->SetBinContent(i, hdev->GetBinContent(i)/ h_nominal->GetBinContent(i));
-      //hdev->SetBinContent(i, h_nominal->GetBinContent(i)/ h_nominal->GetBinContent(i));
-      hdev->SetBinError(i, 0.01);
-    }
-    else {
-      hdev->SetBinContent(i, -99);
-      hdev->SetBinError(i, 0.);
+  float maxSB(0.);
+  float minSB(9999.);
+  if(showdata){
+    for (Int_t i=1;i<=hdev->GetNbinsX()+1;i++) {
+      if(h_nominal->GetBinContent(i) > 0 &&  hdev->GetBinContent(i) > 0){
+	hdev->SetBinContent(i, hdev->GetBinContent(i)/ h_nominal->GetBinContent(i));
+	hdev->SetBinError(i, 0.01);
+      }
+      else {
+	hdev->SetBinContent(i, -99);
+	hdev->SetBinError(i, 0.);
+      }
     }
   }
+  else{
+    
+    for (Int_t i=1;i<=hdev->GetNbinsX()+1;i++) {
+      /*float punzi = 0.;
+      float sig(0.);
+      float bkg(0.);
+      float fake(0.);
+      for (Int_t j=1;j<=i;j++) {
+	  sig+= hsig1->GetBinContent(j);
+	  bkg+=h_nominal->GetBinContent(j);
+	  fake+=h_nominal->GetBinContent(j)*0.3*0.6;
+      }
+      if( (bkg + fake*fake) <=5.) punzi =0.00001; /// require 5 events ....
+      else if((sig / hsig1->Integral() )  < 0.5) punzi =0.00001;
+      else punzi = sig/(1+sqrt(bkg + fake*fake));
+      //cout << i << " " << bkg << " " << fake << " " << sig << endl;
+      
+      hdev->SetBinContent(i, punzi);
+      cout << " maxSB = " << maxSB << "  punzi ="<< punzi << endl;
+      
+      if(punzi  > maxSB)maxSB=  punzi;
+      if(punzi  < minSB)minSB=  punzi;*/
+      float binc(0.);
+      float sigc(0.);
+      if(hsigs[0]->GetBinContent(i)<=0)sigc=0.0001;
+      else sigc=hsigs[0]->GetBinContent(i);
+      sigc=sigc/hsigs[0]->Integral();
+      if(h_nominal->GetBinContent(i)>0.)binc = sigc/h_nominal->GetBinContent(i);
+      else binc=sigc/1.8;
+      hdev->SetBinError(i,0.);
+      hdev->SetBinContent(i, binc);
+      if(binc > maxSB)maxSB=binc;
+      if(binc < minSB)minSB=binc;
+    }
+    
+    for (Int_t i=1;i<=hdev_err->GetNbinsX()+1;i++) {
+      float binc(0.);
+      float sigc(0.);
+      if(hsigs[1]->GetBinContent(i)==0)sigc=0.0001;
+      else sigc=hsigs[1]->GetBinContent(i);
+      sigc=sigc/hsigs[1]->Integral();
+
+      if(h_nominal->GetBinContent(i)>0.)binc = sigc/h_nominal->GetBinContent(i);
+      else binc=sigc/1.8;
+      hdev_err->SetBinError(i,0.);
+
+      hdev_err->SetBinContent(i, binc);
+      if(binc > maxSB)maxSB=binc;
+      if(binc < minSB)minSB=binc;
+
+    }
+    
+  }
   
+
   /// set errors for datamc plot
   TGraphAsymmErrors * gratio = new TGraphAsymmErrors(hdev);
 
-  for (int i = 0; i < gratio->GetN(); ++i) {
-    
-    if(err_down_tmp.at(i)  !=0.) {
-      gratio->SetPointEYlow(i, err_down_tmp.at(i) / h_nominal->GetBinContent(i+1) );
-      gratio->SetPointEXlow(i, 0);
-      gratio->SetPointEYhigh(i, err_up_tmp.at(i) /h_nominal->GetBinContent(i+1));
-      gratio->SetPointEXhigh(i, 0);
-    }
-    else{
-      gratio->SetPointEYlow(i, 0);
-      gratio->SetPointEXlow(i, 0);
-      gratio->SetPointEYhigh(i, 1.8 / h_nominal->GetBinContent(i+1));
-      gratio->SetPointEXhigh(i, 0);
+  if(showdata){
+    for (int i = 0; i < gratio->GetN(); ++i) {
+      
+      if(err_down_tmp.at(i)  !=0.) {
+	gratio->SetPointEYlow(i, err_down_tmp.at(i) / h_nominal->GetBinContent(i+1) );
+	gratio->SetPointEXlow(i, 0);
+	gratio->SetPointEYhigh(i, err_up_tmp.at(i) /h_nominal->GetBinContent(i+1));
+	gratio->SetPointEXhigh(i, 0);
+      }
+      else{
+	gratio->SetPointEYlow(i, 0);
+	gratio->SetPointEXlow(i, 0);
+	gratio->SetPointEYhigh(i, 1.8 / h_nominal->GetBinContent(i+1));
+	gratio->SetPointEXhigh(i, 0);
+      }
     }
   }
-  
+  else{
+    for (int i = 0; i < gratio->GetN(); ++i) {
+      
+      if(err_down_tmp.at(i)  !=0.) {
+	
+	
+      }
+      else{
+        gratio->SetPointEYlow(i, 0);
+        gratio->SetPointEXlow(i, 0);
+        gratio->SetPointEYhigh(i, 1.8 / h_nominal->GetBinContent(i+1));
+        gratio->SetPointEXhigh(i, 0);
+      }
+    }
+
+
+  }
   
   //////////// Plot all
   
   hdev->GetYaxis()->SetLabelSize(0.035);
   hdev->GetYaxis()->SetTitleSize(0.035);
-  hdev->GetYaxis()->SetTitleOffset(1.3);
+  if(!showdata) hdev->GetYaxis()->SetTitleOffset(1.4);
+  else hdev->GetYaxis()->SetTitleOffset(1.3);
 
-  hdev->GetYaxis()->SetTitle( "Data / #Sigma MC" );
-  hdev->GetYaxis()->SetRangeUser(0.25,+1.75);
+  if(showdata){
+    hdev->GetYaxis()->SetTitle( "Data / #Sigma Bkg" );
+    hdev->GetYaxis()->SetRangeUser(0.25,+1.75);
+  }
+  else  {
+    hdev->GetYaxis()->SetTitle( "Bin_{S/B}");
+    gPad->SetLogy();
+    cout << "Set maxSB to " << maxSB << endl;
+    hdev->GetYaxis()->SetRangeUser(0.0001, maxSB*2.);
+  }
+
   hdev->GetYaxis()->SetNdivisions(3);
   hdev->GetXaxis()->SetNdivisions(5);
-
-  hdev->SetMarkerStyle(20);
-  //hdev->SetMarkerSize(2.3);
-  hdev_err_stat->SetMarkerSize(0.);
-  hdev_err->SetMarkerSize(0.);
-  hdev->SetLineColor(kBlack);
-  hdev_err->SetFillColor(kRed);
-  hdev_err->SetLineColor(kRed);
-  hdev_err->SetFillStyle(3444);
-  hdev_err_stat->SetFillColor(kOrange-9);
-  hdev_err_stat->SetLineColor(kOrange-9);
-  hdev->Draw("phist");
   
-  hdev_err_stat->Draw("sameE4");
-  hdev_err->Draw("sameE4");
-  gratio->SetLineWidth(2.0);
-  gratio->SetMarkerSize(0.);
-  gratio->Draw(" p0" );
-  hdev->Draw("same p hist");
-      
+  if(showdata){
+    hdev->SetMarkerStyle(20);
+    //hdev->SetMarkerSize(2.3);
+    hdev_err_stat->SetMarkerSize(0.);
+    hdev_err->SetMarkerSize(0.);
+    hdev->SetLineColor(kBlack);
+    hdev_err->SetFillColor(kRed);
+    hdev_err->SetLineColor(kRed);
+    hdev_err->SetFillStyle(3444);
+    hdev_err_stat->SetFillColor(kOrange-9);
+    hdev_err_stat->SetLineColor(kOrange-9);
+  }
+  
+  if(!showdata){
+    hdev->SetMarkerColor(kRed);
+    hdev->Draw("p");
+    
+    hdev_err->SetMarkerColor(kBlue);
+    hdev_err->Draw("psame");
+  }
+  
+  if(showdata){
+    hdev->Draw("hist");
+
+    hdev_err_stat->Draw("sameE4");
+    hdev_err->Draw("sameE4");
+    gratio->SetLineWidth(2.0);
+    gratio->SetMarkerSize(0.);
+    gratio->Draw(" p0" );
+    hdev->Draw("same p hist");
+  }
+  
     
   TLine *devz = new TLine(hdev->GetBinLowEdge(hdev->GetXaxis()->GetFirst()),1.0,hdev->GetBinLowEdge(hdev->GetXaxis()->GetLast()+1),1.0  );
   devz->SetLineWidth(1);
   devz->SetLineStyle(1);
-  devz->Draw("SAME");
+  if(showdata)  devz->Draw("SAME");
   
   
   TLegend* legendr = MakeRatioLegend(hdev_err,hdev_err_stat);
-  legendr->Draw();
-    
+  if(showdata)legendr->Draw();
+  
 
   CMS_lumi( canvas_log, 4, 2 );
   canvas_log->Update();
@@ -1896,8 +1969,8 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX )
   latex.SetTextSize(lumiTextSize*t);
   latex.DrawLatex(1-r,1-t+lumiTextOffset*t,lumiText);
 
-  if(iPosX==2)  latex.DrawLatex(1-r-0.22,1-t+lumiTextOffset*t, "#mu#mu ch.,");
-  else  latex.DrawLatex(1-r-0.4,1-t+lumiTextOffset*t, "#mu#mu ch.,");
+  if(iPosX==2)  latex.DrawLatex(1-r-0.22,1-t+lumiTextOffset*t, "#mu^{#pm}#mu^{#pm} channel,");
+  else  latex.DrawLatex(1-r-0.4,1-t+lumiTextOffset*t, "#mu^{#pm}#mu^{#pm} channel,");
 
   
 

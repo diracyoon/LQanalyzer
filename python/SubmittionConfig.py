@@ -53,7 +53,7 @@ def   GetMonth(imonth):
     else:
         return "Dec"
 
-def   MergeData(defrunnp,defruncf,defdata_lumi, defFinaloutputdir,  defcatversion, defuseskim, defcycle, defchannel):
+def   MergeData(defrunnp,defruncf,defdata_lumi, defFinaloutputdir,  defcatversion, defuseskim, defcycle, defchannel, skflag):
 
     defoutput_file_skim_tag=defchannel
     if defuseskim == "FLATCAT":
@@ -115,8 +115,8 @@ def   MergeData(defrunnp,defruncf,defdata_lumi, defFinaloutputdir,  defcatversio
                         if "localcpu" in rline:
                             srline = rline.split()
                             lxmachine=srline[2]
-                readcatpath.close()
-                os.system("scp -r "+ defFinaloutputdirMC+ "/"+defcycle+ "_"+defchannel+"_"+foutname+".root" + " jalmond@"+lxmachine+".cern.ch:"+transout)
+                    readcatpath.close()
+                    os.system("scp -r "+ defFinaloutputdirMC+ "/"+defcycle+ "_"+defchannel+"_"+foutname+".root" + " jalmond@"+lxmachine+".cern.ch:"+transout)
                 
 
 
@@ -184,8 +184,8 @@ def   MergeData(defrunnp,defruncf,defdata_lumi, defFinaloutputdir,  defcatversio
                         if "localcpu" in rline:
                             srline = rline.split()
                             lxmachine=srline[2]
-                readcatpath.close()
-                os.system("scp -r "+ defFinaloutputdirMC+ "/"+ defcycle+"_data_" + defchannel+"_cat_"+defcatversion+".root  jalmond@"+lxmachine+".cern.ch:"+transout)
+                    readcatpath.close()
+                    os.system("scp -r "+ defFinaloutputdirMC+ "/"+ defcycle+"_data_" + defchannel+"_cat_"+defcatversion+".root  jalmond@"+lxmachine+".cern.ch:"+transout)
 
 
 def UpdateOutput(outputlist,outputlist_path):
@@ -1499,8 +1499,35 @@ if tmpsubmit_allfiles == "true":
 
 
 if getpass.getuser()  == "jalmond":
+    if not os.path.exists(Finaloutputdir):
+        os.system("mkdir " + Finaloutputdir)
+
+
+    catpath=os.getenv("LQANALYZER_DIR")+"/bin/catconfig"
+    readcatpath=open(catpath,"r")
+    lxmachine=""
+    for rline in readcatpath:
+        if "localcpu" in rline:
+            srline = rline.split()
+            lxmachine=srline[2]
+    readcatpath.close()
+
+
+    print  "Making dir at lxplus"
+    
     transout=Finaloutputdir
     transout=transout.replace("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/" ,"/afs/cern.ch/work/j/jalmond/CAT/")
+    transout=transout.replace("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer//data/output/CAT/" ,"/afs/cern.ch/work/j/jalmond/CAT/")
+
+    os.system("ssh  jalmond@"+lxmachine+".cern.ch  mkdir " + transout )
+    if "OPT" in skflag:
+        Finaloutputdir=Finaloutputdir+"/OPT/"
+    print "Made dir " + transout
+    
+    if "OPT" in skflag:
+        transout = transout+"/OPT/"
+        os.system("ssh  jalmond@"+lxmachine+".cern.ch  mkdir " + transout )
+        print "Made dir " + transout
 
 
     os.system("cat ~/.ssh/config > check_connection.txt")
@@ -3038,7 +3065,7 @@ if end_job_time > email_time_limit:
 if run_in_bkg:
     os.system("mv "+an_jonpre+"CAT_SKTreeOutput/" + os.getenv("USER")  + "/CLUSTERLOG" + str(tagger)+ "/output_bkg.txt "+an_jonpre+"CAT_SKTreeOutput/" + os.getenv("USER")  + "/CLUSTERLOG" + str(tagger)+ "/output_finished.txt")
 if runningData:
-    MergeData(runnp,runcf,data_lumi, Finaloutputdir, catversion, useskim, cycle, channel)
+    MergeData(runnp,runcf,data_lumi, Finaloutputdir, catversion, useskim, cycle, channel, skflag)
 
 if len(output_warning) > 0:
     print "\n"

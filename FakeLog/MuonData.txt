@@ -1,0 +1,31 @@
+##################################################
+####  Central Fake Rates #########################
+##################################################
+### user         jskim   
+### localpath   /data1/LQAnalyzer_rootfiles_for_analysis/CATAnalysis2016/Fake/DiLep/
+### rootfile    Muon_Data_v7_SIP3p5_FR.root
+### histname    Muon_Data_v7_SIP3p5_FR_Awayjet40
+
+### ID
+Muon Loose : MUON_HN_LOOSEv5
+Muon Tight : MUON_HN_TIGHT
+
+comment:: ptcone vs eta, 10-70 GeV
+
+####### histname  	 Muon_Data_v7_SIP3p5_FR_Awayjet40
+
+
+
+
+####################################################
+SYSTEMATICS
+####################################################
+
+### user         jskim
+### localpath   /data1/LQAnalyzer_rootfiles_for_analysis/CATAnalysis2016/Fake/DiLep/
+#### rootfile    Muon_Data_v7_SIP3p5_FR.root
+####### histname     Muon_Data_v7_SIP3p5_FR_Awayjet20
+####### histname     Muon_Data_v7_SIP3p5_FR_Awayjet30
+####### histname     Muon_Data_v7_SIP3p5_FR_Awayjet80
+
+

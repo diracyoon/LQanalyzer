@@ -154,9 +154,15 @@ void ExampleAnalyzer::ExecuteEvents()throw( LQError ){
    float cf_weight = -999.;
    if(CFelectrons.size() == 2){
      if(CFelectrons.at(0).Charge() != CFelectrons.at(1).Charge()){//CF estimation is from OS dielectrons
-       cf_weight = GetCFweight(CFelectrons, true, "ELECTRON_HN_TIGHTv4");//put in electronColl vector, apply sf, electron ID
-       FillHist("chargeflipped_Z_mass", (CFelectrons.at(0)+CFelectrons.at(1)).M(),cf_weight, 50., 130., 80);
-       FillHist("chargeflipped_leading_lepton", CFelectrons.at(0).Pt(), cf_weight, 0., 200., 200);
+       cf_weight = GetCFweight(0,CFelectrons, true, "ELECTRON_HN_TIGHTv4");//put in syst=1,0,-1,  electronColl vector, apply sf, electron ID
+         //scale factor up downs with syst = 1, -1
+
+       std::vector<snu::KElectron> CFelectrons_shifted = ShiftElectronEnergy(CFelectrons, "ELECTRON_HN_TIGHTv4", true);//apply pt shift considering brem radiation after getting CF weights
+       if(CFelectrons_shifted.at(1).Pt()>20){//apply pt cuts again after shifting pt
+         FillHist("chargeflipped_Z_mass", (CFelectrons.at(0)+CFelectrons.at(1)).M(),cf_weight, 50., 130., 80);
+         FillHist("chargeflipped_leading_lepton", CFelectrons.at(0).Pt(), cf_weight, 0., 200., 200);
+   
+       }
      }
    }
 

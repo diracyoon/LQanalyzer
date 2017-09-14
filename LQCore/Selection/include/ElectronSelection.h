@@ -22,6 +22,7 @@ class ElectronSelection : public BaseSelection {
   void BasicSelection(std::vector<snu::KElectron>& leptonColl, bool m_debug= false);
   void SkimSelection(std::vector<snu::KElectron>& leptonColl, bool m_debug= false);
 
+  float IsoCutValue(snu::KElectron electron,TString elid);
   // POG 
   void PogID(std::vector<snu::KElectron>& leptonColl, ID elid);
 

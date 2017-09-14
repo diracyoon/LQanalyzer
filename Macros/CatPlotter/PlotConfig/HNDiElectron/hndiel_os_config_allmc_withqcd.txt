@@ -1,0 +1,38 @@
+### alias                 |   Legend                                            |  Legend alias     |  Color  | uncert. |
+SingleTop_s               |   Top		|  top              |  kRed     |	0.2     |    
+SingleTbar_t              |   Top 		|  top              |  kRed     |	0.2     |
+SingleTop_t               |   Top		|  top              |  kRed     |	0.2     |
+SingleTbar_tW             |   Top		|  top              |  kRed     |	0.2     |
+SingleTop_tW              |   Top		|  top              |  kRed     |	0.2     |
+TT_powheg                 |   Top		|  top              |  kRed     |	0.2     |
+TTTT                      |   Top             |  top              |  kRed     |       0.2     |
+TG	        	       |   Top             |  top              |  kRed     |       0.2     |
+TTG                       |   Top             |  top              |  kRed     |       0.2     |    
+ttH_nonbb                 |   Top           |  top              |  kRed     |	0.2     |
+ttH_bb                    |    Top          |  top              |  kRed     |	0.2     |
+ttW                       |   Top           |  top              |  kRed     |	0.2     |
+ttZ                       |   Top           |  top              |  kRed     |	0.2     |
+ttbb                      |   Top           |  top              |  kRed     |	0.2     |
+tZq                       |   Top           |  top              |  kRed     |   0.2     |
+GG_HToMuMu                |   Higgs                                             |  higgs            |  800    | 0.2     |
+VBF_HToMuMu               |   Higgs                                             |  higgs            |  800    | 0.2     |
+ggHtoWW                   |   Higgs                                             |  higgs            |  800    | 0.2     |
+ggHtoZZ                   |   Higgs                                             |  higgs            |  800    | 0.2     |
+vbfHtoWW                   |   Higgs                                             |  higgs            |  800    | 0.2     |
+vbfHtoZZ                   |   Higgs                                             |  higgs            |  800    | 0.2     |
+WJets                     |   W+Jets						|  wjet             |  kGreen     |	0.2     |
+WWW                       |   Triboson						|  triv              |  kSpring+10    |	0.2     |
+ZZZ                       |   Triboson						|  triv              |  kSpring+10    |	0.2     |
+WWZ                       |   Triboson						|  triv              |  kSpring+10    |	0.2     |     
+WZZ                       |   Triboson						|  vv               |  kSpring-1     | 0.2     |
+WW                        |   Diboson						|  vv               |  kSpring-1     | 0.2     |
+WZ                        |   Diboson						|  vv               |  kSpring-1     | 0.2     |
+ZZ                        |   Diboson						|  vv               |  kSpring-1     | 0.2     |
+WpWpQCD			  |   Diboson						|  vv               |  kSpring-1     | 0.2     |
+WpWpEWK			  |   Diboson						|  vv               |  kSpring-1     | 0.2     |
+ZGto2LG                          |   Diboson                                           |  vv               |  74     | 0.2     |
+WGtoLNuG                 |   Diboson                                           |  vv               |  74     | 0.2     |
+ww_ds                    |   Diboson                                           |  vv               |  74     | 0.2     |
+DYJets_MG_10to50             |   DY #rightarrow ll (m < 50)               |  DYlow            |  kYellow+4     | 0.15    |
+DYJets                    |   DY #rightarrow ll                     |  DY           |  kYellow     | 0.15    |
+END

@@ -54,6 +54,7 @@ class LQController  {
   void SetSkimName(TString skimname);
   void AddLibraries(TString libname);  
   void SetJobName(TString name);
+  void SetTagName(TString name);
   void SetInputList(TString list) throw( LQError );
   void SetFullInputList(TString list);
   void SetDataType(TString settype);
@@ -96,6 +97,7 @@ class LQController  {
   TString CycleName;
   TString skimName;
   TString jobName;
+  TString tagName;
   TString treeName;
   TString filelist;
   TString fullfilelist;

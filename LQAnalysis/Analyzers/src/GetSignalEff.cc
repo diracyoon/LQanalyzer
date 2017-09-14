@@ -60,6 +60,7 @@ void GetSignalEff::ExecuteEvents()throw( LQError ){
   if(!isData){
     std::vector<snu::KTruth> truthColl= eventbase->GetTruth();
     //TruthPrintOut();
+    vector<int> i_jets;
     
     for(unsigned int i = 0; i < truthColl.size(); i++){
     if(fabs(eventbase->GetTruth().at(i).PdgId()) == 11) {
@@ -109,10 +110,57 @@ void GetSignalEff::ExecuteEvents()throw( LQError ){
       if(fabs(eventbase->GetTruth().at(mother_i).PdgId()) == 9900012){
 	FillHist("Jets_FromW_LowMass_Pt", eventbase->GetTruth().at(i).Pt(), 1., 0., 500., 250);
 	FillHist("Jets_FromW_LowMass_Eta", eventbase->GetTruth().at(i).Eta(), 1., -5., 5., 100);
+
+	i_jets.push_back(i);
+      }
+    }
+    }
+
+    if(i_jets.size() ==2){
+      snu::KParticle W = eventbase->GetTruth().at(i_jets[0])+  eventbase->GetTruth().at(i_jets[1]);
+      FillHist("Truth_mjj", W.M(),  1., 0., 125., 250);
+      //FillHist("Truth_mjjll", W.M(),  1., 0., 125., 250);
+      std::vector<snu::KJet> jets = GetJets("JET_HN");
+      std::vector<snu::KMuon> muons = GetMuons("MUON_HN_TIGHT");
+      if(jets.size()>=2 && muons.size()==2){
+	
+	float dijetmass_tmp=999.;
+	float dijetmass=9990000.;
+	int m=-999;
+	int n=-999;
+	for(UInt_t emme=0; emme<jets.size(); emme++){
+	  for(UInt_t enne=1; enne<jets.size(); enne++) {
+	    if(emme == enne) continue;
+	    dijetmass_tmp = (jets[emme]+jets[enne] + muons[0] + muons[1]).M();
+	    if ( fabs(dijetmass_tmp-80.4) < fabs(dijetmass-80.4) ) {
+	      
+	      dijetmass = dijetmass_tmp;
+	      m = emme;
+	      n = enne;
+	    }
+	  }
+	}
+	
+	bool match=false;
+	
+	if(jets[m].DeltaR(muons[0]) < 0.5){
+	  if(jets[n].DeltaR(muons[1]) < 0.5){
+	    match=true;
+	  }
+	}
+	if(jets[m].DeltaR(muons[1]) < 0.5){
+	  if(jets[n].DeltaR(muons[0]) < 0.5){
+	    match=true;
+
+	  }
+	}
+	FillHist("Reco_mjj", (jets[m]+jets[n]).M(),  1., 0., 125., 250);
+	if(match)  FillHist("Matched_JJ_truth_lowmass", 1, 1., 0., 2., 2);
+	else  FillHist("Matched_JJ_truth_lowmass",0, 1., 0., 2., 2);
       }
     }
   }
-  }
+  
   vector<TString> muonIDs;
   muonIDs.push_back("MUON_HN_EFF_PT");
   muonIDs.push_back("MUON_HN_EFF_POG");
@@ -246,23 +294,6 @@ void GetSignalEff::ExecuteEvents()throw( LQError ){
 
 
   if(k_running_nonprompt){
-
-    if(SameCharge(pogmedium))weight_pm=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogmedium, PassID(pogmedium[0],"MUON_POG_MEDIUM"),  PassID(pogmedium[1],"MUON_POG_MEDIUM"), "pogmedium","pogmedium", cb_1, cb_2,"ptcorr_eta",0.25,0.25,false,true);
-
-    
-    if(SameCharge(pogtight))weight_pt =m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogtight, PassID(pogtight[0],"MUON_POG_TIGHT"),  PassID(pogtight[1],"MUON_POG_TIGHT"), "pogtight","pogtight",cb_1, cb_2, "ptcorr_eta",0.15,0.15,false,true);
-
-    
-    if(SameCharge(gent))weight_g=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, gent, PassID(gent[0],"MUON_HNGENT_TIGHT"),  PassID(gent[1],"MUON_HNGENT_TIGHT"),"gent","gent",cb_1, cb_2, "ptcorr_eta",0.1,0.1,false,true);
-     
-    if(SameCharge(hn))weight_hn=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, hn, PassID(hn[0],"MUON_HN_TIGHT"),  PassID(hn[1],"MUON_HN_TIGHT"), "Tight0.07_0.005_3_0.04","Tight0.07_0.005_3_0.04",cb_1, cb_2, "ptcorr_eta",0.07,0.07,false,true);
-
-    if(SameCharge(hn_med))weight_hnm=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, hn_med, PassID(hn_med[0],"MUON_HN_MEDIUM"),  PassID(hn_med[1],"MUON_HN_MEDIUM"), "Medium0.07_0.005_3_0.04","Medium0.07_0.005_3_0.04",cb_1, cb_2, "ptcorr_eta",0.07,0.07,false,true);
-
-    if(SameCharge(hn_iso))weight_hniso=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, hn_iso, PassID(hn_iso[0],"MUON_HN_TIGHT_iso"),  PassID(hn_iso[1],"MUON_HN_TIGHT_iso"), "Tight0.09_0.005_3_0.04","Tight0.09_0.005_3_0.04",cb_1, cb_2, "ptcorr_eta",0.09,0.09,false,true);
-
-    if(SameCharge(hn_dxy))weight_hndxy=m_datadriven_bkg->Get_DataDrivenWeight_MM(false, hn_dxy, PassID(hn_dxy[0],"MUON_HN_TIGHT_dxy"),  PassID(hn_dxy[1],"MUON_HN_TIGHT_dxy"), "Tight0.07_0.05_3_0.04","Tight0.07_0.05_3_0.04",cb_1, cb_2, "ptcorr_eta",0.07,0.07,false,true);
-     
   }
   
   
@@ -283,7 +314,7 @@ void GetSignalEff::ExecuteEvents()throw( LQError ){
   if(CheckSignalRegion(true,hn_dxy,electrons_veto, jets, alljets,"High", weight)) FillEventCutFlow(4, "HighMass_HN_DXY", weight_hndxy);
   
   
-
+  
 
   return;
 }// End of execute event loop

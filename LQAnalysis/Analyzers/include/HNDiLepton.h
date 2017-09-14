@@ -13,7 +13,8 @@ class HNDiLepton : public AnalyzerCore {
   enum FUNC {
     VALIDATION=0,
     ANALYSIS=1, 
-    OPT=2
+    OPT=2,
+    CUTFLOW=3
   };
 
   /// Functions from core
@@ -25,17 +26,13 @@ class HNDiLepton : public AnalyzerCore {
   
   void DoCutFlow(float w);
 
+  void RunMM(TString label, std::vector<snu::KMuon> muons, std::vector<snu::KMuon> muons_veto,std::vector<snu::KElectron> el, std::vector<snu::KJet> alljets, std::vector<snu::KJet> jets, std::vector<snu::KFatJet> fatjets, std::vector<snu::KJet> tjets,float mm_weight ,std::vector<TString> mm_trig, float pt1, float pt2);
+			 
+
   void InitialiseAnalysis() throw( LQError );
   void MakeHistograms();
   void FillEventCutFlow(int cf,TString cut,  float weight);
   void FillEventCutFlow(TString cut, TString label , float weight);
-
-  void MakeControlPlotsMM(int method, TString methodtag, float w)throw( LQError );
-  void MakeControlPlotsEE(int method, TString methodtag, float w)throw( LQError );
-  void MakeControlPlots(int method, TString methodtag, float w)throw( LQError );
-  void MakeValidationPlots(float w);
-
-  void RunAnalysis(TString plottag, TString tightelid, TString vetoelid, TString looseelid);
 
   float WeightCFEvent(std::vector<snu::KElectron> electrons, bool runchargeflip);  
   float IsDiLep(std::vector<snu::KElectron> electrons);
@@ -59,7 +56,10 @@ class HNDiLepton : public AnalyzerCore {
   void SignalValidation();
   void RunAnalysis();
   void OptimiseID(bool isss);
-  
+
+  float MMWeight(std::vector<snu::KMuon> muons,TString id);
+  float EEWeight(TString id);
+  float EMWeight(TString elid, TString muid);
 
   void counter(TString cut, float w);
 
@@ -68,9 +68,24 @@ class HNDiLepton : public AnalyzerCore {
   FUNC functionality ;
   bool _ee_channel;
   bool _mm_channel;
+  bool _m_channel;
+
+  TString _m_tightid;
+  TString _m_looseid;
+  TString _e_tightid;
+  TString _e_looseid;
+
+  float _mm_mll_presel_cut;
+  float _ee_mll_presel_cut;
+  float _em_mll_presel_cut;
+
+  float _mm_met_presel_cut;
+  float _ee_met_presel_cut;
+  float _em_met_presel_cut; 
+
 
   std::map<TString, float> mapcounter;
-  
+  map<TString, pair<pair<TString,TString>, pair<float,TString> >  > fake_hists;
   //
   // The output variables 
   //

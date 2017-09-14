@@ -1,0 +1,24 @@
+### alias                 |   Legend                                            |  Legend alias     |  Color  | uncert. |
+TT_powheg                 |   Top		|  top              |  kRed     |	0.2     |
+WJets                     |   W+Jets						|  wjet             |  kGreen     |	0.2     |
+DYJets                    |   DY                    |  DY           |  kYellow     | 0.15    |
+QCD_DoubleEMEnriched_30-40_mgg80toinf			  |   QCD	     | QCD | kCyan | 0.4 |
+QCD_DoubleEMEnriched_30-inf_mgg40to80			   |   QCD            | QCD | kCyan | 0.4 |
+QCD_Pt-20to30_EMEnriched   |   QCD            | QCD | kCyan | 0.4 |
+QCD_Pt-30to50_EMEnriched   |   QCD            | QCD | kCyan | 0.4 |
+QCD_Pt-50to80_EMEnriched   |   QCD            | QCD | kCyan | 0.4 |
+QCD_Pt-80to120_EMEnriched   |   QCD            | QCD | kCyan | 0.4 |
+QCD_Pt-120to170_EMEnriched   |   QCD            | QCD | kCyan | 0.4 |
+QCD_Pt-170to300_EMEnriched   |   QCD            | QCD | kCyan | 0.4 |
+QCD_Pt-300to470_EMEnriched   |   QCD            | QCD | kCyan | 0.4 |
+QCD_Pt-470to600_EMEnriched   |   QCD            | QCD | kCyan | 0.4 |
+QCD_Pt-600to800_EMEnriched   |   QCD            | QCD | kCyan | 0.4 |
+QCD_Pt-800to1000_EMEnriched   |   QCD            | QCD | kCyan | 0.4 |
+QCD_Pt-1000toInf_EMEnriched   |   QCD            | QCD | kCyan | 0.4 |
+qcd_15to20_bctoe   | qcdbc   | qcdbc | kGreen -2 | 0.4 |
+qcd_20to30_bctoe   | qcdbc   | qcdbc | kGreen -2 | 0.4 |
+qcd_30to80_bctoe   | qcdbc   | qcdbc | kGreen -2 | 0.4 |
+qcd_80to170_bctoe   | qcdbc   | qcdbc | kGreen -2 | 0.4 |
+qcd_170to250_bctoe   | qcdbc   | qcdbc | kGreen -2 | 0.4 |
+qcd_250toinf_bctoe   | qcdbc   | qcdbc | kGreen -2 | 0.4 |
+END

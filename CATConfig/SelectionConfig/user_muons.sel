@@ -1,6 +1,12 @@
-ncuts 13
+ncuts 15
 webpage https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2
-| ID              |  ptmin  | |etamax| |  isomin04   | isomax04 | IsTight(POG)  | IsMedium(POG)  | IsLoose(POG)   | |dxymax|  |  |dzmax|  | chi2max | |dxysigmin|  |  |dxysigmax|  | ApplyRoch |
-| MUON_NOCUT      | 0.      | 8.       |   0.        | 1000.    | false         | false          |  false         | 999.      | 999.      | 999.    | 999.         | 999.         | false |
-| MUON_HN_Tight_FAKELOOSEST                 | 5.     | 2.4      |   0.        | 0.60     | true          | false          |  false         | 999.      | 0.5       | 50.     | 999.    | 999.         |  true      |
-| MUON_HN_Medium_FAKELOOSEST                 | 5.     | 2.4      |   0.        | 0.60     | false          | true          |  false         | 999.      | 0.5       | 50.     | 999.    | 999.         |  true      |
+| ID                            |  ptmin  | |etamax| |  isomin04   | isomax04_b | isomax04_ec | IsTight(POG)  | IsMedium(POG)  | IsLoose(POG)   | |dxymax|  |  |dzmax_b| |  |dzmax_ec|  | chi2max | |dxysigmin|  |  |dxysigmax| |  ApplyRoch |
+| MUON_NOCUT      | 0.      | 8.       |   0.        | 1000.    | 1000.  | false         | false          |  false         | 999.   | 999.       | 999.      | 999.    | 999.         | 999.         | false |
+| MUON_HN_Tight_FAKELOOSEST                 | 5.     | 2.4      |   0.        | 0.60  | 0.60     | true          | false          |  false         | 999.  | 0.5           | 0.5       | 50.     | 999.    | 999.         |  true      |
+| MUON_HN_Medium_FAKELOOSEST                 | 5.     | 2.4      |   0.        | 0.60 | 0.60      | false          | true          |  false         | 999.  | 0.5          | 0.5       | 50.     | 999.    | 999.         |  true      |
+| MUON_HNGENT_TIGHT                 | 5.     | 2.4      |   0.        | 0.10     | 0.1        | false          | true          | true         | 0.05      | 0.1       | 0.1      | 999.     | 999.    | 4.         |  true      |
+| MUON_HNGENT_LOOSE                 | 5.     | 2.4      |   0.        | 0.60     | 0.6        | false          | true          | true         | 0.05      | 0.1       | 0.1      | 999.     | 999.    | 4.         |  true      |
+| MUON_HNGENT_TIGHT2                 | 5.     | 2.4      |   0.        | 0.10     | 0.1        | false          | true          | true         | 999.      | 999.       | 999.    | 999.    | 999.    | 999.         |  true      |
+| MUON_HNGENT_TIGHT3                 | 5.     | 2.4      |   0.        | 0.10     | 0.1        | false          | true          | true         | 999.      | 0.1       | 0.1      | 999.     | 999.    | 999.         |  true      |
+| MUON_HNGENT_TIGHT4                 | 5.     | 2.4      |   0.        | 0.10     | 0.1        | false          | true          | true         | 999.      | 0.1       | 0.1      | 999.     | 999.    | 4.         |  true      |
+| MUON_HNGENT_TIGHT5                 | 5.     | 2.4      |   0.        | 0.10     | 0.1        | false          | true          | true         | 0.05      | 0.1       | 0.1      | 999.     | 999.    | 4.         |  true      |

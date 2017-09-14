@@ -32,7 +32,7 @@ void MakeFRRootFile(){
 
 void MakeFRRootFile(TString file, TString tag){
   
-  TString path= "/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/FakeRateCalculator_Mu/periodBtoH/";
+  TString path= "/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/FakeRateCalculator_Mu/periodBtoH/2017-08-01/";
   
   TFile * fdata = new TFile(path + "FakeRateCalculator_Mu_data_"+file+"_cat_v8-0-7.root");
   TFile * fmc = new TFile(path + "FakeRateCalculator_Mu_mc_v8-0-7.root");
@@ -54,7 +54,13 @@ void MakeFRRootFile(TString file, TString tag){
   fout->cd();
   
   std::vector<TString> fakes40;
+  fakes40.push_back("20_pt_eta");
+  fakes40.push_back("20_ptcorr_eta");
+  fakes40.push_back("30_pt_eta");
+  fakes40.push_back("30_ptcorr_eta");
   fakes40.push_back("40_pt_eta");
+  fakes40.push_back("60_ptcorr_eta");
+  fakes40.push_back("60_pt_eta");
   fakes40.push_back("40_ptcorr_eta");
   //fakes40.push_back("40_pt_eta_cb_l");
   //fakes40.push_back("40_ptcorr_eta_cb_l");
@@ -125,7 +131,8 @@ void MakeFRRootFile(TString file, TString tag){
     }
   }
   
-  isocut.push_back("SNUTightdijet_0.07_0.005_3_0.04_40_ptcorr_eta");
+  isocut.push_back("SNUTightdijet_0.07_0.005_3_0.04");
+
 
   for(vector<TString>::iterator it2 = fakes40.begin(); it2!=fakes40.end(); ++it2){
     for(vector<TString>::iterator it3 = isocut.begin(); it3!=isocut.end(); ++it3){
@@ -153,10 +160,10 @@ void MakeFRRootFile(TString file, TString tag){
       TH2D* eff_rate = (TH2D*)h_pt_num->Clone(("FakeRate_" + name).Data());
       TH2D* hratedenom = (TH2D*)h_pt_denom->Clone((name +"_denom").Data());
       
-      TH2D* eff_rate_mcup10 = (TH2D*)h_pt_num->Clone(("FakeRate_" + name).Data());
-      TH2D* eff_rate_mcdown10 = (TH2D*)h_pt_num->Clone(("FakeRate_" + name).Data());
-      TH2D* hratedenom_mcup10 = (TH2D*)h_pt_denom->Clone((name +"_denom").Data());
-      TH2D* hratedenom_mcdown10 = (TH2D*)h_pt_denom->Clone((name +"_denom").Data());
+      TH2D* eff_rate_mcup10 = (TH2D*)h_pt_num->Clone(("FakeRate_up_" + name).Data());
+      TH2D* eff_rate_mcdown10 = (TH2D*)h_pt_num->Clone(("FakeRate_down)" + name).Data());
+      TH2D* hratedenom_mcup10 = (TH2D*)h_pt_denom->Clone((name +"_up_denom").Data());
+      TH2D* hratedenom_mcdown10 = (TH2D*)h_pt_denom->Clone((name +"_down_denom").Data());
 
       
       eff_rate->Add(h_mcpt_num,-1.);

@@ -1,0 +1,18 @@
+## alias                 |   Legend                                            |  Legend alias     |  Color  | uncert. |
+ggHtoZZ                   |   Higgs                                             |  Higgs            |  kPink       | 0.2 |
+ZZTo4L_powheg             |   Diboson                                                |  diboson             |  kGreen     | 0.20     |
+WZTo3LNu_powheg		  |  Diboson                                                |  diboson             |  kGreen     | 0.20     |
+ggZZto4mu                 |   Diboson                                                |  diboson             |  kGreen     | 0.20     |
+WpWpQCD                   |    Diboson                                                |  diboson             |  kGreen     |     0.15     |
+WpWpEWK                   |    Diboson                                                |  diboson             |  kGreen     |     0.15     |
+ww_ds                     |   Diboson                                           |  diboson               |  kGreen    | 0.15     |
+WWW                       |   Triboson                                          |  triv              |  kSpring+2    |      0.3     |
+ZZZ                       |   Triboson                                          |  triv              |  kSpring+2   |      0.3     |
+WWZ                       |   Triboson                                         |  triv              |  kSpring+2    |      0.3     |
+WZZ                       |   Triboson                                          |  triv               |  kSpring+2    | 0.3     |
+WWG                       |   Triboson                                          |  triv               |  kSpring+2   | 0.3     |
+WZG                       |   Triboson                                          |  triv               |  kSpring+2    | 0.3     |
+ZGto2LG                   |   Diboson                                           |  zg               |  kGreen     | 0.15     |
+WGtoLNuG                  |   Diboson                                           |  wg               |  kGreen     | 0.15     |
+END
+

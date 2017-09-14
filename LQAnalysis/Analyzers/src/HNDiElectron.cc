@@ -220,6 +220,7 @@ void HNDiElectron::ExecuteEvents()throw( LQError ){
   IDs.push_back("ELECTRON_HN_EFF_dxysig");
   IDs.push_back("ELECTRON_HN_EFF_iso");
   IDs.push_back("ELECTRON_HN_EFF_gentmva");
+  IDs.push_back("ELECTRON_HN_TIGHT");
   IDs.push_back("ELECTRON_HN_TIGHTv4");
 
   bool _diel =   isData ?  (k_channel.Contains("DoubleEG")) : true ;
@@ -283,6 +284,26 @@ void HNDiElectron::ExecuteEvents()throw( LQError ){
 	    if(jets.size() > 1) FillEventCutFlow(itrig, "DiJet", weight);
 	    if((jets.size() + fatjets.size()) > 1 )  FillEventCutFlow(itrig, "NewDiJet", weight);
 	  }
+	}
+	else if(electrons_eff.size()==2){
+	  TString dataset="";
+
+          if(itrig==0 && !_diel) continue;
+          if(itrig==1 && !_singleel) continue;
+          if(itrig==0){
+            dataset="DoubleEG";
+            if(!PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v")) continue;
+            if(electrons_eff[0].Pt() < 25 || electrons_eff[1].Pt() < 15) continue;
+          }
+          if(itrig==1){
+            dataset="SingleElectron";
+            if(PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v")) continue;
+            if(!PassTrigger("HLT_Ele27_WPTight_Gsf_v"))  continue;
+            if(electrons_eff[0].Pt() < 30 || electrons_eff[1].Pt() < 10) continue;
+          }
+
+          FillCLHist(sighist_ee, dataset+"OS"+elid, eventbase->GetEvent(), muons_veto, electrons_eff,jets, alljets,weight);
+	  
 	}
 	
 	if(IDs[iid] == "ELECTRON_HN_TIGHT"){
@@ -635,12 +656,12 @@ void HNDiElectron::MakeValidationPlots(float w){
       gent=  GetMuons("MUON_HNGENT_LOOSE",false);
       pogtight_tight = GetMuons("MUON_HN_LOOSE",false);
       pogmedium_tight = GetMuons("MUON_HN_LOOSE",false);
-      if(SameCharge(gent))wg = m_datadriven_bkg->Get_DataDrivenWeight_MM(false, gent, PassID(gent[0],"MUON_HNGENT_TIGHT"),  PassID(gent[1],"MUON_HNGENT_TIGHT"), "gent","gent",false, false, "ptcorr_eta",0.1,0.1,false, false);
+      if(SameCharge(gent))wg = 1.;//m_datadriven_bkg->Get_DataDrivenWeight_MM(false, gent, PassID(gent[0],"MUON_HNGENT_TIGHT"),  PassID(gent[1],"MUON_HNGENT_TIGHT"), "gent","gent",false, false, "ptcorr_eta",0.1,0.1,false, false);
       else wg=0.;
       cout << "wg  = " << wg << endl;
-      if(SameCharge(pogmedium_tight))wm = m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogmedium_tight, PassID(pogmedium_tight[0],"MUON_POG_MEDIUM"),  PassID(pogmedium_tight[1],"MUON_POG_MEDIUM"),"pogmedium",  "pogmedium", false, false ,"ptcorr_eta",0.25,0.25,false,false);
+      if(SameCharge(pogmedium_tight))wm = 1.;//m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogmedium_tight, PassID(pogmedium_tight[0],"MUON_POG_MEDIUM"),  PassID(pogmedium_tight[1],"MUON_POG_MEDIUM"),"pogmedium",  "pogmedium", false, false ,"ptcorr_eta",0.25,0.25,false,false);
       else wm = 0.;
-      if(SameCharge(pogtight_tight)) wt = m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogtight_tight, PassID(pogtight_tight[0],"MUON_POG_TIGHT"),  PassID(pogtight_tight[1],"MUON_POG_TIGHT"), "pogtight","pogtight", false, false, "ptcorr_eta",0.15,0.15,false,false);
+      if(SameCharge(pogtight_tight)) wt =1.;// m_datadriven_bkg->Get_DataDrivenWeight_MM(false, pogtight_tight, PassID(pogtight_tight[0],"MUON_POG_TIGHT"),  PassID(pogtight_tight[1],"MUON_POG_TIGHT"), "pogtight","pogtight", false, false, "ptcorr_eta",0.15,0.15,false,false);
       else wt=0.;
       
       
@@ -1655,7 +1676,7 @@ void HNDiElectron::FillByTriggerTrigger(int iel_trig, TString ID,int method, TSt
       
       //// set ev_weight OF running fake bkg prediction
       if(k_running_nonprompt){
-	ev_weight     = m_datadriven_bkg->Get_DataDrivenWeight(false, muonVetoColl, "MUON_HN_TRI_TIGHT", muonVetoColl.size(), electronZZColl, elid_tight_fixed, electronZZColl.size(), elid_loose, method_fake);
+	ev_weight     = 1.;//m_datadriven_bkg->Get_DataDrivenWeight(false, muonVetoColl, "MUON_HN_TRI_TIGHT", muonVetoColl.size(), electronZZColl, elid_tight_fixed, electronZZColl.size(), elid_loose, method_fake);
       }
       
       
@@ -1799,7 +1820,7 @@ void HNDiElectron::FillByTriggerTrigger(int iel_trig, TString ID,int method, TSt
       
       // pt el 1 and 2 are set earlier to comply with trigger (25,12)
       if(k_running_nonprompt){
-	ev_weight     = m_datadriven_bkg->Get_DataDrivenWeight(false, muonVetoColl, "MUON_HN_TRI_TIGHT", muonVetoColl.size(), electronTightColl,elid_tight_fixed, electronTightColl.size(),elid_loose, method_fake);
+	ev_weight     = 1.;//m_datadriven_bkg->Get_DataDrivenWeight(false, muonVetoColl, "MUON_HN_TRI_TIGHT", muonVetoColl.size(), electronTightColl,elid_tight_fixed, electronTightColl.size(),elid_loose, method_fake);
 	
       }
       if(!(muonVetoColl.size() > 0 ||  electronVetoColl.size() > 3)){
@@ -1910,7 +1931,7 @@ void HNDiElectron::FillByTriggerTrigger(int iel_trig, TString ID,int method, TSt
 	
 	if(k_running_nonprompt){
 	  //ev_weight =  m_datadriven_bkg->Get_DataDrivenWeight_EE( false,electronTightColl, "ELECTRON16_POG_FAKELOOSE","ELECTRON16_FR_POG_TIGHT","dijet_ajet40");     
-	  ev_weight     = m_datadriven_bkg->Get_DataDrivenWeight(false, muonVetoColl, "MUON_HN_TRI_TIGHT", muonVetoColl.size(), electronTightColl,elid_tight_fixed, electronTightColl.size(),elid_loose, method_fake);
+	  ev_weight     = 1.;//m_datadriven_bkg->Get_DataDrivenWeight(false, muonVetoColl, "MUON_HN_TRI_TIGHT", muonVetoColl.size(), electronTightColl,elid_tight_fixed, electronTightColl.size(),elid_loose, method_fake);
 	
 	  ev_weight2 = ev_weight;
 	  ev_weight3 = ev_weight;

@@ -174,7 +174,11 @@ namespace snu {
     inline Bool_t PassMVAZZ() const{return pass_notrigmva_zz;}
 
     
-    inline Bool_t MCMatched() const{return k_mc_matched;}
+    inline Bool_t MCMatched() const{
+      if(k_is_fromtau) return true;
+      return k_mc_matched;
+    }
+
     inline Bool_t IsPF() const{return k_isPF;}
     inline Bool_t MCIsPrompt() const{return k_mc_matched;}
     inline Bool_t MCIsCF() const{return k_is_cf;}
@@ -233,8 +237,16 @@ namespace snu {
       else  if(cone == 0.4)  return k_pf_neutral_iso04;
       else return -999.;
     }
-
+    
 		
+    inline Double_t PTCone(double cone, double iso=0.08){
+      float ptcone= this->Pt() * (1.+ std::max(0., k_rel_iso03 - iso));
+      if(cone == 0.4)   ptcone= this->Pt() * (1.+ std::max(0., k_rel_iso04 - iso));
+      if(ptcone< 10.) return -1.;
+      return ptcone;
+    }
+
+
     inline Double_t PFRelIso(double cone) const {
       if(cone == 0.3)   return k_rel_iso03;
       else  if(cone == 0.4)   return k_rel_iso04;

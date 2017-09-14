@@ -90,7 +90,7 @@ void FakeRateCalculator_Mu::RunFakes(TString tag, TString ID){
     vector<float> vcut_dxy_b;
     vector<TString> vcut_dxy_b_s;
     
-    for(unsigned int dxy_b=0;dxy_b < 10; dxy_b++){
+    for(unsigned int dxy_b=0;dxy_b < 1; dxy_b++){
       float cut_dxy_b =  float(dxy_b)*0.005 + 0.005;
       vcut_dxy_b.push_back(cut_dxy_b);
       stringstream ss;
@@ -99,17 +99,17 @@ void FakeRateCalculator_Mu::RunFakes(TString tag, TString ID){
     }
     vector<float> vcut_dxysig_b;
     vcut_dxysig_b.push_back(3.);
-    vcut_dxysig_b.push_back(4.);
+    //vcut_dxysig_b.push_back(4.);
     vector<TString> vcut_dxysig_b_s;
     vcut_dxysig_b_s.push_back("3");
-    vcut_dxysig_b_s.push_back("4");
+    //vcut_dxysig_b_s.push_back("4");
     
     
     vector<float> vcut_dz_b;
     vector<TString> vcut_dz_b_s;
     
-    for(unsigned int dz_b=0;dz_b < 4; dz_b++){
-      float cut_dz_b =  float(dz_b)*0.02 + 0.02;
+    for(unsigned int dz_b=0;dz_b < 1; dz_b++){
+      float cut_dz_b =  float(dz_b)*0.04 + 0.02;
       vcut_dz_b.push_back(cut_dz_b);
       stringstream ss;
       ss <<cut_dz_b;
@@ -120,8 +120,8 @@ void FakeRateCalculator_Mu::RunFakes(TString tag, TString ID){
     
     vector<float> vcut_iso_b;
     vector<TString> vcut_iso_b_s;
-    for(unsigned int iso_b=0;iso_b < 5; iso_b++){
-      float cut_iso_b = float(iso_b)*0.01 + 0.05;
+    for(unsigned int iso_b=0;iso_b < 1; iso_b++){
+      float cut_iso_b = float(iso_b)*0.01 + 0.07;
       vcut_iso_b.push_back(cut_iso_b);
       stringstream ss;
       ss <<cut_iso_b;
@@ -316,7 +316,7 @@ float FakeRateCalculator_Mu::GetPrescale( std::vector<snu::KMuon> muons,bool pas
     /// 10 - 20  HLT_Mu7
     /// 20 - INF  HLT_Mu17
     
-    if(muons.at(0).Pt() >= 25.){
+    if(muons.at(0).Pt() >= 20.){
       if((isData&&k_channel != "DoubleMuon")) return 0.;
 
       if(pass1){
@@ -328,7 +328,7 @@ float FakeRateCalculator_Mu::GetPrescale( std::vector<snu::KMuon> muons,bool pas
 	return 0;
       }
     }
-    else  if(muons.at(0).Pt() >= 12.){
+    else  if(muons.at(0).Pt() >= 10.){
       if((isData&&k_channel != "DoubleMuon")) return 0.;
 
       if(pass2){
@@ -393,7 +393,10 @@ void FakeRateCalculator_Mu::MakeFakeRatePlots(TString label, TString mutag,   st
   if(truth_match){
     if(jets.size() >= 1){
       if(makebasicplots){
-	if(useevent40)GetFakeRates(muons, muons_tight,label, jets, alljets,  label+"_40", (prescale_w * w),isocut,makebasicplots);
+	if(useevent20)GetFakeRates(muons, muons_tight,label, jets, alljets,  label+"_20", (prescale_w * w),isocut,makebasicplots);
+	if(useevent30)GetFakeRates(muons, muons_tight,label, jets, alljets,  label+"_30", (prescale_w * w),isocut,makebasicplots);
+        if(useevent40)GetFakeRates(muons, muons_tight,label, jets, alljets,  label+"_40", (prescale_w * w),isocut,makebasicplots);
+        if(useevent60)GetFakeRates(muons, muons_tight, label,jets, alljets,  label+"_60", (prescale_w * w),isocut,makebasicplots);
       }
       else{
 	if(useevent20)GetFakeRates(muons, muons_tight,label, jets, alljets,  label+"_20", (prescale_w * w),isocut,makebasicplots);
@@ -438,7 +441,7 @@ bool FakeRateCalculator_Mu::UseEvent(std::vector<snu::KMuon> muons,  std::vector
 
 void FakeRateCalculator_Mu::GetFakeRates(std::vector<snu::KMuon> loose_mu, std::vector<snu::KMuon> tight_mu, TString tightlabel,  std::vector<snu::KJet> jets,  std::vector<snu::KJet> alljets, TString tag, double w, float isocut, bool basicplots){
 
-  Float_t ptbins[11] = { 5.,12., 15.,20.,25.,30.,35.,45.,60.,100., 200.};
+  Float_t ptbins[11] = { 5., 12., 15.,20.,25.,30.,35.,45.,  60.,100., 200.};
   Float_t ptbinsb[9] = { 5., 12., 15.,20.,30.,45.,60.,100., 200.};
   Float_t etabin[2] = { 0.,  2.5};
   Float_t etabins[4] = { 0., 0.8,1.479,  2.5};
@@ -461,7 +464,17 @@ void FakeRateCalculator_Mu::GetFakeRates(std::vector<snu::KMuon> loose_mu, std::
     float el_pt = loose_mu.at(0).Pt();
     float el_pt_corr = loose_mu.at(0).Pt()*(1+max(0.,(loose_mu.at(0).RelIso04()-isocut))) ; /// will need changing for systematics
     
-    cout << el_pt << endl;
+    if(el_pt_corr < 10 || el_pt_corr > 20){
+      if(PassTrigger("HLT_Mu3_PFJet40_v")) el_pt_corr= -1.;
+    }
+    if(el_pt_corr < 20 || el_pt_corr > 30){
+      if(PassTrigger("HLT_Mu8_TrkIsoVVL_v")) el_pt_corr= -1.;
+    }
+    if(el_pt_corr < 30 ){
+      if(PassTrigger("HLT_Mu17_TrkIsoVVL_v"))  el_pt_corr= -1.;
+    }
+
+
     FillHist(("LooseMu" + tag + "_pt_eta").Data(), el_pt, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
     FillHist(("LooseMu" + tag + "_ptcorr_eta").Data(), el_pt_corr, fabs(loose_mu.at(0).Eta()),  w, ptbins, 10 , etabins2, 4);
     

@@ -29,6 +29,7 @@ class MuonSelection : public BaseSelection {
   bool MuonPass(snu::KMuon muon, TString muid,  float ptcut=-999., float etacut=-999.);
   bool MuonPass(snu::KMuon muon, TString muid, vector<pair<TString, TString> > vids, vector<pair<TString, float> > vidf,  float ptcut=-999., float etacut=-999.);
 
+  float IsoCutValue(snu::KMuon muon,TString muid);
   bool PassUserID(TString id, snu::KMuon mu);
   bool PassUserID(TString id, snu::KMuon mu,vector<pair<TString, TString> > vids, vector<pair<TString, float> > vidf);
   bool PassID(TString id, snu::KMuon mu, bool checkdxy=true, bool checkdz=true, bool checkchi2=true, bool m_debug = false);

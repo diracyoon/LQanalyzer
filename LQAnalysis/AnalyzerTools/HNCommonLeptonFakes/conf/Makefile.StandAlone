@@ -42,7 +42,7 @@ endif
 # -------------------------------------------------------------
 # General flags
 # -------------------------------------------------------------
-PACKAGE    = HNCommonLeptonFakes,HNCommonLeptonFakesOpt
+PACKAGE    = HNCommonLeptonFakes,HNCommonLeptonFakesOpt,HNCommonLeptonFakesTriLep
 OUTPUTDIR  = ../Root
 
 MFLAGS     = -MM -Wall -W -Woverloaded-virtual

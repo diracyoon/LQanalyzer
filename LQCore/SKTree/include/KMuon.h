@@ -106,7 +106,11 @@ namespace snu {
     inline Double_t dZ() const {return k_dz;}
     inline Double_t dXY() const {return k_dxy;}
     inline Double_t dXYSig() const {return k_dxy_sig;}
-    
+    inline Double_t  dxy() const {return  k_dxy;}
+    inline Double_t  dxySig() const {return  k_dxy_sig;}
+    inline Double_t  dz() const {return  k_dz;}
+
+
     inline Double_t GlobalChi2() const {return k_globmuon_chi2;}
 
     inline Bool_t   IsLoose () const {return k_isloose;}
@@ -127,12 +131,27 @@ namespace snu {
     inline Int_t MotherTruthIndex() const{return k_mother_index;} 
     inline Int_t MCTruthIndex() const{return k_mc_index;}
 
+    inline Double_t PFRelIso(double cone) const {
+      if(cone == 0.3)   return k_muon_reliso03;
+      else  if(cone == 0.4)   return k_muon_reliso04;
+      else return -999.;
+    }
+
+    inline Double_t PTCone(double cone, double iso=0.07){
+      float ptcone= this->Pt() * (1.+ std::max(0., k_muon_reliso04 - iso));
+      if(cone == 0.3)  ptcone= this->Pt() * (1.+ std::max(0., k_muon_reliso03 - iso));
+      if(ptcone < 5.) return -1.;
+      return ptcone;
+    }
+    
     inline Double_t RelIso03()  const {return k_muon_reliso03;}
     inline Double_t RelIso04()  const {return k_muon_reliso04;}
     inline Double_t RelMiniAODIso03()  const {return k_muon_maod_reliso03;}
     inline Double_t RelMiniAODIso04()  const {return k_muon_maod_reliso04;}
 
     inline Double_t RelMiniIso()  const {return k_muon_relminiiso;}
+    inline Double_t PFRelMiniIso() const { return k_muon_relminiiso; }
+
 
     inline Double_t MiniAODPt() const {return muon_maod_pt;}
     inline Double_t PtShiftedUp() const {return muon_pt_up;}

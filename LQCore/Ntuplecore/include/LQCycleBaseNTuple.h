@@ -45,6 +45,7 @@ public:
   void SetCFStatus( bool type);
   void SetTauStatus( bool type);
   void SetSampleName( TString sample);
+  void SetTagName( TString tag);
   void SetSkimName( TString sample);
   void SetAnalyzerClassName( TString name); 
   void SetDataChannel(TString channel);
@@ -61,6 +62,7 @@ public:
   bool k_running_chargeflip;
   bool k_running_taudecays;
   TString k_sample_name;
+  TString k_tag_name;
   TString k_channel;
   TString k_skim;
   TString k_classname;

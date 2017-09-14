@@ -59,7 +59,7 @@ void SetTitles(TH1* hist, string name);
 bool HistInGev(string name);
 void fixOverlay();
 void setTDRStyle();
-TCanvas* CompDataMC(TH1* hdata,  vector<THStack*> mcstack,TH1* hup, TH1* hdown, TH1* hupnostat,TLegend* legend, const string hname, const int rebin, double xmin, double xmax,double ymin, double ymax,string path , string folder, bool logy, bool usedata, TString channel);
+TCanvas* CompDataMC(TH1* hdata, vector<TH1*> hsigs, vector<THStack*> mcstack,TH1* hup, TH1* hdown, TH1* hupnostat,TLegend* legend, const string hname, const int rebin, double xmin, double xmax,double ymin, double ymax,string path , string folder, bool logy, bool usedata, TString channel);
 TH1* MakeSumHist2(THStack* thestack);
 TH1* MakeSumHist3(THStack* thestack);
 TH1* MakeErrorBand(TH1* hnom, TH1* hup, TH1* hdown);
