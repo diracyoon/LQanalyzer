@@ -7,7 +7,7 @@ ClassImp(Kinematic_Fitter_0);
 //////////
 
 
-Kinematic_Fitter_0::Kinematic_Fitter_0(const Bool_t& a_chk_high_mass_fitter, const Bool_t& a_chk_debug) : Kinematic_Fitter_Base(a_chk_high_mass_fitter, a_chk_debug)
+Kinematic_Fitter_0::Kinematic_Fitter_0(const Bool_t& a_chk_high_mass_fitter, const Int_t& ts_correction_type, const Bool_t& a_chk_debug) : Kinematic_Fitter_Base(a_chk_high_mass_fitter, ts_correction_type, a_chk_debug)
 {
   cout << "Kinematic_Fitter type : 0" << endl;
 }//Kinematic_Fitter_0::Kinematic_Fitter_0()

@@ -13,7 +13,7 @@
 class Kinematic_Fitter_Base
 {
  public:
-  Kinematic_Fitter_Base(const Bool_t& a_chk_high_mass_fitter=kTRUE, const Bool_t& a_chk_debug=kFALSE);
+  Kinematic_Fitter_Base(const Bool_t& a_chk_high_mass_fitter=kTRUE, const Int_t& ts_correction_type=4, const Bool_t& a_chk_debug=kFALSE);
   virtual ~Kinematic_Fitter_Base();
 
   virtual void Fit()=0;

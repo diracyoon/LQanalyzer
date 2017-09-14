@@ -20,11 +20,13 @@ Fitter_Test::Fitter_Test() : AnalyzerCore()
   // This function sets up Root files and histograms Needed in ExecuteEvents
   InitialiseAnalysis();
 
-  Bool_t high_mass_fitter = kTRUE;
+  Bool_t high_mass_fitter = kFALSE;
   chk_debug = kFALSE;
-  fitter = new Kinematic_Fitter_1(high_mass_fitter, chk_debug);
+  Int_t ts_correction_type = 4;
+  
+  fitter = new Kinematic_Fitter_1(high_mass_fitter, ts_correction_type, chk_debug);
  
-  ts_correction = new TS_Correction(1);
+  ts_correction = new TS_Correction(ts_correction_type);
 }//Fitter_Test::Fitter_Test()
 
 //////////
@@ -105,15 +107,15 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   std::vector<snu::KMuon> muon_tight_coll;
   muon_tight_coll = GetMuons(BaseSelection::MUON_POG_TIGHT);
   
-  std::vector<snu::KMuon> muon_veto_coll;
-  muon_veto_coll = GetMuons(BaseSelection::MUON_POG_LOOSE);
+  std::vector<snu::KMuon> muon_loose_coll;
+  muon_loose_coll = GetMuons(BaseSelection::MUON_POG_LOOSE);
   
   //tight muon==1 cut
   if(muon_tight_coll.size()!=1) throw LQError("Fails tight muon==1 cuts", LQError::SkipEvent);
   FillCutFlow("OneTightMuon", weight);
 
   //extra muon veto cut
-  if(muon_veto_coll.size()>1) throw LQError("Fails extra electron veto cuts", LQError::SkipEvent);
+  if(muon_loose_coll.size()>1) throw LQError("Fails extra electron veto cuts", LQError::SkipEvent);
   FillCutFlow("ExtraMuonVeto", weight);
 
   //construct muon vector
@@ -209,26 +211,27 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   ////////////////
   /*Save results*/
   ////////////////
+  Bool_t chk_convergence = fitter->Get_Convergence_Checker();
+  if(chk_convergence==kFALSE) throw LQError("Fitter Fail", LQError::SkipEvent);
 
   //neutrino pz solution. Is it real or complex
   Bool_t chk_pz_real = fitter->Get_Neutrino_Pz_Sol_Checker();
   if(chk_pz_real==kTRUE) FillHist("Neutrino_Pz_Sol", 1, weight);
   else FillHist("Neutrino_Pz_Sol", 0, weight);
 
-  Bool_t chk_convergence = fitter->Get_Convergence_Checker();
-  if(chk_convergence==kFALSE) throw LQError("Fitter Fail", LQError::SkipEvent);
-
+  //get chi2
   Double_t chi2 = fitter->Get_Chi2();
+  Double_t chi2_piece[N_CHI2_PIECE];
+  fitter->Get_Chi2_Piece(chi2_piece);
   
+  //get jet permutation
   Int_t permutation_fitter[4];
   fitter->Get_Permutation(permutation_fitter);
   
   //check jet permutation match
   Bool_t chk_permutation_match = Chk_Permutation_Match(permutation_truth, permutation_fitter);
   
-  Double_t chi2_piece[N_CHI2_PIECE];
-  fitter->Get_Chi2_Piece(chi2_piece);
-  
+  //get fitted objects
   TLorentzVector fitted_object[6];
   TLorentzVector unfitted_object[6];
   for(Int_t i=0; i<6; i++)
@@ -244,6 +247,21 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
   FillHist("METPhi_Truth_Vs_Fitted", gen_neutrino.Phi(), fitted_object[5].Phi()-gen_neutrino.Phi(), weight, 0, 0, 0, 0, 0, 0);
   FillHist("Pz_Truth_Vs_Fitted", gen_neutrino.Pz(), fitted_object[5].Pz()-gen_neutrino.Pz(), weight, 0, 0, 0, 0, 0, 0);
   FillHist("Eta_Truth_Vs_Fitted", gen_neutrino.Eta(), fitted_object[5].Eta()-gen_neutrino.Eta(), weight, 0, 0, 0, 0, 0, 0);
+  
+  if(chk_permutation_match==kTRUE)
+    {
+      FillHist("MET_Truth_Vs_Fitted_OFS", gen_neutrino.Pt(), fitted_object[5].Pt()-gen_neutrino.Pt(), weight, 0, 0, 0, 0, 0, 0);
+      FillHist("METPhi_Truth_Vs_Fitted_OFS", gen_neutrino.Phi(), fitted_object[5].Phi()-gen_neutrino.Phi(), weight, 0, 0, 0, 0, 0, 0);
+      FillHist("Pz_Truth_Vs_Fitted_OFS", gen_neutrino.Pz(), fitted_object[5].Pz()-gen_neutrino.Pz(), weight, 0, 0, 0, 0, 0, 0);
+      FillHist("Eta_Truth_Vs_Fitted_OFS", gen_neutrino.Eta(), fitted_object[5].Eta()-gen_neutrino.Eta(), weight, 0, 0, 0, 0, 0, 0);
+    }
+  else
+    {
+      FillHist("MET_Truth_Vs_Fitted_OFF", gen_neutrino.Pt(), fitted_object[5].Pt()-gen_neutrino.Pt(), weight, 0, 0, 0, 0, 0, 0);
+      FillHist("METPhi_Truth_Vs_Fitted_OFF", gen_neutrino.Phi(), fitted_object[5].Phi()-gen_neutrino.Phi(), weight, 0, 0, 0, 0, 0, 0);
+      FillHist("Pz_Truth_Vs_Fitted_OFF", gen_neutrino.Pz(), fitted_object[5].Pz()-gen_neutrino.Pz(), weight, 0, 0, 0, 0, 0, 0);
+      FillHist("Eta_Truth_Vs_Fitted_OFF", gen_neutrino.Eta(), fitted_object[5].Eta()-gen_neutrino.Eta(), weight, 0, 0, 0, 0, 0, 0);
+    }
 
   TLorentzVector leptonic_w = fitted_object[4] + fitted_object[5];
   Double_t leptonic_w_mass = leptonic_w.M();
@@ -303,21 +321,21 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
 	  hname += i;
 
 	  FillHist(hname, chi2_piece[i], weight);
-	  if(chk_permutation_match==kFALSE) FillHist(hname + "_PF", chi2_piece[i], weight);
-	  else FillHist(hname + "_PS", chi2_piece[i], weight);
+	  if(chk_permutation_match==kFALSE) FillHist(hname + "_OFF", chi2_piece[i], weight);
+	  else FillHist(hname + "_OFS", chi2_piece[i], weight);
 	}
      
       FillHist("Chi2_2B", chi2, weight);
-      if(chk_permutation_match==kFALSE) FillHist("Chi2_2B_PF", chi2, weight);
-      else FillHist("Chi2_2B_PS", chi2, weight);
+      if(chk_permutation_match==kFALSE) FillHist("Chi2_2B_OFF", chi2, weight);
+      else FillHist("Chi2_2B_OFS", chi2, weight);
       
       FillHist("DiJetMass_2B", hadronic_w_ch_mass, weight);
-      if(chk_permutation_match==kFALSE) FillHist("DiJetMass_2B_PF", hadronic_w_ch_mass, weight);
-      else FillHist("DiJetMass_2B_PS", hadronic_w_ch_mass, weight);
+      if(chk_permutation_match==kFALSE) FillHist("DiJetMass_2B_OFF", hadronic_w_ch_mass, weight);
+      else FillHist("DiJetMass_2B_OFS", hadronic_w_ch_mass, weight);
 
       FillHist("DiJetMass_Chi2_2B", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
-      if(chk_permutation_match==kFALSE) FillHist("DiJetMass_Chi2_2B_PF", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
-      else FillHist("DiJetMass_Chi2_2B_PS", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
+      if(chk_permutation_match==kFALSE) FillHist("DiJetMass_Chi2_2B_OFF", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
+      else FillHist("DiJetMass_Chi2_2B_OFS", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
 
       FillHist("Unfitted_DiJetMass_2B", hadronic_w_ch_unfitted_mass, weight);
       
@@ -353,21 +371,21 @@ void Fitter_Test::ExecuteEvents() throw(LQError)
 	  hname += i;
 
 	  FillHist(hname, chi2_piece[i], weight);
-	  if(chk_permutation_match==kFALSE) FillHist(hname + "_PF", chi2_piece[i], weight);
-	  else FillHist(hname + "_PS", chi2_piece[i], weight);
+	  if(chk_permutation_match==kFALSE) FillHist(hname + "_OFF", chi2_piece[i], weight);
+	  else FillHist(hname + "_OFS", chi2_piece[i], weight);
 	}
 
       FillHist("Chi2_3B", chi2, weight);
-      if(chk_permutation_match==kFALSE) FillHist("Chi2_3B_PF", chi2, weight);
-      else FillHist("Chi2_3B_PS", chi2, weight);
+      if(chk_permutation_match==kFALSE) FillHist("Chi2_3B_OFF", chi2, weight);
+      else FillHist("Chi2_3B_OFS", chi2, weight);
 
       FillHist("DiJetMass_3B", hadronic_w_ch_mass, weight);
-      if(chk_permutation_match==kFALSE) FillHist("DiJetMass_3B_PF", hadronic_w_ch_mass, weight);
-      else FillHist("DiJetMass_3B_PS", hadronic_w_ch_mass, weight);
+      if(chk_permutation_match==kFALSE) FillHist("DiJetMass_3B_OFF", hadronic_w_ch_mass, weight);
+      else FillHist("DiJetMass_3B_OFS", hadronic_w_ch_mass, weight);
       
       FillHist("DiJetMass_Chi2_3B", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
-      if(chk_permutation_match==kFALSE) FillHist("DiJetMass_Chi2_3B_PF", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
-      else FillHist("DiJetMass_Chi2_3B_PS", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
+      if(chk_permutation_match==kFALSE) FillHist("DiJetMass_Chi2_3B_OFF", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
+      else FillHist("DiJetMass_Chi2_3B_OFS", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
       
       FillHist("Unfitted_DiJetMass_3B", hadronic_w_ch_unfitted_mass, weight);
     
@@ -421,15 +439,28 @@ void Fitter_Test::InitialiseAnalysis() throw(LQError)
 
   //neutrino
   MakeHistograms("Neutrino_Pz_Sol", 2, -0.5, 1.5);
-  
+  MakeHistograms("Neutrino_Pz_Sol_OFS", 2, -0.5, 1.5);
+  MakeHistograms("Neutrino_Pz_Sol_OFF", 2, -0.5, 1.5);
+
   MakeHistograms2D("MET_Truth_Vs_Measured", 100, 0, 200, 100, -100, 100);
-  MakeHistograms2D("METPhi_Truth_Vs_Measured", 100, -4, 4, 100, -4, 4);
-
   MakeHistograms2D("MET_Truth_Vs_Fitted", 100, 0, 200, 100, -100, 100);
-  MakeHistograms2D("METPhi_Truth_Vs_Fitted", 100, -4, 4, 100, -4, 4);
-  MakeHistograms2D("Pz_Truth_Vs_Fitted", 100, -200, 200, 100, -200, 200);
-  MakeHistograms2D("Eta_Truth_Vs_Fitted", 100, -5, 5, 100, -5, 5);
+  MakeHistograms2D("MET_Truth_Vs_Fitted_OFS", 100, 0, 200, 100, -100, 100);
+  MakeHistograms2D("MET_Truth_Vs_Fitted_OFF", 100, 0, 200, 100, -100, 100);
 
+  MakeHistograms2D("METPhi_Truth_Vs_Measured", 100, -4, 4, 100, -4, 4);
+  MakeHistograms2D("METPhi_Truth_Vs_Fitted", 100, -4, 4, 100, -4, 4);
+  MakeHistograms2D("METPhi_Truth_Vs_Fitted_OFS", 100, -4, 4, 100, -4, 4);
+  MakeHistograms2D("METPhi_Truth_Vs_Fitted_OFF", 100, -4, 4, 100, -4, 4);
+
+  MakeHistograms2D("Pz_Truth_Vs_Fitted", 100, -200, 200, 100, -200, 200);
+  MakeHistograms2D("Pz_Truth_Vs_Fitted_OFS", 100, -200, 200, 100, -200, 200);
+  MakeHistograms2D("Pz_Truth_Vs_Fitted_OFF", 100, -200, 200, 100, -200, 200);
+  
+  MakeHistograms2D("Eta_Truth_Vs_Fitted", 100, -5, 5, 100, -5, 5);
+  MakeHistograms2D("Eta_Truth_Vs_Fitted_OFS", 100, -5, 5, 100, -5, 5);
+  MakeHistograms2D("Eta_Truth_Vs_Fitted_OFF", 100, -5, 5, 100, -5, 5);
+
+  
   //chi2
   for(Int_t i=0; i<N_CHI2_PIECE; i++)
     {
@@ -438,46 +469,46 @@ void Fitter_Test::InitialiseAnalysis() throw(LQError)
       hname += i;
 
       MakeHistograms(hname, 100, 0, 50);
-      MakeHistograms(hname + "_PF", 100, 0, 50);
-      MakeHistograms(hname + "_PS", 100, 0, 50);
+      MakeHistograms(hname + "_OFF", 100, 0, 50);
+      MakeHistograms(hname + "_OFS", 100, 0, 50);
    
       //3b
       hname = "Chi2_Piece_3B_";
       hname += i;
 
       MakeHistograms(hname, 100, 0, 50);
-      MakeHistograms(hname + "_PF", 100, 0, 50);
-      MakeHistograms(hname + "_PS", 100, 0, 50);
+      MakeHistograms(hname + "_OFF", 100, 0, 50);
+      MakeHistograms(hname + "_OFS", 100, 0, 50);
     }
 
   MakeHistograms("Chi2_2B", 100, 0, 50);
-  MakeHistograms("Chi2_2B_PS", 100, 0, 50);
-  MakeHistograms("Chi2_2B_PF", 100, 0, 50);
+  MakeHistograms("Chi2_2B_OFS", 100, 0, 50);
+  MakeHistograms("Chi2_2B_OFF", 100, 0, 50);
 
   MakeHistograms("Chi2_3B", 100, 0, 50);
-  MakeHistograms("Chi2_3B_PS", 100, 0, 50);
-  MakeHistograms("Chi2_3B_PF", 100, 0, 50);
+  MakeHistograms("Chi2_3B_OFS", 100, 0, 50);
+  MakeHistograms("Chi2_3B_OFF", 100, 0, 50);
 
   //dijet mass
   MakeHistograms("DiJetMass_2B", 50, 0, 200); 
-  MakeHistograms("DiJetMass_2B_PS", 50, 0, 200);
-  MakeHistograms("DiJetMass_2B_PF", 50, 0, 200);
+  MakeHistograms("DiJetMass_2B_OFS", 50, 0, 200);
+  MakeHistograms("DiJetMass_2B_OFF", 50, 0, 200);
   
   MakeHistograms("DiJetMass_3B", 50, 0, 200);
-  MakeHistograms("DiJetMass_3B_PS", 50, 0, 200);
-  MakeHistograms("DiJetMass_3B_PF", 50, 0, 200);
+  MakeHistograms("DiJetMass_3B_OFS", 50, 0, 200);
+  MakeHistograms("DiJetMass_3B_OFF", 50, 0, 200);
 
   MakeHistograms("Unfitted_DiJetMass_2B", 50, 0, 200);
   MakeHistograms("Unfitted_DiJetMass_3B", 50, 0, 200);
   
   //chi2 & dijet mass 2d
   MakeHistograms2D("DiJetMass_Chi2_2B", 50, 0, 200, 100, 0, 50);
-  MakeHistograms2D("DiJetMass_Chi2_2B_PS", 50, 0, 200, 100, 0, 50);
-  MakeHistograms2D("DiJetMass_Chi2_2B_PF", 50, 0, 200, 100, 0, 50);
+  MakeHistograms2D("DiJetMass_Chi2_2B_OFS", 50, 0, 200, 100, 0, 50);
+  MakeHistograms2D("DiJetMass_Chi2_2B_OFF", 50, 0, 200, 100, 0, 50);
 
   MakeHistograms2D("DiJetMass_Chi2_3B", 50, 0, 200, 100, 0, 50);
-  MakeHistograms2D("DiJetMass_Chi2_3B_PS", 50, 0, 200, 100, 0, 50);
-  MakeHistograms2D("DiJetMass_Chi2_3B_PF", 50, 0, 200, 100, 0, 50);
+  MakeHistograms2D("DiJetMass_Chi2_3B_OFS", 50, 0, 200, 100, 0, 50);
+  MakeHistograms2D("DiJetMass_Chi2_3B_OFF", 50, 0, 200, 100, 0, 50);
 
   for(Int_t cut_level=0; cut_level<20; cut_level++)
     {

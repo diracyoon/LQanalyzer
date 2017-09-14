@@ -22,8 +22,9 @@ Jet_Selection_Test_0::Jet_Selection_Test_0() : AnalyzerCore()
 
   Bool_t high_mass_fitter = kFALSE;
   chk_debug = kFALSE;
+  Int_t ts_correction_type = 4;
 
-  fitter = new Kinematic_Fitter_1(high_mass_fitter, chk_debug);
+  fitter = new Kinematic_Fitter_1(high_mass_fitter, ts_correction_type, chk_debug);
 }//Jet_Selection_Test_0::Jet_Selection_Test_0()
 
 //////////
@@ -258,24 +259,24 @@ void Jet_Selection_Test_0::ExecuteEvents() throw(LQError)
 
 	  FillHist(hname, chi2_piece[i], weight);
 	  if(chk_true_jet_input==kFALSE) FillHist(hname + "_TF", chi2_piece[i], weight);
-	  else if(chk_permutation_match==kFALSE) FillHist(hname + "_TS_PF", chi2_piece[i], weight);
-	  else FillHist(hname + "_PS", chi2_piece[i], weight);
+	  else if(chk_permutation_match==kFALSE) FillHist(hname + "_TS_OFF", chi2_piece[i], weight);
+	  else FillHist(hname + "_OFS", chi2_piece[i], weight);
 	}
       
       FillHist("Chi2_2B", chi2, weight);
       if(chk_true_jet_input==kFALSE) FillHist("Chi2_2B_TF", chi2, weight);
-      else if(chk_permutation_match==kFALSE) FillHist("Chi2_2B_TS_PF", chi2, weight);
-      else FillHist("Chi2_2B_PS", chi2, weight); 
+      else if(chk_permutation_match==kFALSE) FillHist("Chi2_2B_TS_OFF", chi2, weight);
+      else FillHist("Chi2_2B_OFS", chi2, weight); 
 	
       FillHist("DiJetMass_2B", hadronic_w_ch_mass, weight);
       if(chk_true_jet_input==kFALSE) FillHist("DiJetMass_2B_TF", hadronic_w_ch_mass, weight);
-      else if(chk_permutation_match==kFALSE) FillHist("DiJetMass_2B_TS_PF", hadronic_w_ch_mass, weight);
-      else FillHist("DiJetMass_2B_PS", hadronic_w_ch_mass, weight);
+      else if(chk_permutation_match==kFALSE) FillHist("DiJetMass_2B_TS_OFF", hadronic_w_ch_mass, weight);
+      else FillHist("DiJetMass_2B_OFS", hadronic_w_ch_mass, weight);
       
       FillHist("DiJetMass_Chi2_2B", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
       if(chk_true_jet_input==kFALSE) FillHist("DiJetMass_Chi2_2B_TF", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
-      else if(chk_permutation_match==kFALSE) FillHist("DiJetMass_Chi2_2B_TS_PF", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0); 
-      else FillHist("DiJetMass_Chi2_2B_PS", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
+      else if(chk_permutation_match==kFALSE) FillHist("DiJetMass_Chi2_2B_TS_OFF", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0); 
+      else FillHist("DiJetMass_Chi2_2B_OFS", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
     }//2b tagged events
   else
     {
@@ -292,24 +293,24 @@ void Jet_Selection_Test_0::ExecuteEvents() throw(LQError)
 
 	  FillHist(hname, chi2_piece[i], weight);
 	  if(chk_true_jet_input==kFALSE) FillHist(hname + "_TF", chi2_piece[i], weight);
-	  else if(chk_permutation_match==kFALSE) FillHist(hname + "_TS_PF", chi2_piece[i], weight);
-	  else FillHist(hname + "_PS", chi2_piece[i], weight);
+	  else if(chk_permutation_match==kFALSE) FillHist(hname + "_TS_OFF", chi2_piece[i], weight);
+	  else FillHist(hname + "_OFS", chi2_piece[i], weight);
 	}
 
       FillHist("Chi2_3B", chi2, weight);
       if(chk_true_jet_input==kFALSE) FillHist("Chi2_3B_TF", chi2, weight);
-      else if(chk_permutation_match==kFALSE) FillHist("Chi2_3B_TS_PF", chi2, weight);
-      else FillHist("Chi2_3B_PS", chi2, weight);
+      else if(chk_permutation_match==kFALSE) FillHist("Chi2_3B_TS_OFF", chi2, weight);
+      else FillHist("Chi2_3B_OFS", chi2, weight);
       
       FillHist("DiJetMass_3B", hadronic_w_ch_mass, weight);
       if(chk_true_jet_input==kFALSE) FillHist("DiJetMass_3B_TF", hadronic_w_ch_mass, weight);
-      else if(chk_permutation_match==kFALSE) FillHist("DiJetMass_3B_TS_PF", hadronic_w_ch_mass, weight);
-      else FillHist("DiJetMass_3B_PS", hadronic_w_ch_mass, weight);
+      else if(chk_permutation_match==kFALSE) FillHist("DiJetMass_3B_TS_OFF", hadronic_w_ch_mass, weight);
+      else FillHist("DiJetMass_3B_OFS", hadronic_w_ch_mass, weight);
       
       FillHist("DiJetMass_Chi2_3B", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
       if(chk_true_jet_input==kFALSE) FillHist("DiJetMass_Chi2_3B_TF", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
-      else if(chk_permutation_match==kFALSE) FillHist("DiJetMass_Chi2_3B_TS_PF", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
-      else FillHist("DiJetMass_Chi2_3B_PS", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
+      else if(chk_permutation_match==kFALSE) FillHist("DiJetMass_Chi2_3B_TS_OFF", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
+      else FillHist("DiJetMass_Chi2_3B_OFS", hadronic_w_ch_mass, chi2, weight, 0, 0, 0, 0, 0, 0);
     }//3b tagged events
   
   
@@ -371,8 +372,8 @@ void Jet_Selection_Test_0::InitialiseAnalysis() throw(LQError)
 
       MakeHistograms(hname, 100, 0, 50);
       MakeHistograms(hname + "_TF", 100, 0, 50);
-      MakeHistograms(hname + "_TS_PF", 100, 0, 50);
-      MakeHistograms(hname + "_PS", 100, 0, 50);
+      MakeHistograms(hname + "_TS_OFF", 100, 0, 50);
+      MakeHistograms(hname + "_OFS", 100, 0, 50);
     
       //3b
       hname = "Chi2_Piece_3B_";
@@ -380,41 +381,41 @@ void Jet_Selection_Test_0::InitialiseAnalysis() throw(LQError)
       
       MakeHistograms(hname, 100, 0, 50);
       MakeHistograms(hname + "_TF", 100, 0, 50);
-      MakeHistograms(hname + "_TS_PF", 100, 0, 50);
-      MakeHistograms(hname + "_PS", 100, 0, 50);
+      MakeHistograms(hname + "_TS_OFF", 100, 0, 50);
+      MakeHistograms(hname + "_OFS", 100, 0, 50);
     }
 
   MakeHistograms("Chi2_2B", 100, 0, 50);
   MakeHistograms("Chi2_2B_TF", 100, 0, 50);
-  MakeHistograms("Chi2_2B_TS_PF", 100, 0, 50);
-  MakeHistograms("Chi2_2B_PS", 100, 0, 50);
+  MakeHistograms("Chi2_2B_TS_OFF", 100, 0, 50);
+  MakeHistograms("Chi2_2B_OFS", 100, 0, 50);
 
   MakeHistograms("Chi2_3B", 100, 0, 50);
   MakeHistograms("Chi2_3B_TF", 100, 0, 50);
-  MakeHistograms("Chi2_3B_TS_PF", 100, 0, 50);
-  MakeHistograms("Chi2_3B_PS", 100, 0, 50);
+  MakeHistograms("Chi2_3B_TS_OFF", 100, 0, 50);
+  MakeHistograms("Chi2_3B_OFS", 100, 0, 50);
 
   //dijet mass
   MakeHistograms("DiJetMass_2B", 50, 0, 200);
   MakeHistograms("DiJetMass_2B_TF", 50, 0, 200);
-  MakeHistograms("DiJetMass_2B_TS_PF", 50, 0, 200);
-  MakeHistograms("DiJetMass_2B_PS", 50, 0, 200);
+  MakeHistograms("DiJetMass_2B_TS_OFF", 50, 0, 200);
+  MakeHistograms("DiJetMass_2B_OFS", 50, 0, 200);
 
   MakeHistograms("DiJetMass_3B", 50, 0, 200);
   MakeHistograms("DiJetMass_3B_TF", 50, 0, 200);
-  MakeHistograms("DiJetMass_3B_TS_PF", 50, 0, 200);
-  MakeHistograms("DiJetMass_3B_PS", 50, 0, 200);
+  MakeHistograms("DiJetMass_3B_TS_OFF", 50, 0, 200);
+  MakeHistograms("DiJetMass_3B_OFS", 50, 0, 200);
   
   //chi2 & dijet mass 2d
   MakeHistograms2D("DiJetMass_Chi2_2B", 50, 0, 200, 100, 0, 50);
   MakeHistograms2D("DiJetMass_Chi2_2B_TF", 50, 0, 200, 100, 0, 50);
-  MakeHistograms2D("DiJetMass_Chi2_2B_TS_PF", 50, 0, 200, 100, 0, 50);
-  MakeHistograms2D("DiJetMass_Chi2_2B_PS", 50, 0, 200, 100, 0, 50);
+  MakeHistograms2D("DiJetMass_Chi2_2B_TS_OFF", 50, 0, 200, 100, 0, 50);
+  MakeHistograms2D("DiJetMass_Chi2_2B_OFS", 50, 0, 200, 100, 0, 50);
   
   MakeHistograms2D("DiJetMass_Chi2_3B", 50, 0, 200, 100, 0, 50);
   MakeHistograms2D("DiJetMass_Chi2_3B_TF", 50, 0, 200, 100, 0, 50);
-  MakeHistograms2D("DiJetMass_Chi2_3B_TS_PF", 50, 0, 200, 100, 0, 50);
-  MakeHistograms2D("DiJetMass_Chi2_3B_PS", 50, 0, 200, 100, 0, 50);
+  MakeHistograms2D("DiJetMass_Chi2_3B_TS_OFF", 50, 0, 200, 100, 0, 50);
+  MakeHistograms2D("DiJetMass_Chi2_3B_OFS", 50, 0, 200, 100, 0, 50);
   
   //others  
   MakeHistograms("Leptonic_W_Mass", 50, 55, 105);

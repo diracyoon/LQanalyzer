@@ -27,7 +27,7 @@ Double_t Kinematic_Fitter_Base::f_chi2_piece[N_CHI2_PIECE];
 
 /////////
 
-Kinematic_Fitter_Base::Kinematic_Fitter_Base(const Bool_t& a_chk_high_mass_fitter, const Bool_t& a_chk_debug)
+Kinematic_Fitter_Base::Kinematic_Fitter_Base(const Bool_t& a_chk_high_mass_fitter, const Int_t& ts_correction_type, const Bool_t& a_chk_debug)
 {  
   chk_high_mass_fitter = a_chk_high_mass_fitter;
   chk_debug = a_chk_debug;
@@ -42,7 +42,7 @@ Kinematic_Fitter_Base::Kinematic_Fitter_Base(const Bool_t& a_chk_high_mass_fitte
   minimizer->SetTolerance(0.001);
   minimizer->SetPrintLevel(chk_debug);
   
-  ts_correction = new TS_Correction(1);
+  ts_correction = new TS_Correction(ts_correction_type);
 
   //set parameters for minimization
   parameter_name[0] = "B_Leptonic_Side";
@@ -380,12 +380,12 @@ Bool_t Kinematic_Fitter_Base::Pass_B_Tag_Configuration()
       //additional constrain on jet[1] and jet[2] because chi2 can't distinguish those permutation
       if(chk_high_mass_fitter==kTRUE){ if(reordered_jet[1].Pt()<reordered_jet[2].Pt()) b_tag_p_comp = kTRUE; }
       else{ if(reordered_jet[1].Pt()>reordered_jet[2].Pt()) b_tag_p_comp = kTRUE; }
-      
+            
       if(b_tag_config==kTRUE && b_tag_p_comp==kTRUE) b_tag_config_check = kTRUE; 
     }
   
   return b_tag_config_check;
-}///Bool_t kinematic_Fitter_Base::Pass_B_Tag_Configuration()
+}///Bool_t kinematic_Fitter_Base::Pass_BTag_Configuration()
 
 //////////
 
