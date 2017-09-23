@@ -12,7 +12,7 @@ function usage
     echo "              [-h (more/debug)][-l <args> ][-g <args>] [-A <args>]"
     echo "              [-D <catversion>] [-miniaod input_file ] [-xsec input_file] [-efflumi input_file] [-userflag flag]"
     echo "              [-tagdiff <tagname>  -sktreelog  -printID IDNAME -updateselection <object>]   "
- 
+    echo "              [-filename xxx]"
 }
 
 
@@ -661,6 +661,7 @@ function listavailable
 	echo "For Lepton skim run 'sktree -L SKTree_LeptonSkim " ${submit_searchlist} ${submit_catvlist} "'" 
 	echo "For DiLepton skim run 'sktree -L SKTree_DiLepSkim " ${submit_searchlist} ${submit_catvlist} "'" 
 	echo "For TriLepton skim run 'sktree -L SKTree_TriLepSkim " ${submit_searchlist} ${submit_catvlist} "'" 
+	echo "For SSLepton skim run 'sktree -L SKTree_SSLepSkim " ${submit_searchlist} ${submit_catvlist} "'" 
 	
     fi
     if [[ $specified_catversion != "true" ]];
@@ -670,6 +671,7 @@ function listavailable
 	echo "For Lepton skim run 'sktree -L SKTree_LeptonSkim " ${submit_searchlist}  "'"
 	echo "For DiLepton skim run 'sktree -L SKTree_DiLepSkim " ${submit_searchlist}  "'"
 	echo "For TriLepton skim run 'sktree -L SKTree_TriLepSkim " ${submit_searchlist}  "'"
+	echo "For SSLepton skim run 'sktree -L SKTree_SSLepSkim " ${submit_searchlist}  "'"
 	
     fi
 
@@ -781,6 +783,7 @@ function runlist
     isHNDiLep=false
     isHNFake=false
     isTriLep=false
+    isSSLep=false
     if [[ $submit_skim  == "SKTree_NoSkim" ]]; then 
 	isNoCut=true 
     fi
@@ -812,7 +815,10 @@ function runlist
         then
         isTriLep=true
     fi
-
+    if [[ $submit_skim  == "SKTree_SSLepSkim" ]];
+	then
+	isSSLep=true
+    fi
     if [[ $submit_skim  == "DiLep" ]];
 	then
 	isDiLep=true
@@ -859,13 +865,20 @@ function runlist
             check_path=""
         fi
     fi
-
+    if [[ $isSSLep  == "true" ]];
+	then
+	check_path=$SKTREE_MC${submit_catvlist}"/SKTrees/MCSS"
+        if [[ ${submit_catvlist} == *"v7-4-4"* ]];
+            then
+            check_path=""
+        fi
+    fi
     echo $check_path
     if [[ $check_path == "" ]];
 	then
 	echo "Invalid option for ntuple version: "
 	echo "sktree -L <skim>"
-        echo "Need to set ntuple version: Options are FLATCAT/SKTree_NoSkim/SKTree_LeptonSkim/SKTree_DiLepSkim/SKTree_TriLepSkim"
+        echo "Need to set ntuple version: Options are FLATCAT/SKTree_NoSkim/SKTree_LeptonSkim/SKTree_DiLepSkim/SKTree_SSLepSkim"
 	exit 1
     fi
     
@@ -889,6 +902,7 @@ function runlist
 	      suffixhn="_hndilep"
 	      suffixhnfake="_hnfake"
               suffix2="_trilep"
+              suffixss="_sslep"
 
 	      if [[ $sline == *${prefix}* ]];
 		  then
@@ -901,6 +915,10 @@ function runlist
 	      if [[ $sline == *${suffix2}* ]];
                   then
                   sline=${sline%$suffix2}
+              fi
+              if [[ $sline == *${suffixss}* ]];
+                  then
+                  sline=${sline%$suffixss}
               fi
 	      if [[ $sline == *${suffixhn}* ]];
                   then
@@ -929,6 +947,7 @@ function runlist
 		  suffixhn="_hndilep"
 		  suffixhnfake="_hnfake"
 		  suffix2="_trilep"
+		  suffixss="_sslep"
 		  if [[ $sline == *${prefix}* ]];
 		      then
 		      sline=${sline:2}
@@ -940,6 +959,10 @@ function runlist
 		  if [[ $sline == *${suffix2}* ]];
                       then
                       sline=${sline%$suffix2}
+                  fi
+		  if [[ $sline == *${suffixss}* ]];
+                      then
+                      sline=${sline%$suffixss}
                   fi
 		  if [[ $sline == *${suffixhn}* ]];
                   then
@@ -1096,6 +1119,28 @@ function runlist
                 echo ""
             fi
     fi
+    
+    if [[ $isSSLep  == "true" ]];
+        then
+        counter=${#UNPROCESSED[@]}
+            if [[ $counter -ne 0 ]];
+                then
+                echo "Samples that have local flat catuples but no sslepton skim are:"
+            else   echo -e $missing_comment
+
+            fi
+            for il in  ${UNPROCESSED[@]};
+              do
+              echo samplename = $il
+
+            done
+            echo ""
+            if [[ $counter -ne 0 ]];
+		then
+                echo "If you want this sktree run 'sktree -a SKTreeMakerssLep -i <samplename> -c "$submit_catvlist"'"
+		echo ""
+            fi
+    fi
 
     
     if [[ $specified_catversion == "false" ]];
@@ -1140,6 +1185,10 @@ function runlist
               then
               check_path=$SKTREE_MC${ic}"/SKTrees/MCTriLep"
           fi
+	  if [[ $submit_skim  == "SKTree_SSLepSkim" ]];
+              then
+              check_path=$SKTREE_MC${ic}"/SKTrees/MCSS"
+          fi
 
 	  while read line
 	    do
@@ -1166,6 +1215,7 @@ function runlist
 			suffixhn="_hndilep"
 			suffixhnfake="_hnfake"
 			suffix2="_trilep"
+			suffixss="_sslep"
 			if [[ $sline == *${prefix}* ]];
 			    then
 			    sline=${sline:2}
@@ -1178,6 +1228,11 @@ function runlist
                             then
                             sline=${sline%$suffix2}
                         fi
+			if [[ $sline == *${suffixss}* ]];
+			then
+                            sline=${sline%$suffixss}
+                        fi
+
 			if [[ $sline == *${suffixhn}* ]];
 			then
 			    sline=${sline%$suffixhn}
@@ -1213,6 +1268,7 @@ function runlist
 			    suffixhn="_hndilep"
 			    suffixhnfake="_hnfake"
 			    suffix2="_trilep"
+			    suffixss="_sslep"
 			    if [[ $sline == *${prefix}* ]];
 				then
 				sline=${sline:2}
@@ -1225,6 +1281,11 @@ function runlist
                                 then
                                 sline=${sline%$suffix2}
                             fi
+			    if [[ $sline == *${suffixss}* ]];
+							then
+                                sline=${sline%$suffixss}
+                            fi
+
 			    if [[ $sline == *${suffixhn}* ]];
 			    then
 				sline=${sline%$suffixhn}
@@ -1283,7 +1344,11 @@ while [ "$1" != "" ]; do
                                 ;;
         -F | --submitall)       shift
                                 job_submitallfiles="true"
-                                ;;
+				;;
+        -SIG | --submitall)     shift
+                                RUNSIG="true"
+				TXTPATH=${LQANALYZER_RUN_PATH}"/txt/datasets_snu_sig_"
+				;;
 #	-sktree | --usesktrees )shift
 #                                submit_skinput="$1"
 #				changed_skinput=true
@@ -1387,6 +1452,9 @@ while [ "$1" != "" ]; do
 				idname2=$2
 				printid
 				exit 1
+				;;
+	-filename )             shift
+	                        job_tmp_filename=$1
 				;;
 	-D | --GetProductionInfo)  shift
                                 submit_catvlist=$1
@@ -1861,6 +1929,7 @@ declare -a FULLLISTOFSAMPLESDILEP=()
 declare -a FULLLISTOFSAMPLESHNDILEP=()
 declare -a FULLLISTOFSAMPLESHNFAKE=()
 declare -a FULLLISTOFSAMPLESTRILEP=()
+declare -a FULLLISTOFSAMPLESTSSLEP=()
 
 
 if [[ $check_all_catversions != "true" ]];
@@ -1920,7 +1989,11 @@ if [[ $submit_analyzer_name == *"SKTreeMaker"* ]];
     fi
     if [[ $submit_analyzer_name == "SKTreeMakerTriLep" ]];
         then
-        job_skim=SKTree_DiLepSkim
+        job_skim=SKTree_LeptonSkim
+    fi
+    if [[ $submit_analyzer_name == "SKTreeMakerSSLep" ]];
+        then
+	    job_skim=SKTree_LeptonSkim
     fi
 
 
@@ -2226,6 +2299,50 @@ if [[ $MakeFullLists == "true" ]];
 		fi
 	    fi
 	fi
+	if [[ $job_skim == "SKTree_SSLepSkim" ]];
+        then
+            checkline=$SKTREE_MC${iclist}"/SKTrees/MCSS"
+            if [[ ${iclist} == *"v7-4-4"* ]];
+                then
+                checkline=$SKTREE_MC${iclist}"/SKTrees/Sep15/MCSS"
+            fi
+
+
+            if [[ $line == *$checkline* ]];
+                then
+                sline=$(echo $line | head -n1 | awk '{print $1}')
+                sline2=$(echo $line | head -n1 | awk '{print $6}')
+
+                prefix="SK"
+                suffix="_SSlep"
+                if [[ $sline == *${prefix}* ]];
+                    then
+                    sline=${sline:2}
+                fi
+                if [[ $sline == *${suffix}* ]];
+                    then
+                    sline=${sline%$suffix}
+                fi
+
+                isDuplicate=false
+                for il in  ${FULLLISTOFSAMPLESSS[@]};
+                  do
+                  if [[ $sline == $il ]];
+                          then
+                      isDuplicate=true
+                  fi
+                done
+                if [[ $isDuplicate == "false" ]];
+                    then
+                    if [[ -d "${sline2}" ]]; then
+                        if test "$(ls -A "$sline2")"; then
+                            FULLLISTOFSAMPLESSS+=(${sline})
+                        fi
+                    fi
+                fi
+            fi
+        fi
+
       done < ${TXTPATH}"CAT_mc_"${iclist}".txt"
     done
     

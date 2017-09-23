@@ -218,6 +218,21 @@ void MCDataCorrections::FillCorrectionHist(string label, string dirname, string 
     cout << "CorrectionMap["<<label+"_MC" <<"] = " << endl;
     cout << histsname+"_MC" << " (from " << getenv(dirname.c_str())<< "/" << filename<<")" << endl;
   }
+  else if(tmp_filename.Contains("ElectronTriggerEfficiency")){
+    cout << "[ElectronTriggerEfficiency]" << endl;
+    TString tmp_label = label;
+    cout << "label = "  << label << endl;
+    //==== Data
+    TH2F* tmp_Data =  dynamic_cast<TH2F*> (( infile_sf->Get((histsname+"Data2D").c_str()))->Clone());
+    CorrectionMap[label+"_Data"] = tmp_Data;
+    cout << "CorrectionMap["<<label+"_Data" <<"] = "<< endl;
+    cout << histsname+"_Data" << " (from " << getenv(dirname.c_str())<< "/" << filename<<")" << endl;
+    //==== MC
+    TH2F* tmp_MC =  dynamic_cast<TH2F*> (( infile_sf->Get((histsname+"MC2D").c_str()))->Clone());
+    CorrectionMap[label+"_MC"] = tmp_MC;
+    cout << "CorrectionMap["<<label+"_MC" <<"] = " << endl;
+    cout << histsname+"_MC" << " (from " << getenv(dirname.c_str())<< "/" << filename<<")" << endl;
+  }
   else{
     TH2F* tmp =  dynamic_cast<TH2F*> (( infile_sf->Get(histsname.c_str()))->Clone());
     CorrectionMap[label] = tmp;
@@ -674,6 +689,10 @@ double MCDataCorrections::TriggerEfficiencyLegByLegPeriodDependant(std::vector<s
   //==== - HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v
   //==== ==> Leg1 : Mu17_TrkIsoVVL
   //====     Leg2 : Mu8_TrkIsoVVL or TkMu8_TrkIsoVVL
+  //==== 2) TriggerCategory = 1
+  //==== - HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v
+  //==== ==> Leg1 : Ele23_CaloIdL_TrackIdL_IsoVL
+  //====     Leg2 : Ele12_CaloIdL_TrackIdL_IsoVL
 
   if(TriggerCategory==0){
 
@@ -695,11 +714,39 @@ double MCDataCorrections::TriggerEfficiencyLegByLegPeriodDependant(std::vector<s
       }
     }
     bool debug(false);
-    if(debug){cout << "Direction = " << direction << "n_el " << el.size() << endl;
-}
+    if(debug){
+      cout << "Direction = " << direction << "n_el " << el.size() << endl;
+    }
     return 1.-faileff;
 
   }
+  else if(TriggerCategory==1){
+
+    if(el.size()<2) return 1.;
+
+    TString leg1 = "ELE23";
+    TString leg2 = "ELE12";
+
+    double faileff(1.);
+
+    for(unsigned int i=0; i<el.size()-1; i++){
+      snu::KElectron el1 = el.at(i);
+      for(unsigned j=i+1; j<el.size(); j++){
+        snu::KElectron el2 = el.at(j);
+        double dieleff = TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger(el1, el2, "ELE23", "ELE12", elid, DataOrMC, catperiod);
+        //cout << "[MCDataCorrections::TriggerEfficiencyLegByLegPeriodDependant] dimueff = " << dimueff << endl;
+
+        faileff *= (1.-dieleff);
+      }
+    }
+    bool debug(false);
+    if(debug){
+      cout << "Direction = " << direction << "n_el " << el.size() << endl;
+    }
+    return 1.-faileff;
+
+  }
+
   else{
     return 1.;
   }
@@ -768,6 +815,67 @@ double MCDataCorrections::TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger(snu
   }
 }
 
+double MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger(snu::KElectron el1, snu::KElectron el2, TString leg1, TString leg2, TString elid, int DataOrMC, int catperiod){
+
+  TString labelkey = ""; //When we have multiple ids..
+
+  TString tag = "";
+  if(catperiod < 6) tag = "_BCDEF";
+  else tag = "_GH";
+
+  TString sample="";
+  //if(DataOrMC==0) sample = "_Data";
+  //else sample = "_MC";
+  if(DataOrMC==0) sample = "Data"; // if labelkey != "", add _
+  else sample = "MC";
+
+  double eta1 = el1.SCEta();
+  if(eta1<-2.5) eta1 = -2.4;
+  if(eta1>=2.5) eta1 = 2.4;
+  double pt1 = el1.Pt();
+  if(pt1>=500.) pt1 = 499.;
+  if(pt1 <10.) pt1 = 10.1;
+  double eta2 = el2.SCEta();
+  if(eta2<-2.5) eta2 = -2.4;
+  if(eta2>=2.5) eta2 = 2.4;
+  double pt2 = el2.Pt();
+  if(pt2>=500.) pt2 = 499.;
+  if(pt2 <10.) pt2 = 10.1;
+
+  //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] tag = " << tag << ", sample = " << sample << endl;
+  //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] leg1 = " << leg1 << ", leg2 = " << leg2 << endl;
+
+  if( (leg1=="ELE23" && leg2=="ELE12") || (leg2=="ELE23" && leg1=="ELE12") ){
+
+    //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] ELECTRON_"+leg1+"_TRIGGER"+tag+"_"+labelkey+sample << endl;
+    //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] ELECTRON_"+leg2+"_TRIGGER"+tag+"_"+labelkey+sample << endl;
+
+    TH2F *hist_leg1 = GetCorrectionHist("ELECTRON_"+leg1+"_TRIGGER"+tag+"_"+labelkey+sample);
+    TH2F *hist_leg2 = GetCorrectionHist("ELECTRON_"+leg2+"_TRIGGER"+tag+"_"+labelkey+sample);
+
+    double eff_el1leg1 = hist_leg1->GetBinContent( hist_leg1->FindBin(eta1,pt1) );
+    double eff_el2leg2 = hist_leg2->GetBinContent( hist_leg2->FindBin(eta2,pt2) );
+
+    double eff_el1leg2 = hist_leg2->GetBinContent( hist_leg2->FindBin(eta1,pt1) );
+    double eff_el2leg1 = hist_leg1->GetBinContent( hist_leg1->FindBin(eta2,pt2) );
+
+    //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] pt1 = " << pt1 << ", eta1 = " << eta1 << endl;
+    //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] => " << leg1 << " : " << eff_el1leg1 << endl;
+    //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] => " << leg2 << " : " << eff_el1leg2 << endl;
+    //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] pt2 = " << pt2 << ", eta2 = " << eta2 << endl;
+    //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] => " << leg1 << " : " << eff_el2leg1 << endl;
+    //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] => " << leg2 << " : " << eff_el2leg2 << endl;
+
+    double eff = 1.-(1.-eff_el1leg1*eff_el2leg2)*(1.-eff_el1leg2*eff_el2leg1);
+
+    return eff;
+
+
+  }
+  else{
+    return 1.;
+  }
+}
 
 
 
@@ -780,15 +888,19 @@ double MCDataCorrections::ElectronScaleFactor( TString elid, vector<snu::KElectr
   
   if(elid.Contains("HN")) elid = "ELECTRON_MVA_80";
   if(elid.Contains("ELECTRON_MVA_90")) elid = "ELECTRON_MVA_80";
+  if(elid == "ELECTRON_HN_TIGHTv4") elid = "ELECTRON_HN_TIGHTv4";
 
   for(vector<KElectron>::iterator itel=el.begin(); itel!=el.end(); ++itel) {
     float elpt=itel->Pt();
-    if(elpt > 500.) elpt= 499.;
-    if(elpt < 10.) elpt= 11;
+    float eleta = itel->SCEta();
+    if(eleta<-2.5) eleta = -2.4;
+    if(eleta>=2.5) eleta = 2.4;
+    if(elpt>=500.) elpt= 499.;
+    if(elpt <10.) elpt= 11;
     float unc = 0.02; //// Check this
     
     if(CheckCorrectionHist("ID_" + elid)){
-      int bin =  GetCorrectionHist("ID_" + elid)->FindBin(fabs(itel->SCEta()), elpt);
+      int bin =  GetCorrectionHist("ID_" + elid)->FindBin(itel->SCEta(), elpt);
       sf *= GetCorrectionHist("ID_" + elid)->GetBinContent(bin);
       float err =  GetCorrectionHist("EL_RECO")->GetBinError(bin);
       err = sqrt (pow(err, 2.) + pow(unc, 2.));

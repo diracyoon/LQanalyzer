@@ -126,11 +126,10 @@ float HNCommonLeptonFakes::get_dilepton_mm_eventweight(bool geterr, std::vector<
 
   if(muons.size() != 2) return 0.;
 
-  //// vectors need to be ordered in pT                                                                                                                                                                                                           
-  if(muons[0].Pt() < muons[1].Pt()) return -100000000000.;
-
+  //// vectors need to be ordered in pT                                                                                                                                             
   float _mu1_eta=fabs(muons.at(0).Eta());
   float _mu2_eta=fabs(muons.at(1).Eta());
+
 
 
   float fr1(0.),fr2(0.),r1(0.),r2(0.);
@@ -139,8 +138,11 @@ float HNCommonLeptonFakes::get_dilepton_mm_eventweight(bool geterr, std::vector<
   r1=getPromptRate(_mu1_val, _mu1_eta, prkey);
   r2=getPromptRate(_mu2_val, _mu2_eta, prkey);
   
+
   fr1=  getFakeRate(_mu1_val, _mu1_eta,frkey,_minpt_muon,false);
   fr2=  getFakeRate(_mu2_val, _mu2_eta,frkey,_minpt_muon,false);
+
+
 
   if(geterr) {
     float fr1_err=  getFakeRate(_mu1_val, _mu1_eta,frkey,_minpt_muon,geterr);
@@ -172,7 +174,6 @@ float HNCommonLeptonFakes::get_dilepton_ee_eventweight(bool geterr, std::vector<
     _el2_val=value2;
   }
   //// vectors need to be ordered in pT                                                                                                                                         
-  if(_el1_val < _el2_val) return -100000000000.;
 
   float _el1_eta=fabs(electrons.at(0).Eta());
   float _el2_eta=fabs(electrons.at(1).Eta());

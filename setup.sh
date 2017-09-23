@@ -34,6 +34,10 @@ if [[ $setupok == "False" ]]; then
     return 1
 fi
 
+if [[ $USER == "jalmond" ]]; then
+    
+    source python/jalmondsetup.sh
+fi
 
 
 
@@ -61,6 +65,8 @@ fi
 
 
 
+
+
 ## variables that are specific to your machine: Change if noy listed
 if [ "$HOSTNAME" = "cms2.snu.ac.kr" ] || [ "$HOSTNAME" = "cms1.snu.ac.kr" ]; then    
     source /share/apps/root_v5-34-32/root/bin/thisroot.sh 
@@ -74,7 +80,6 @@ fi
 
 # speficy the LQANALYZER_DIR base directory, i.e., the directory in which this file lives
 export LQANALYZER_DIR=${PWD}
-
 
 if [[ $1 == *"v7"* ]]; then
     echo "Setting up tag "$1
@@ -195,7 +200,8 @@ fi
 export yeartag="80X/"
 
 
-
+alias cathistcounter="source scripts/Counter.sh "
+alias catcutflowcounter="source scripts/CutFlow.sh "
 alias sktree="bash submitSKTree.sh"
 alias sktreemaker="bash submitSKTree.sh -M True "
 alias sktree_val="bash submitSKTree.sh -V True "

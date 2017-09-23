@@ -123,5 +123,6 @@ if not filecmp.cmp(path_master,path_local):
     os.system("cp " + path_local + " " + path_master)
     SendEmail(localcopy,mastercopy)
     print "Updating file " + path_master
+    
 else:
     print "No difference in files"

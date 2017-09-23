@@ -1,0 +1,1 @@
+root -l -q -b $LQANALYZER_DIR/Macros/GetCounts/Counter.C'("'$1'")'

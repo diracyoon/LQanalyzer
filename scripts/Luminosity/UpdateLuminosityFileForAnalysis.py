@@ -546,6 +546,8 @@ if os.path.exists(path_full_sample_list):
             print "----"*100
             print "####"*100
             
+        if os.getenv("USER") == "jalmond":
+            sys.exit()
         if len(newxsec_list) > 0:
             EmailNewXsecList(catversion,path_newfile2)
         if len(newsample_list) > 0:

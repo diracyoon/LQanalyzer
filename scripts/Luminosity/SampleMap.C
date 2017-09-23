@@ -4,22 +4,31 @@
 #include <map>
 
 map<TString, TString>  GetLQMap(TString listpath);
-map<TString, TString>  GetLQMap2016(TString listpath);
+map<TString, TString>  GetLQMap2016(TString listpath, bool sig);
 map<TString, Double_t>  GetXSecMap(TString listpath);
-map<TString, Double_t>  GetXSecMap2016(TString listpath);
-map<TString, TString>  GetMissingMap(TString cversion,TString listpath);
-vector<TString>  GetAvailableMap(TString cversion,TString listpath);
-map<TString, TString>  GetDatasetNames(TString cversion,TString listpath);
+map<TString, Double_t>  GetXSecMap2016(TString listpath, bool sig);
+map<TString, TString>  GetMissingMap(TString cversion,TString listpath, bool sig);
+vector<TString>  GetAvailableMap(TString cversion,TString listpath, bool sig);
+map<TString, TString>  GetDatasetNames(TString cversion,TString listpath, bool sig);
 map<TString, TString>  GetTriLepMap(TString listpath);
-map<TString, TString>  GetTriLepMap2016(TString listpath);
+map<TString, TString>  GetTriLepMap2016(TString listpath, bool sig);
 
-bool CheckMaps(TString listpath);
+bool CheckMaps(TString listpath,bool sig);
 
-bool CheckMaps(TString listpath){
+
+bool IsSignal(TString samplename){
+  
+  if(samplename.Contains("HN")) return true;
+  if(samplename.Contains("CH")) return true;
+  if(samplename.Contains("TTToHc")) return true;
+  return false;
+}
+
+bool CheckMaps(TString listpath, bool sig){
   
   // Function checks the initialisation of the maps are consistent
-  map<TString,  Double_t> mapxs = GetXSecMap2016(listpath);
-  map<TString,  TString>  maplq = GetLQMap2016(listpath);
+  map<TString,  Double_t> mapxs = GetXSecMap2016(listpath, sig);
+  map<TString,  TString>  maplq = GetLQMap2016(listpath, sig);
 
   bool failcheck=false;
   if (mapxs.size() != maplq.size()) {
@@ -45,7 +54,7 @@ bool CheckMaps(TString listpath){
   return failcheck;
 }
 
-map<TString,  Double_t>  GetXSecMap2016(TString datasetfile){
+map<TString,  Double_t>  GetXSecMap2016(TString datasetfile, bool sig){
   map<TString,  Double_t> dirmap;
 
   ifstream datasetname_file(datasetfile.Data());
@@ -63,7 +72,13 @@ map<TString,  Double_t>  GetXSecMap2016(TString datasetfile){
     datasetname_file >> xsec;
     datasetname_file >> fullname;
     if(samplealias=="END") break;
-    if (! datasetname.empty())  dirmap[TString(datasetname)] = xsec;
+    if(sig&&IsSignal(samplealias))    {
+      if (! datasetname.empty())  dirmap[TString(datasetname)] = xsec;
+    }
+    if(!sig&&!IsSignal(samplealias))    {
+      if (! datasetname.empty())  dirmap[TString(datasetname)] = xsec;
+    }
+
   }
   /*
 
@@ -359,13 +374,13 @@ map<TString,  Double_t>  GetXSecMap(TString datasetfile){
    return dirmap;
 }
 
-vector<TString>  GetAvailableMap(TString cversion, TString listpath){
+vector<TString>  GetAvailableMap(TString cversion, TString listpath, bool sig){
   vector<TString> available;
 
   if(cversion.Contains("v7-4"))   return available;
   if(cversion.Contains("v7-6-2")) return available;
 
-  std::map<TString, TString> mapdir = GetLQMap2016(listpath);
+  std::map<TString, TString> mapdir = GetLQMap2016(listpath, sig);
 
   TString dir = "ls   " + TString(getenv("LQANALYZER_DATASET_DIR"))+"/datasets_" + cversion + "/ > inputlist_map.txt";
 
@@ -447,14 +462,14 @@ vector<TString>  GetAvailableMap(TString cversion, TString listpath){
   return available;
 }
 
-map<TString, TString>  GetDatasetNames(TString cversion, TString listpath){
+map<TString, TString>  GetDatasetNames(TString cversion, TString listpath, bool sig){
 
   bool cluster = false;
   TString analysisdir = TString(getenv("HOSTNAME"));
   if(analysisdir.Contains("cmscluster.snu.ac.kr")) cluster=true;
 
   map<TString, TString> datasets;
-  std::map<TString, TString> mapdir = GetLQMap2016(listpath);
+  std::map<TString, TString> mapdir = GetLQMap2016(listpath, sig);
   TString dir = "ls  "+ TString(getenv("LQANALYZER_DATASET_DIR"))+"/datasets_" + cversion + "/ > inputlist_map.txt";
   if(cluster) dir = "ls  /data4/LocalNtuples/LQAnalyzer_rootfiles_for_analysis/DataSetLists/datasets_" + cversion + "/ > inputlist_map.txt";
 
@@ -502,7 +517,7 @@ map<TString, TString>  GetDatasetNames(TString cversion, TString listpath){
 }
   
 
-map<TString, TString>  GetMissingMap(TString cversion, TString listpath){
+map<TString, TString>  GetMissingMap(TString cversion, TString listpath, bool sig){
 
   map<TString, TString> map_missing;
 
@@ -512,7 +527,7 @@ map<TString, TString>  GetMissingMap(TString cversion, TString listpath){
   if(cversion.Contains("v7-4"))   return map_missing;
   if(cversion.Contains("v7-6-2")) return map_missing;
 
-  std::map<TString, TString> mapdir = GetLQMap2016(listpath);
+  std::map<TString, TString> mapdir = GetLQMap2016(listpath, sig);
   TString dir = "ls  " + TString(getenv("LQANALYZER_DATASET_DIR"))+"/datasets_" + cversion + "/ > inputlist_map.txt";
   if(cluster) dir = "ls  /data4/LocalNtuples/LQAnalyzer_rootfiles_for_analysis/DataSetLists/datasets_" + cversion + "/ > inputlist_map.txt";
 
@@ -579,7 +594,7 @@ map<TString, TString>  GetMissingMap(TString cversion, TString listpath){
 }
 
 
-map<TString, TString>  GetTriLepMap2016(TString listpath){
+map<TString, TString>  GetTriLepMap2016(TString listpath,bool  sig){
 
 
   map<TString, TString> trimap;
@@ -600,7 +615,13 @@ map<TString, TString>  GetTriLepMap2016(TString listpath){
     datasetname_file >>fullname;
 
     if(samplealias=="END") break;
-    if (! datasetname.empty()) trimap[TString(datasetname)] = samplealias;
+    if(sig&&IsSignal(samplealias))    {
+      if (! datasetname.empty()) trimap[TString(datasetname)] = samplealias;
+    }
+    if(!sig&&!IsSignal(samplealias))    {
+      if (! datasetname.empty()) trimap[TString(datasetname)] = samplealias;
+    }
+
   }
 
   return trimap;
@@ -648,7 +669,7 @@ map<TString, TString>  GetTriLepMap(){
 }
   
 
-map<TString, TString>  GetLQMap2016(TString datasetfile){
+map<TString, TString>  GetLQMap2016(TString datasetfile, bool sig){
 
   map<TString, TString> lqmap;
 
@@ -668,7 +689,13 @@ map<TString, TString>  GetLQMap2016(TString datasetfile){
     datasetname_file >>fullname;
 
     if(samplealias=="END") break;
-    if (! datasetname.empty()) lqmap[TString(datasetname)] = samplealias;
+    if(sig&&IsSignal(samplealias))    {
+      if (! datasetname.empty()) lqmap[TString(datasetname)] = samplealias;
+    }
+    if(!sig&&!IsSignal(samplealias))    {
+      if (! datasetname.empty()) lqmap[TString(datasetname)] = samplealias;
+    }
+
   }
 
 

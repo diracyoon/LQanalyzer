@@ -26,7 +26,7 @@ float GetSumWeights(std::string filename);
 map<TString, Double_t> map_lumi;
 map<TString, Double_t> neventmap;
 map<TString, Double_t> n_w_eventmap;
-void GetEffectiveLuminosity(TString path_of_list, TString tag,TString version="") {
+void GetEffectiveLuminosity(TString path_of_list, bool sig,  TString tag,TString version="") {
   
   bool debug = true;
   map_lumi.clear();
@@ -47,24 +47,24 @@ void GetEffectiveLuminosity(TString path_of_list, TString tag,TString version=""
   if (NewList) cout << "New list " << endl;
   else cout <<"Not new list" << endl;
 
-  if(CheckMaps(path_of_list)) return;
+  if(CheckMaps(path_of_list, sig)) return;
   TString def_version = TString(getenv("CATVERSION"));
   if(!version.Contains("v8") ) version = def_version;
 
   map<TString, TString> missing_map;
   vector<TString> vec_available ;
   if(!NewList){
-    missing_map= GetMissingMap(version,path_of_list);
-    vec_available = GetAvailableMap(version,path_of_list);
+    missing_map= GetMissingMap(version,path_of_list, sig);
+    vec_available = GetAvailableMap(version,path_of_list, sig);
   }
 
   cout << "GetEffectiveLuminosity: Using file: " << path_of_list << " @ " << endl;
-  map<TString, TString> datasets =  GetDatasetNames(version,path_of_list);
+  map<TString, TString> datasets =  GetDatasetNames(version,path_of_list, sig);
   
   
-  map<TString, Double_t> dirmap = GetXSecMap2016(path_of_list); 
-  map<TString, TString> lqmap = GetLQMap2016(path_of_list);
-  map<TString, TString> trilepmap = GetTriLepMap2016(path_of_list);
+  map<TString, Double_t> dirmap = GetXSecMap2016(path_of_list, sig); 
+  map<TString, TString> lqmap = GetLQMap2016(path_of_list, sig);
+  map<TString, TString> trilepmap = GetTriLepMap2016(path_of_list, sig);
   
   TString analysisdir = TString(getenv("HOSTNAME"));
   bool cluster = false;
@@ -277,7 +277,9 @@ void GetEffectiveLuminosity(TString path_of_list, TString tag,TString version=""
 
   
   ofstream lumi_file;
-  string lfile =  "datasets_snu_CAT_mc_" + string(version.Data()) + string(tag)+".txt";
+  string lfile =  "datasets_snu_nonsig_CAT_mc_" + string(version.Data()) + string(tag)+".txt";
+  if(sig) lfile =  "datasets_snu_sig_CAT_mc_" + string(version.Data()) + string(tag)+".txt";
+
   if(cluster) lfile =  "datasets_snu_cluster_CAT_mc_" + string(version.Data()) + ".txt";
 
   lumi_file.open(lfile.c_str());
@@ -332,7 +334,31 @@ void GetEffectiveLuminosity(TString path_of_list, TString tag,TString version=""
       
       lumi_file <<  "SK" << mit2->second << "_dilep  " << mit4->second << " " << mit5->second << " " <<  mit3->second <<" "  << mit->second << " /data2/CatNtuples/" + string(version.Data()) +"/SKTrees/MCDiLep/" <<  mit2->second << "/" <<endl;
     }
+    lumi_file << "" << endl;
+    lumi_file << "" << endl;
+    lumi_file << "#### HNDilepton_skims:_SKTrees" << endl;
+    for(std::map<TString, Double_t>::iterator mit =map_lumi.begin(); mit != map_lumi.end();++mit){
+      std::map<TString, TString>::iterator mit2 = lqmap.find(mit->first);
+      std::map<TString, Double_t>::iterator mit3 = dirmap.find(mit->first);
+      std::map<TString, Double_t>::iterator mit4 = neventmap.find(mit->first);
+      std::map<TString, Double_t>::iterator mit5 = n_w_eventmap.find(mit->first);
+
+      lumi_file <<  "SK" << mit2->second << "_hndilep  " << mit4->second << " " << mit5->second << " " <<  mit3->second <<" "  << mit->second << " /data2/CatNtuples/" + string(version.Data()) +"/SKTrees/MCDiLep/" <<  mit2->second << "/" <<endl;
+    }
     
+    lumi_file << "" << endl;
+    lumi_file << "#### HNFake_skims:_SKTrees" << endl;
+
+    for(std::map<TString, Double_t>::iterator mit =map_lumi.begin(); mit != map_lumi.end();++mit){
+      std::map<TString, TString>::iterator mit2 = lqmap.find(mit->first);
+      std::map<TString, Double_t>::iterator mit3 = dirmap.find(mit->first);
+      std::map<TString, Double_t>::iterator mit4 = neventmap.find(mit->first);
+      std::map<TString, Double_t>::iterator mit5 = n_w_eventmap.find(mit->first);
+      
+      lumi_file <<  "SK" << mit2->second << "_hnfake  " << mit4->second << " " << mit5->second << " " <<  mit3->second <<" "  << mit->second << " /data2/CatNtuples/" + string(version.Data()) +"/SKTrees/MCHNFake/" <<  mit2->second << "/" <<endl;
+    }
+
+
     lumi_file << "" << endl;
     lumi_file << "" << endl;
     lumi_file << "#### Trilepton_skims:_SKTrees" << endl;
@@ -422,6 +448,15 @@ void GetEffectiveLuminosity(TString path_of_list, TString tag,TString version=""
 
       lumi_file <<  "SK" << mit2->second << "_trilep  " << mit4->second << " " << mit5->second << " " <<  mit3->second <<" "  << mit->second << " /data2/CatNtuples/" + string(version.Data()) +"/SKTrees/MCTriLep/" <<  mit2->second << "/" <<endl;
     }
+    for(std::map<TString, Double_t>::iterator mit =map_lumi.begin(); mit != map_lumi.end();++mit){
+      std::map<TString, TString>::iterator mit2 = lqmap.find(mit->first);
+      std::map<TString, Double_t>::iterator mit3 = dirmap.find(mit->first);
+      std::map<TString, Double_t>::iterator mit4 = neventmap.find(mit->first);
+      std::map<TString, Double_t>::iterator mit5 = n_w_eventmap.find(mit->first);
+      
+      lumi_file <<  "SK" << mit2->second << "_hndilep  " << mit4->second << " " << mit5->second << " " <<  mit3->second <<" "  << mit->second << " /data2/CatNtuples/" + string(version.Data()) +"/SKTrees/MCHNDiLep/" <<  mit2->second << "/" <<endl;
+																					       
+    }
     
     for(std::map<TString, Double_t>::iterator mit =map_lumi.begin(); mit != map_lumi.end();++mit){
       std::map<TString, TString>::iterator mit2 = lqmap.find(mit->first);
@@ -433,10 +468,12 @@ void GetEffectiveLuminosity(TString path_of_list, TString tag,TString version=""
     }
 
   }
-  
+
 
   string lqdir = getenv("LQANALYZER_DIR");
-  string lfile2 =  lqdir + "/LQRun/txt/datasets_snu_CAT_mc_" + string(version.Data()) + ".txt";
+  string lfile2 =  lqdir + "/LQRun/txt/datasets_snu_nonsig_CAT_mc_" + string(version.Data()) + ".txt";
+  if(sig) lfile2 =  lqdir + "/LQRun/txt/datasets_snu_sig_CAT_mc_" + string(version.Data()) + ".txt";
+
   if(cluster) lfile2 =  lqdir + "/LQRun/txt/Cluster/datasets_snu_cluster_CAT_mc_" + string(version.Data()) + ".txt";
 
   TString user = TString(getenv("USER"));

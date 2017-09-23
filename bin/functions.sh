@@ -1,6 +1,7 @@
 #!/bin/sh
 declare -a input_samples=("")
 stream=""
+tmpfilename=""
 cycle=""
 njobs=1
 data_lumi=""

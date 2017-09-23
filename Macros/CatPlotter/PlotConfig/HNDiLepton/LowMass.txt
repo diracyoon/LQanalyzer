@@ -1,0 +1,5 @@
+####  path    |   scale   |   legend
+/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/HNDiLepton/periodBtoH/2017-09-18/HNDiLepton_HNMumMum_40_cat_v8-0-7.root   |  0.01 |    m_{N} = 40 GeV, |V_{#muN}|^{2} = 5 #times 10^{-4} 
+/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/HNDiLepton/periodBtoH/2017-09-18/HNDiLepton_HNMumMum_60_cat_v8-0-7.root   |  0.05 |    m_{N} = 60 GeV, |V_{#muN}|^{2} = 1 #times 10^{-3} 
+/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/HNDiLepton/periodBtoH/2017-09-18/HNDiLepton_HNMumMum_80_cat_v8-0-7.root   |  0.3 |    m_{N} = 80 GeV, |V_{#muN}|^{2} = 3 #times 10^{-3} 
+END

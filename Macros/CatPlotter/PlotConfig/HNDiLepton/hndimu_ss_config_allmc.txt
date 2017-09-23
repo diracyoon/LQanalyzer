@@ -6,8 +6,8 @@ ggZZto4mu                 |   Diboson                                           
 WpWpQCD                   |    Diboson                                                |  diboson             |  kGreen     |     0.15     |
 WpWpEWK                   |    Diboson                                                |  diboson             |  kGreen     |     0.15     |
 ww_ds                     |   Diboson                                           |  diboson               |  kGreen    | 0.15     |
-ZGto2LG                   |   Diboson                                           |  zg               |  kGreen     | 0.15     |
-WGtoLNuG                  |   Diboson                                           |  wg               |  kGreen     | 0.15     |
+ZGto2LG                   |   Xg                                          |  zg               |  kRed     | 0.15     |
+WGtoLNuG                  |   Xg                                           |  wg               |  kRed     | 0.15     |
 ttZToLL_M-10		  |   Top						|  top			| kRed | 0.2 | 
 tZq			  |   Top                                               |  top                  | kRed | 0.2 |
 TTG                       |   Top             |  top              |  kRed     |       0.2     |

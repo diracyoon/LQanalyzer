@@ -44,6 +44,7 @@ parser.add_option("-L", "--LibList", dest="LibList", default="NULL", help="Add e
 parser.add_option("-D", "--debug", dest="debug", default=False, help="Run submit script in debug mode?")
 parser.add_option("-m", "--useskim", dest="useskim", default="Lepton", help="Run submit script in debug mode?")
 parser.add_option("-G", "--runtau", dest="runtau", default="runtau", help="Run fake mode for np bkg?")
+parser.add_option("-g", "--tmpfilename", dest="tmpfilename", default="", help="Run fake mode for np bkg?")
 parser.add_option("-P", "--runnp", dest="runnp", default="runnp", help="Run fake mode for np bkg?")
 parser.add_option("-Q", "--runcf", dest="runcf", default="runcf", help="Run fake mode for np bkg?")
 parser.add_option("-q", "--queue", dest="queue", default="queue", help="what queue")
@@ -87,6 +88,8 @@ DEBUG = options.debug
 useskim = options.useskim
 skflag = options.skflag
 usebatch =options.usebatch
+
+tmp_filename=options.tmpfilename
 
 new_channel = channel.replace(":", "")
 original_channel = new_channel
@@ -332,6 +335,13 @@ catversions = ["v7-6-4",
 sample_catversion = ""
 output_catversion=os.getenv("CATVERSION")
 
+if "HN" in  sample or "CHT" in sample:
+    datasetfile="datasets_snu_sig_CAT_mc_"
+else:
+    datasetfile="datasets_snu_nonsig_CAT_mc_"
+
+
+
 #### Check latest tag/version for DS.                                                                                                                                          
 iversion=0
 while inDS == "":
@@ -347,7 +357,7 @@ while inDS == "":
         if printToScreen:
             print "Using CAT " +sample_catversion + " ntuples"
         if mc:
-            filename = os.getenv("LQANALYZER_RUN_PATH") + '/txt/datasets_snu_CAT_mc_' +sample_catversion +  '.txt'
+            filename = os.getenv("LQANALYZER_RUN_PATH") + '/txt/'+datasetfile +sample_catversion +  '.txt'
             if "cmscluster.snu.ac.kr" in str(os.getenv("HOSTNAME")):
                 filename = os.getenv("LQANALYZER_RUN_PATH") + '/txt/Cluster/datasets_snu_cluster_CAT_mc_' +sample_catversion +  '.txt'
 
@@ -438,7 +448,7 @@ if os.path.exists(path_log):
 if printToScreen:
     print "number_of_files = " + str(number_of_files) + " njobs running in batch = " + str(njobs)
 
-njobs_max_allowed = 1750
+njobs_max_allowed = 10750
 if queuename == "long":
     njobs_max_allowed = 2750
 

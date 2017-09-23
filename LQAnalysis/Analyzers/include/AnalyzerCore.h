@@ -90,7 +90,7 @@ class AnalyzerCore : public LQCycleBase {
   float GetPtRelLepTJet(snu::KMuon muon, std::vector<snu::KJet> jets, bool usecorrectedpt=true);
 
 
-  float MC_CR_Correction(TString ID);
+  float MC_CR_Correction(int syst=0);
   float GetTriggerPrescaleCorrection(TString triggername);
 
   void SetupLuminosityMap(bool initialsetup, TString forceperiod="");

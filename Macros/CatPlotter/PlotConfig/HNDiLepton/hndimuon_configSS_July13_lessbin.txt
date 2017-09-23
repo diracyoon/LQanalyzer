@@ -1,0 +1,16 @@
+###      MakeCleverHistograms(sighist_mm, "DiMuon_SSPreselection"+dimuonIDs.at(i));
+#**************************************************************************************
+# cut SSMM_DiJet_passMT
+# samples HNDiLepton/hndimu_ss_config_allmc.txt
+# skim SKTree_DiLepSkim
+# stream DoubleMuon
+# analyzer HNDiLepton
+# periodtag periodBtoH
+# datetag  2017-07-14
+# plottag snuHNmeetingJuly12
+# caption Number of events with two same-sign muon and two jets...
+# DrawSig HNDiLepton/LowMass.txt
+# blinded  true
+# hists: HNDiLepton/hndimuon_configSS_allbinhists.txt
+#######################################################################################
+END

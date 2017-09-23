@@ -90,6 +90,8 @@ void SKTreeMakerFakeHN::ExecuteEvents()throw( LQError ){
     if(PassTrigger("HLT_Mu3_PFJet40_v")) passtrig=true;
     if(PassTrigger("HLT_Mu8_v")) passtrig=true;
     if(PassTrigger("HLT_Mu17_v")) passtrig=true;
+    if(PassTrigger("HLT_Mu8_TrkIsoVVL_v")) passtrig=true;
+    if(PassTrigger("HLT_Mu17_TrkIsoVVL_v")) passtrig=true;
     if(!passtrig) throw LQError( "REMOVE TRIGGERED EVENTS for OR",  LQError::SkipEvent );
     std::vector<snu::KElectron> elColl = GetElectrons("ELECTRON_HN_VETO");  // loose selection                                                    
     if(elColl.size() > 0) throw LQError( "REMOVE TRIGGERED EVENTS for OR",  LQError::SkipEvent );
@@ -226,6 +228,8 @@ void SKTreeMakerFakeHN::ExecuteEvents()throw( LQError ){
     if(PassTrigger("HLT_Mu3_PFJet40_v")) passtrig=true;
     if(PassTrigger("HLT_Mu8_v")) passtrig=true;
     if(PassTrigger("HLT_Mu17_v")) passtrig=true;
+    if(PassTrigger("HLT_Mu8_TrkIsoVVL_v")) passtrig=true;
+    if(PassTrigger("HLT_Mu17_TrkIsoVVL_v")) passtrig=true;
     if(PassTrigger(analysis_trigger_1))  passtrig=true;
     if(PassTrigger(analysis_trigger_2))  passtrig=true;
     if(!passtrig) throw LQError( "REMOVE TRIGGERED EVENTS for OR",  LQError::SkipEvent );

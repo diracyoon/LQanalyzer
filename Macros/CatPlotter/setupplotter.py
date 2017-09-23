@@ -181,6 +181,9 @@ for i in list_of_legends:
                 elif skim == "SKTree_TriLepSkim":
                     tag="_SK"
                     tag2="_trilep"
+                elif skim == "SKTree_HNDiLepSkim":
+                    tag="_SK"
+                    tag2="_hndilep"
 
 
                 prefix= analyzer + tag
@@ -417,6 +420,11 @@ elif skim == "SKTree_DiLepSkim":
 elif skim == "SKTree_TriLepSkim":
     tag="_SK"
     tag2="_trilep"
+
+elif skim == "SKTree_HNDiLepSkim":
+    tag="_SK"
+    tag2="_hndilep"
+
 
 MakeConfFile(inputdir,jobdir,stream,analyzer,tag,tag2,catversion,period,filedate,cutlist,list_of_legends_alias, plottag, isblind)
 

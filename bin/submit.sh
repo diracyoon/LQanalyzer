@@ -37,7 +37,8 @@ usebatch=$(makeParseVariable 'b' ${usebatch})
 drawhists=$(makeParseVariable 'A' ${drawhists})
 queue=$(makeParseVariable 'q' ${queue}) 
 submitallfiles=$(makeParseVariable 'F' ${submitallfiles})
-
+tmpfilename=$(makeParseVariable 'g' ${tmpfilename})
+sendemail=$(makeParseVariable 'H' ${sendemail})
 ################                                                                                                                                                
 
 ########## GET EMAIL                                                                                                                                                                                                              
@@ -77,7 +78,7 @@ then
     if [[ ! -d "${statdir}" ]]; then
         mkdir ${statdir}
     fi
-    python   ${LQANALYZER_DIR}/python/SubmittionConfig.py  -p ${samplelist} ${stream} ${njobs} ${cycle} ${logstep} ${data_lumi} ${outputdir} ${remove} ${loglevel} ${skipevent} ${nevents} ${totalev} ${xsec} ${targetlumi} ${efflumi}  ${skinput} ${runevent} ${useCATv742ntuples} ${LibList} ${DEBUG} ${useskim} ${runnp} ${runcf} ${catversion} ${skflag} ${usebatch} -X ${tagger} -u $cat_email -B ${run_in_bkg} ${drawhists} ${queue} ${setnjobs} ${submitallfiles} ${runtau}
+    python   ${LQANALYZER_DIR}/python/SubmittionConfig.py  -p ${samplelist} ${stream} ${njobs} ${cycle} ${logstep} ${data_lumi} ${outputdir} ${remove} ${loglevel} ${skipevent} ${nevents} ${totalev} ${xsec} ${targetlumi} ${efflumi}  ${skinput} ${runevent} ${useCATv742ntuples} ${LibList} ${DEBUG} ${useskim} ${runnp} ${runcf} ${catversion} ${skflag} ${usebatch} -X ${tagger} -u $cat_email -B ${run_in_bkg} ${drawhists} ${queue} ${setnjobs} ${submitallfiles} ${runtau} ${tmpfilename} ${sendemail}
 else 
     for i in ${input_samples[@]}
     do

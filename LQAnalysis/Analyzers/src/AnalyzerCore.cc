@@ -421,22 +421,35 @@ bool  AnalyzerCore::Check(float val){
   return true;
 }
 
-float AnalyzerCore::MC_CR_Correction(TString ID){
-  if(ID == "MUON_HN_TIGHT"){
-    if(k_sample_name.Contains("")) return 1.;
-  }
-  if(ID== "ELECTRON_HN_TIGHTv5"){
-    if(k_sample_name.Contains("")) return 1.;
-  }
-  //...... This function needs filling 
+float AnalyzerCore::MC_CR_Correction(int syst){
+  
+  float fsyst = 0.;
+  if(syst==1) fsyst=1.;
+  if(syst==-1) fsyst=-1.;
+
+  if(k_sample_name.Contains("WZTo3LNu_powheg")) return 0.995791 + fsyst*0.0631857;
+  if(k_sample_name.Contains("ZGto2LG")) return  0.830936+ fsyst*0.11205;
+  if(k_sample_name.Contains("WGtoLNuG")) return 0.830936  + fsyst*0.11205;
+  if(k_sample_name.Contains("ZZTo4L_powheg")) return 0.922903  + fsyst*0.0829533;
+  if(k_sample_name.Contains("ggZZto2e2mu")) return 0.922903  + fsyst*0.0829533;
+  if(k_sample_name.Contains("ggZZto2e2nu")) return 0.922903  + fsyst*0.0829533;
+  if(k_sample_name.Contains("ggZZto2e2tau")) return 0.922903  + fsyst*0.0829533;
+  if(k_sample_name.Contains("ggZZto2mu2nu")) return 0.922903  + fsyst*0.0829533;
+  if(k_sample_name.Contains("ggZZto2mu2tau")) return 0.922903  + fsyst*0.0829533;
+  if(k_sample_name.Contains("ggZZto4e")) return 0.922903  + fsyst*0.0829533;
+  if(k_sample_name.Contains("ggZZto4mu")) return 0.922903  + fsyst*0.0829533;
+  if(k_sample_name.Contains("ggZZto4tau")) return 0.922903  + fsyst*0.0829533;
+  
   return 1.;
 }
 
 float AnalyzerCore::GetTriggerPrescaleCorrection(TString triggername){
   float corr_trig=1.;
-  if(triggername== "HLT_Mu3_PFJet40") corr_trig = 0.728;
-  if(triggername== "HLT_Mu8_TrkIsoVVL") corr_trig = 1.399;
+
+  if(triggername.Contains( "HLT_Mu3_PFJet40_v")) corr_trig = 0.728;
+  if(triggername.Contains("HLT_Mu8_TrkIsoVVL_v")) corr_trig = 1.399;
   return corr_trig;
+
 }
 
 

@@ -1,4 +1,4 @@
-import os,getpass
+import os,getpass,filecmp
 from CleanUp import *
 
 path_jobpre="/data1/"
@@ -61,8 +61,16 @@ if not LQANALYZER_DIR == "None" :
 	os.system("cp " + localfiledir + "/Luminosity/lumi_catversion_"+str(os.getenv("CATVERSION"))+".txt "  + lumifiledir)
 	os.system("cp " + datasetfiledir + "/list_all_mc_"+str(os.getenv("CATVERSION"))+".sh " + txtfiledir)
         if os.getenv("HOSTNAME") == "cms.snu.ac.kr":
-            if not os.getenv("USER") == "jalmond":
-                os.system("cp " + localfiledir + "/Selection/*.sel " + seldir)
+            list_sel= ["muons","electrons","jets","fatjets"]
+            for x in list_sel:
+                if not filecmp.cmp(localfiledir + "/Selection/"+str(x)+".sel",seldir+"/"+str(x)+".sel"):
+                    print "#"*50
+                    print "File "+str(x)+".sel is out of date...... Updating "
+                    print "Differences are:"
+
+                    os.system("diff " + localfiledir + "/Selection/"+str(x)+".sel " + seldir+"/"+str(x)+".sel")
+                    os.system("cp " + localfiledir + "/Selection/"+str(x)+".sel " + seldir)
+                    print "#"*50
         else:
             os.system("rm " + seldir  +"/electrons.sel") 
             while not os.path.exists(seldir  +"/electrons.sel"):

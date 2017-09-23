@@ -1,2 +1,2 @@
-SSMM_1Jet
+SSMM_DiJet
 END

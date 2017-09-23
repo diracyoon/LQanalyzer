@@ -1,0 +1,41 @@
+###      MakeCleverHistograms(sighist_mm, "DiMuon_SSPreselection"+dimuonIDs.at(i));
+#**************************************************************************************
+# cut SSMM_DiJet
+# samples HNDiLepton/hndimu_ss_config_allmc.txt
+# skim SKTree_DiLepSkim
+# stream DoubleMuon
+# analyzer HNDiLepton
+# periodtag periodBtoH
+# datetag  2017-07-13
+# plottag snuHNmeetingJuly12
+# caption Number of events with two same-sign muon and two jets...
+# DrawSig HNDiLepton/LowMass.txt
+# blinded  true
+# hists: HNDiLepton/hndimuon_configSS_hists.txt
+#######################################################################################
+# cut SSMM_Preselection
+# caption Number of events with two same-sign muon...
+# blinded  false
+#######################################################################################
+# cut SSMM_DiJet_noB
+# caption Number of events with two same-sign muon...
+#######################################################################################
+# cut SSMM_DiJet_FailnoB
+# caption Number of events with two same-sign muon...
+#######################################################################################
+# cut SSMM_DiJet_passMET
+# caption Number of events with two same-sign muon...
+#######################################################################################
+# cut SSMM_DiJet_passMETST
+# caption Number of events with two same-sign muon...
+#######################################################################################
+# cut SSMM_DiJet_passHT
+# caption Number of events with two same-sign muon...
+#######################################################################################
+# cut SSMM_DiJet_passDR
+# caption Number of events with two same-sign muon...
+#######################################################################################
+# cut SSMM_DiJet_passDR2
+# caption Number of events with two same-sign muon...
+#######################################################################################
+END

@@ -79,7 +79,7 @@ void SKTreeMakerHNDiLep::ExecuteEvents()throw( LQError ){
 
   //###### JET SELECTION  ################
   Message("Selecting jets", DEBUG);
-  eventbase->GetJetSel()->SetPt(10);
+  eventbase->GetJetSel()->SetPt(20);
   eventbase->GetJetSel()->SetEta(5.);
   eventbase->GetJetSel()->BasicSelection(out_jets);
   
@@ -94,7 +94,7 @@ void SKTreeMakerHNDiLep::ExecuteEvents()throw( LQError ){
   //###### Electron Selection ########
   Message("Selecting electrons", DEBUG);
   std::vector<snu::KElectron> skim_electrons;
-  eventbase->GetElectronSel()->SetPt(5.); 
+  eventbase->GetElectronSel()->SetPt(9.); 
   eventbase->GetElectronSel()->SetEta(5.); 
   eventbase->GetElectronSel()->BasicSelection(out_electrons); 
   eventbase->GetElectronSel()->SetPt(9.);
@@ -110,17 +110,35 @@ void SKTreeMakerHNDiLep::ExecuteEvents()throw( LQError ){
 
   bool pass15gev=false;
 
-  if(skim_electrons.size() > 0 ) {
-    if(skim_electrons.at(0).Pt() > 14.) pass15gev= true;
+  if(skim_electrons.size() > 0) {
+    if(skim_electrons.at(0).Pt() > 10.) pass15gev= true;
   }
   if(skim_muons.size() > 0){
     float mupt=skim_muons.at(0).Pt();
     if(skim_muons.at(0).RochPt() < skim_muons.at(0).Pt()) mupt=skim_muons.at(0).RochPt();
     if(skim_muons.at(0).RochPt() < 0.) mupt=skim_muons.at(0).Pt();
 
-    if(mupt > 14.)  pass15gev= true;
+    if(mupt > 10.)  pass15gev= true;
   }
   if(!pass15gev) throw LQError( "Not Lepton Event",  LQError::SkipEvent );
+
+
+  std::vector<snu::KElectron> elColl = GetElectrons("ELECTRON_HN_VETO");
+  std::vector<snu::KMuon> muColl = GetMuons("MUON_HN_VETO");
+
+
+  //if((muColl.size() + elColl.size()) != 2) throw LQError( "Not Lepton Event",  LQError::SkipEvent );
+  if(muColl.size()==2) {
+    if(!SameCharge(muColl)) throw LQError( "Not Lepton Event",  LQError::SkipEvent );
+  }
+  else if(elColl.size()==2) {
+    if(!SameCharge(elColl)) throw LQError( "Not Lepton Event",  LQError::SkipEvent );
+  }
+  else{
+    if(muColl.size()==1 && elColl.size()==1 ) {
+      if(elColl[0].Charge() != muColl[0].Charge()) throw LQError( "Not Lepton Event",  LQError::SkipEvent );
+    }
+  }
 
 
   FillCutFlow("TriLep", 1);

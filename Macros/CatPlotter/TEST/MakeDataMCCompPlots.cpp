@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     int a =MakeCutFlow_Plots(configfile);
   }
   
-  system(("scp -r " + output_path + " jalmond@lxplus003.cern.ch:~/www/SNU/CATAnalyzerPlots/").c_str());
+  system(("scp -r " + output_path + " jalmond@lxplus033.cern.ch:~/www/SNU/CATAnalyzerPlots/").c_str());
 
   cout << "Open plots in " << output_index_path << endl;
   cout << "Local directory = ~/CATAnalyzerPlots/" + path +  "/histograms/" + histdir  << endl;
@@ -173,7 +173,7 @@ int MakePlots(string hist) {
 
 vector<TH1*> hsig ;
 float int_bkg = hup->Integral()/2.; 
-TFile* file_sig0 =  TFile::Open(("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/HNDiLepton/periodBtoH/HNDiLepton_HNMumMum_40_cat_v8-0-7.root")); 
+TFile* file_sig0 =  TFile::Open(("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/HNDiLepton/periodBtoH/2017-09-18/HNDiLepton_HNMumMum_40_cat_v8-0-7.root")); 
 TH1* hsig0 = dynamic_cast<TH1*> ((file_sig0->Get(name.c_str()))->Clone()); 
 hsig0->Rebin(rebin); 
 hsig0->Scale(0.01); 
@@ -184,7 +184,7 @@ hsig0->SetLineWidth(3.);
 hsig0->GetXaxis()->SetRangeUser(xmin,xmax); 
 hsig0->GetYaxis()->SetRangeUser(ymin,ymax); 
 hsig.push_back(hsig0);
-TFile* file_sig1 =  TFile::Open(("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/HNDiLepton/periodBtoH/HNDiLepton_HNMumMum_60_cat_v8-0-7.root")); 
+TFile* file_sig1 =  TFile::Open(("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/HNDiLepton/periodBtoH/2017-09-18/HNDiLepton_HNMumMum_60_cat_v8-0-7.root")); 
 TH1* hsig1 = dynamic_cast<TH1*> ((file_sig1->Get(name.c_str()))->Clone()); 
 hsig1->Rebin(rebin); 
 hsig1->Scale(0.05); 
@@ -195,7 +195,7 @@ hsig1->SetLineWidth(3.);
 hsig1->GetXaxis()->SetRangeUser(xmin,xmax); 
 hsig1->GetYaxis()->SetRangeUser(ymin,ymax); 
 hsig.push_back(hsig1);
-TFile* file_sig2 =  TFile::Open(("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/HNDiLepton/periodBtoH/HNDiLepton_HNMumMum_80_cat_v8-0-7.root")); 
+TFile* file_sig2 =  TFile::Open(("/data2/CAT_SKTreeOutput/JobOutPut/jalmond/LQanalyzer/data/output/CAT/HNDiLepton/periodBtoH/2017-09-18/HNDiLepton_HNMumMum_80_cat_v8-0-7.root")); 
 TH1* hsig2 = dynamic_cast<TH1*> ((file_sig2->Get(name.c_str()))->Clone()); 
 hsig2->Rebin(rebin); 
 hsig2->Scale(0.3); 
@@ -584,6 +584,7 @@ TLegend* MakeLegend( map<TString, TH1*> map_legend,TH1* hlegdata,  bool rundata 
 
 legorder.push_back("Misid. Lepton Background");
 legorder.push_back("Diboson");
+legorder.push_back("Xg");
 legorder.push_back("Top");
 legorder.push_back("Triboson");
 legorder.push_back("Higgs");
@@ -663,7 +664,7 @@ if(sample.Contains("DoubleMuon_SKnonprompt")){    list.push_back(make_pair("Doub
     list.push_back(make_pair("WpWpQCD",0.15));
     list.push_back(make_pair("WpWpEWK",0.15));
     list.push_back(make_pair("ww_ds",0.15));
-    list.push_back(make_pair("ZGto2LG",0.15));
+}if(sample.Contains("zg")){    list.push_back(make_pair("ZGto2LG",0.15));
     list.push_back(make_pair("WGtoLNuG",0.15));
 }if(sample.Contains("top")){    list.push_back(make_pair("ttZToLL_M-10",0.2));
     list.push_back(make_pair("tZq",0.2));
@@ -1324,6 +1325,7 @@ void  SetUpConfig(vector<pair<pair<vector<pair<TString,float> >, int >, TString 
 vector<pair<TString,float> > np;
 np.push_back(make_pair("DoubleMuon_SKnonprompt",0.34));
 vector<pair<TString,float> >  diboson = InitSample(" diboson"); 
+vector<pair<TString,float> >  zg = InitSample(" zg"); 
 vector<pair<TString,float> >  top = InitSample(" top"); 
 vector<pair<TString,float> >  triv = InitSample(" triv"); 
 vector<pair<TString,float> >  higgs = InitSample(" higgs"); 
@@ -1332,6 +1334,7 @@ vector<pair<TString,float> >  higgs = InitSample(" higgs");
   for( unsigned int i = 0; i < listofsamples.size(); i++){
    if(listofsamples.at(i) =="DoubleMuon_SKnonprompt")samples.push_back(make_pair(make_pair(np,870),"Misid. Lepton Background"));
    if(listofsamples.at(i) =="diboson")samples.push_back(make_pair(make_pair(diboson,kGreen),"Diboson"));
+   if(listofsamples.at(i) =="zg")samples.push_back(make_pair(make_pair(zg,kRed),"Xg"));
    if(listofsamples.at(i) =="top")samples.push_back(make_pair(make_pair(top,kRed),"Top"));
    if(listofsamples.at(i) =="triv")samples.push_back(make_pair(make_pair(triv,kSpring+2),"Triboson"));
    if(listofsamples.at(i) =="higgs")samples.push_back(make_pair(make_pair(higgs,800),"Higgs"));
