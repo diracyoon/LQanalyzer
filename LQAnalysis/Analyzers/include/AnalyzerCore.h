@@ -452,6 +452,7 @@ class AnalyzerCore : public LQCycleBase {
   static Bool_t Compare_Jet_CSV(const snu::KJet& jet0, const snu::KJet& jet1);
   Double_t Distance(const snu::KTruth& truth, const snu::KJet& jet);
   Bool_t Search_Truth_Value(std::vector<snu::KTruth>& gen_truth_coll, snu::KTruth gen_quark[4], snu::KTruth& gen_neutrino, snu::KTruth& gen_lepton);
+  Double_t Top_Pair_Reweight(const Double_t& top_pt, const Double_t& a_top_pt);
   Bool_t Truth_Jet_Match(const snu::KTruth gen_quark[], const vector<snu::KJet>& jet_vector, Int_t permutation_truth[4], const Double_t distance_match=0.2);
 };
 #endif

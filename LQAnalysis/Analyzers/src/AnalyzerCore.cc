@@ -4327,6 +4327,16 @@ Double_t AnalyzerCore::Distance(const snu::KTruth& truth, const snu::KJet& jet)
 
 //////////
 
+inline Double_t AnalyzerCore::Top_Pair_Reweight(const Double_t& top_pt, const Double_t& a_top_pt)
+{
+  Double_t sf_top = TMath::Exp(0.0615-0.0005*top_pt);
+  Double_t sf_a_top = TMath::Exp(0.0615-0.0005*a_top_pt);
+
+  return TMath::Sqrt(sf_top*sf_a_top);
+}//Double_t AnalyzerCore::Top_Pair_Reweight(const Double_t& top_pt, const Double_t& a_top_pt)
+
+//////////
+
 Bool_t AnalyzerCore::Search_Truth_Value(std::vector<snu::KTruth>& gen_truth_coll, snu::KTruth gen_quark[4], snu::KTruth& gen_neutrino, snu::KTruth& gen_lepton)
 {
   Int_t n_parton = gen_truth_coll.size();
