@@ -26,4 +26,6 @@
 #define PDG_TOP 6
 #define PDG_A_TOP -6
 
+#define TOTAL_LUMINOSITY 36.4466098
+
 #endif /*__My_Defs_H__*/

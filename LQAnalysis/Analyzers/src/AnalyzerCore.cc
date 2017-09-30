@@ -4327,7 +4327,7 @@ Double_t AnalyzerCore::Distance(const snu::KTruth& truth, const snu::KJet& jet)
 
 //////////
 
-inline Double_t AnalyzerCore::Top_Pair_Reweight(const Double_t& top_pt, const Double_t& a_top_pt)
+Double_t AnalyzerCore::Top_Pair_Reweight(const Double_t& top_pt, const Double_t& a_top_pt)
 {
   Double_t sf_top = TMath::Exp(0.0615-0.0005*top_pt);
   Double_t sf_a_top = TMath::Exp(0.0615-0.0005*a_top_pt);
