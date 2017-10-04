@@ -140,6 +140,8 @@ void Validation_CH_MuJet::ExecuteEvents() throw(LQError)
   if(n_b_tag<1) throw LQError("Fail at least one b-tagged jet", LQError::SkipEvent);
   FillCutFlow("B_Tag", weight);
 
+  cout << MCweight << endl;
+
   /////////////////
   /*Scale factors*/
   /////////////////
@@ -180,6 +182,8 @@ void Validation_CH_MuJet::ExecuteEvents() throw(LQError)
   Double_t weight_by_trigger_sf = 1;
   if(k_isdata==kFALSE) weight_by_trigger_sf =  WeightByTrigger("HLT_IsoMu24_v", TOTAL_LUMINOSITY);
 
+  //Pile up reweight
+  
   //Muoon ID scale factor
   Double_t muon_id_sf[3] = {1, 1, 1};
   if(k_isdata==kFALSE)
@@ -205,7 +209,7 @@ void Validation_CH_MuJet::ExecuteEvents() throw(LQError)
   ///////////////////////////
   /*saving ntuple variables*/
   ///////////////////////////
-  Double_t variables[26];
+  Double_t variables[29];
   
   //met
   variables[0] = met;
@@ -222,7 +226,7 @@ void Validation_CH_MuJet::ExecuteEvents() throw(LQError)
       variables[2*i+3] = jet.Eta();
       variables[2*i+4] = jet.Pt();
     }
-
+  
   //
   variables[11] = eventbase->GetEvent().nVertices();
   variables[12] = n_b_tag;
@@ -234,13 +238,16 @@ void Validation_CH_MuJet::ExecuteEvents() throw(LQError)
   variables[16] = trigger_sf[1];
   variables[17] = trigger_sf[2];
   variables[18] = weight_by_trigger_sf;
-  variables[19] = muon_id_sf[0];
-  variables[20] = muon_id_sf[1];
-  variables[21] = muon_id_sf[2];
-  variables[22] = muon_iso_sf[0];
-  variables[23] = muon_iso_sf[1];
-  variables[24] = muon_iso_sf[2];
-  variables[25] = muon_tracking_effi_sf; 
+  variables[19] = 1;
+  variables[20] = 1;
+  variables[21] = 1;
+  variables[22] = muon_id_sf[0];
+  variables[23] = muon_id_sf[1];
+  variables[24] = muon_id_sf[2];
+  variables[25] = muon_iso_sf[0];
+  variables[26] = muon_iso_sf[1];
+  variables[27] = muon_iso_sf[2];
+  variables[28] = muon_tracking_effi_sf; 
 
   FillNtp("tuple_variables", variables);
 
@@ -265,7 +272,7 @@ void Validation_CH_MuJet::InitialiseAnalysis() throw(LQError)
   //Initialise histograms
   MakeHistograms();
 
-  MakeNtp("tuple_variables", "met:muon_eta:muon_pt:jet0_eta:jet0_pt:jet1_eta:jet1_pt:jet2_eta:jet2_pt:jet3_eta:jet3_pt:n_vertices:n_b_tag:weight:top_pair_reweight:trigger_sf_down:trigger_sf:trigger_up:weight_by_trigger:muon_id_sf_down:muon_id_sf:muon_id_sf_up:muon_iso_sf_down:muon_iso_sf:muon_iso_sf_up:muon_tracking_eff_sf");
+  MakeNtp("tuple_variables", "met:muon_eta:muon_pt:jet0_eta:jet0_pt:jet1_eta:jet1_pt:jet2_eta:jet2_pt:jet3_eta:jet3_pt:n_vertices:n_b_tag:weight:top_pair_reweight:trigger_sf_down:trigger_sf:trigger_sf_up:weight_by_trigger:muon_id_sf_down:muon_id_sf:muon_id_sf_up:muon_iso_sf_down:muon_iso_sf:muon_iso_sf_up:muon_tracking_eff_sf");
 
   return;
 }//void Validation_CH_MuJet::InitialiseAnalysis()

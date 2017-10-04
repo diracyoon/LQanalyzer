@@ -5,4 +5,5 @@ webpage https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
 ###--------------------------------------------------------------------------------------------------------------------------------------------------------
 | ID                 |  ptmin  | |etamax| | tau21 |  pileup | LooseID  | TightID | TightIDLepVeto | remove_near_muonID   | remove_near_electronID   | mass_min   | mass_max |
 | FATJET_HN             | 20.     | 2.5     | 0.6  | false  | true     |  false  |  false         | MUON_HN_VETO         | ELECTRON_HN_VETO        |  65.        |  95.     |
-| FATJET_NOCUT          | 20.     | 2.5     | 0.  | false  | true     |  false  |  false          |  MUON_HN_VETO               | ELECTRON_HN_VETO  | 999.       | 999.     |
+| FATJET_HN_noM             | 20.     | 2.5     | 0.6  | false  | true     |  false  |  false         | MUON_HN_VETO         | ELECTRON_HN_VETO        |  45.        |  115.     |
+| FATJET_NOCUT          | 20.     | 2.5     | 999.  | false  | true     |  false  |  false          |  MUON_HN_VETO               | ELECTRON_HN_VETO  | 999.       | 999.     |

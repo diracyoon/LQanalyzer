@@ -92,4 +92,4 @@ declare -a ch_high=('TT_powheg' 'CHToCB_M110_madgraph_13TeV_2016' 'CHToCB_M120_m
 declare -a ch_cb_all=('CHToCB_M090_madgraph_13TeV_2016' 'CHToCB_M100_madgraph_13TeV_2016' 'CHToCB_M110_madgraph_13TeV_2016' 'CHToCB_M120_madgraph_13TeV_2016' 'CHToCB_M125_madgraph_13TeV_2016' 'CHToCB_M130_madgraph_13TeV_2016' 'CHToCB_M140_madgraph_13TeV_2016' 'CHToCB_M150_madgraph_13TeV_2016')
 declare -a ch_all=('TT_powheg' 'CHToCB_M090_madgraph_13TeV_2016' 'CHToCB_M100_madgraph_13TeV_2016' 'CHToCB_M110_madgraph_13TeV_2016' 'CHToCB_M120_madgraph_13TeV_2016' 'CHToCB_M125_madgraph_13TeV_2016' 'CHToCB_M130_madgraph_13TeV_2016' 'CHToCB_M140_madgraph_13TeV_2016' 'CHToCB_M150_madgraph_13TeV_2016')
 
-declare -a ch_validation=('TT_powheg' 'WJets')
+declare -a ch_validation=('TT_powheg' 'WJets' 'DYJets' 'SingleTop_s' 'SingleTop_t' 'SingleTop_tW' 'SingleTop_tW_noHadron' 'SingleTbar_t' 'SingleTbar_tW' 'SingleTbar_tW_noHadron' 'WW' 'ZZ' 'WZ' 'ttW' 'ttZ' 'ttH_bb' 'ttH_nonbb')
