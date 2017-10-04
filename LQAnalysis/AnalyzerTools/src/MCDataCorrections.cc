@@ -707,7 +707,7 @@ double MCDataCorrections::TriggerEfficiencyLegByLegPeriodDependant(std::vector<s
       snu::KMuon mu1 = mu.at(i);
       for(unsigned j=i+1; j<mu.size(); j++){
         snu::KMuon mu2 = mu.at(j);
-        double dimueff = TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger(mu1, mu2, "MU17", "MU8_OR_TKMU8", muid, DataOrMC, catperiod);
+        double dimueff = TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger(mu1, mu2, "MU17", "MU8_OR_TKMU8", muid, DataOrMC, catperiod, direction);
         //cout << "[MCDataCorrections::TriggerEfficiencyLegByLegPeriodDependant] dimueff = " << dimueff << endl;
         
         faileff *= (1.-dimueff);
@@ -733,7 +733,7 @@ double MCDataCorrections::TriggerEfficiencyLegByLegPeriodDependant(std::vector<s
       snu::KElectron el1 = el.at(i);
       for(unsigned j=i+1; j<el.size(); j++){
         snu::KElectron el2 = el.at(j);
-        double dieleff = TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger(el1, el2, "ELE23", "ELE12", elid, DataOrMC, catperiod);
+        double dieleff = TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger(el1, el2, "ELE23", "ELE12", elid, DataOrMC, catperiod, direction);
         //cout << "[MCDataCorrections::TriggerEfficiencyLegByLegPeriodDependant] dimueff = " << dimueff << endl;
 
         faileff *= (1.-dieleff);
@@ -753,7 +753,7 @@ double MCDataCorrections::TriggerEfficiencyLegByLegPeriodDependant(std::vector<s
 
 }
 
-double MCDataCorrections::TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger(snu::KMuon mu1, snu::KMuon mu2, TString leg1, TString leg2, TString muid, int DataOrMC, int catperiod){
+double MCDataCorrections::TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger(snu::KMuon mu1, snu::KMuon mu2, TString leg1, TString leg2, TString muid, int DataOrMC, int catperiod, int direction){
 
   TString labelkey = "";
   if(muid=="MUON_HN_TIGHT"){
@@ -791,11 +791,21 @@ double MCDataCorrections::TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger(snu
     TH2F *hist_leg1 = GetCorrectionHist("MUON_"+leg1+"_TRIGGER"+tag+"_"+labelkey+sample);
     TH2F *hist_leg2 = GetCorrectionHist("MUON_"+leg2+"_TRIGGER"+tag+"_"+labelkey+sample);
 
-    double eff_mu1leg1 = hist_leg1->GetBinContent( hist_leg1->FindBin(eta1,pt1) );
-    double eff_mu2leg2 = hist_leg2->GetBinContent( hist_leg2->FindBin(eta2,pt2) );
+    int bin_11 = hist_leg1->FindBin(eta1,pt1);
+    int bin_22 = hist_leg2->FindBin(eta2,pt2);
 
-    double eff_mu1leg2 = hist_leg2->GetBinContent( hist_leg2->FindBin(eta1,pt1) );
-    double eff_mu2leg1 = hist_leg1->GetBinContent( hist_leg1->FindBin(eta2,pt2) );
+    double eff_mu1leg1 = hist_leg1->GetBinContent( bin_11 );
+    double eff_mu2leg2 = hist_leg2->GetBinContent( bin_22 );
+    double eff_mu1leg1_err = hist_leg1->GetBinError( bin_11 );
+    double eff_mu2leg2_err = hist_leg2->GetBinError( bin_22 );
+
+    int bin_12 = hist_leg2->FindBin(eta1,pt1);
+    int bin_21 = hist_leg1->FindBin(eta2,pt2);
+
+    double eff_mu1leg2 = hist_leg2->GetBinContent( bin_12 );
+    double eff_mu2leg1 = hist_leg1->GetBinContent( bin_21 );
+    double eff_mu1leg2_err = hist_leg2->GetBinError( bin_12 );
+    double eff_mu2leg1_err = hist_leg1->GetBinError( bin_21 );
 
     //cout << "[MCDataCorrections::TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger] pt1 = " << pt1 << ", eta1 = " << eta1 << endl;
     //cout << "[MCDataCorrections::TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger] => " << leg1 << " : " << eff_mu1leg1 << endl;
@@ -803,6 +813,11 @@ double MCDataCorrections::TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger(snu
     //cout << "[MCDataCorrections::TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger] pt2 = " << pt2 << ", eta2 = " << eta2 << endl;
     //cout << "[MCDataCorrections::TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger] => " << leg1 << " : " << eff_mu2leg1 << endl;
     //cout << "[MCDataCorrections::TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger] => " << leg2 << " : " << eff_mu2leg2 << endl;
+
+    eff_mu1leg1 += 1.*direction*eff_mu1leg1_err;
+    eff_mu2leg2 += 1.*direction*eff_mu2leg2_err;
+    eff_mu1leg2 += 1.*direction*eff_mu1leg2_err;
+    eff_mu2leg1 += 1.*direction*eff_mu2leg1_err;
 
     double eff = 1.-(1.-eff_mu1leg1*eff_mu2leg2)*(1.-eff_mu1leg2*eff_mu2leg1); 
 
@@ -815,7 +830,7 @@ double MCDataCorrections::TriggerEfficiency_DiMuon_passing_DoubleMuonTrigger(snu
   }
 }
 
-double MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger(snu::KElectron el1, snu::KElectron el2, TString leg1, TString leg2, TString elid, int DataOrMC, int catperiod){
+double MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger(snu::KElectron el1, snu::KElectron el2, TString leg1, TString leg2, TString elid, int DataOrMC, int catperiod, int direction){
 
   TString labelkey = ""; //When we have multiple ids..
 
@@ -853,11 +868,21 @@ double MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTri
     TH2F *hist_leg1 = GetCorrectionHist("ELECTRON_"+leg1+"_TRIGGER"+tag+"_"+labelkey+sample);
     TH2F *hist_leg2 = GetCorrectionHist("ELECTRON_"+leg2+"_TRIGGER"+tag+"_"+labelkey+sample);
 
-    double eff_el1leg1 = hist_leg1->GetBinContent( hist_leg1->FindBin(eta1,pt1) );
-    double eff_el2leg2 = hist_leg2->GetBinContent( hist_leg2->FindBin(eta2,pt2) );
+    int bin_11 = hist_leg1->FindBin(eta1,pt1);
+    int bin_22 = hist_leg2->FindBin(eta2,pt2);
 
-    double eff_el1leg2 = hist_leg2->GetBinContent( hist_leg2->FindBin(eta1,pt1) );
-    double eff_el2leg1 = hist_leg1->GetBinContent( hist_leg1->FindBin(eta2,pt2) );
+    double eff_el1leg1 = hist_leg1->GetBinContent( bin_11 );
+    double eff_el2leg2 = hist_leg2->GetBinContent( bin_22 );
+    double eff_el1leg1_err = hist_leg1->GetBinError( bin_11 );
+    double eff_el2leg2_err = hist_leg2->GetBinError( bin_22 );
+
+    int bin_12 = hist_leg2->FindBin(eta1,pt1);
+    int bin_21 = hist_leg1->FindBin(eta2,pt2);
+
+    double eff_el1leg2 = hist_leg2->GetBinContent( bin_12 );
+    double eff_el2leg1 = hist_leg1->GetBinContent( bin_21 );
+    double eff_el1leg2_err = hist_leg2->GetBinError( bin_12 );
+    double eff_el2leg1_err = hist_leg1->GetBinError( bin_21 );
 
     //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] pt1 = " << pt1 << ", eta1 = " << eta1 << endl;
     //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] => " << leg1 << " : " << eff_el1leg1 << endl;
@@ -865,6 +890,11 @@ double MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTri
     //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] pt2 = " << pt2 << ", eta2 = " << eta2 << endl;
     //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] => " << leg1 << " : " << eff_el2leg1 << endl;
     //cout << "[MCDataCorrections::TriggerEfficiency_DiElectron_passing_DoubleElectronTrigger] => " << leg2 << " : " << eff_el2leg2 << endl;
+
+    eff_el1leg1 += 1.*direction*eff_el1leg1_err;
+    eff_el2leg2 += 1.*direction*eff_el2leg2_err;
+    eff_el1leg2 += 1.*direction*eff_el1leg2_err;
+    eff_el2leg1 += 1.*direction*eff_el2leg1_err;
 
     double eff = 1.-(1.-eff_el1leg1*eff_el2leg2)*(1.-eff_el1leg2*eff_el2leg1);
 
@@ -887,7 +917,6 @@ double MCDataCorrections::ElectronScaleFactor( TString elid, vector<snu::KElectr
   std::string sid= "";
   
   if(elid.Contains("HN")) elid = "ELECTRON_MVA_80";
-  if(elid.Contains("ELECTRON_MVA_90")) elid = "ELECTRON_MVA_80";
   if(elid == "ELECTRON_HN_TIGHTv4") elid = "ELECTRON_HN_TIGHTv4";
 
   for(vector<KElectron>::iterator itel=el.begin(); itel!=el.end(); ++itel) {

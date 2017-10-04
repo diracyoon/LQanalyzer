@@ -76,12 +76,20 @@ void MuonSelection::SkimSelection( std::vector<KMuon>& leptonColl , bool m_debug
 
 }
 
-void MuonSelection::Selection( std::vector<KMuon>& leptonColl, bool applyrochester, bool m_debug) {
-  
+void MuonSelection::Selection( std::vector<KMuon>& leptonColl, bool applyrochester, TString Option){
 
   std::vector<KMuon> allmuons = k_lqevent.GetMuons();
-  int ilep(0);
-  for (std::vector<KMuon>::iterator muit = allmuons.begin(); muit!=allmuons.end(); muit++, ilep++){ 
+
+  int  SystDir=0;
+  bool Syst_MuEn=false, DebugPrint=false;
+  if(Option.Contains("Debug")) DebugPrint=true;
+  if(Option.Contains("Syst")){
+    if     (Option.Contains("Up"))   SystDir   = 1;
+    else if(Option.Contains("Down")) SystDir   =-1;
+    if     (Option.Contains("MuEn")) Syst_MuEn = true;
+  }
+
+  for(std::vector<KMuon>::iterator muit = allmuons.begin(); muit!=allmuons.end(); muit++){ 
 
       bool pass_selection(true);      
       if(muit->Pt() == 0.) continue;
@@ -96,48 +104,50 @@ void MuonSelection::Selection( std::vector<KMuon>& leptonColl, bool applyrochest
 	muit->SetIsRochesterCorrected(true);
       }
 
+      if     (Syst_MuEn && SystDir>0) *muit *= muit->PtShiftedUp();
+      else if(Syst_MuEn && SystDir<0) *muit *= muit->PtShiftedDown();
+
+
       TString MuID=GetString(k_id);
       if(apply_ID && !PassID(MuID, *muit)) pass_selection =false;
-      if(m_debug && apply_ID && !PassID(MuID, *muit)) cout << "Fails Selection::ID cut " << endl;
+      if(DebugPrint && apply_ID && !PassID(MuID, *muit)) cout << "Fails Selection::ID cut " << endl;
 
 
       if(apply_ptcut && ! ( muit->Pt() > pt_cut_min )) pass_selection = false;
-      if(m_debug && apply_ptcut && ! (muit->Pt() >= pt_cut_min && muit->Pt() < pt_cut_max)) cout << "Fails Selection::pt cut " << endl;
+      if(DebugPrint && apply_ptcut && ! (muit->Pt() >= pt_cut_min && muit->Pt() < pt_cut_max)) cout << "Fails Selection::pt cut " << endl;
       
       if(apply_etacut && !(fabs(muit->Eta()) < eta_cut)) pass_selection =false;
-      if(m_debug && apply_etacut && !(fabs(muit->Eta()) < eta_cut))  cout << "Fails Selection::eta cut " << endl;
+      if(DebugPrint && apply_etacut && !(fabs(muit->Eta()) < eta_cut))  cout << "Fails Selection::eta cut " << endl;
 
 
       //// Calculate PF isolation
       /// https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Muon_Isolation
-      //LeptonRelIso = (muit->RelIso04());
       if     (apply_relisocut && RelIsoType.Contains("Default"))    LeptonRelIso=muit->RelIso04();
       else if(apply_relisocut && RelIsoType.Contains("PFRelIso03")) LeptonRelIso=muit->RelIso03();
       else   LeptonRelIso=muit->RelIso04();
       
       if(apply_relisocut && !( LeptonRelIso < relIso_cut)) pass_selection = false;
-      if(m_debug && apply_relisocut && !( LeptonRelIso < relIso_cut))  cout << "Fails Selection::reliso cut " << endl;
+      if(DebugPrint && apply_relisocut && !( LeptonRelIso < relIso_cut))  cout << "Fails Selection::reliso cut " << endl;
       
   
       /// impact parameter cuts
       // Uses fabs(recoMu.muonBestTrack()->dxy(vertex->position())) as described in https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Tight_Muon 
-      // Also stores dB() on pat::Muon  as dxy_pat
-      // Also stores D0 
+      // Also stores dB() on pat::Muon  as dxy_pat, Also stores D0 
       if(apply_dzcut && !(fabs(muit->dZ())<  dz_cut )) pass_selection = false;
-      if(m_debug && apply_dzcut && !(fabs(muit->dZ())<  dz_cut ))  cout << "Fails Selection::dz cut " << endl;
+      if(DebugPrint && apply_dzcut && !(fabs(muit->dZ())<  dz_cut ))  cout << "Fails Selection::dz cut " << endl;
 
       if(apply_dxycut && !(fabs(muit->dXY())< dxy_cut )) pass_selection = false;
-      if(m_debug && apply_dxycut && !(fabs(muit->dXY())< dxy_cut ))cout << "Fails Selection::dxy cut " << endl;
+      if(DebugPrint && apply_dxycut && !(fabs(muit->dXY())< dxy_cut ))cout << "Fails Selection::dxy cut " << endl;
 
       if(apply_dxysigmin && !(fabs(muit->dXYSig()) >= dxySig_min )) pass_selection = false;
-      if(m_debug && apply_dxysigmin && !(fabs(muit->dXYSig()) >= dxySig_min ))cout << "Fails Selection::dxySigMin cut " << endl;
+      if(DebugPrint && apply_dxysigmin && !(fabs(muit->dXYSig()) >= dxySig_min ))cout << "Fails Selection::dxySigMin cut " << endl;
 
       if(apply_dxysigmax && !(fabs(muit->dXYSig()) < dxySig_max )) pass_selection = false;
-      if(m_debug && apply_dxysigmax && !(fabs(muit->dXYSig()) < dxySig_max ))cout << "Fails Selection::dxySigMin cut " << endl;
+      if(DebugPrint && apply_dxysigmax && !(fabs(muit->dXYSig()) < dxySig_max ))cout << "Fails Selection::dxySigMin cut " << endl;
 
       
       if(apply_chi2cut && !( muit->GlobalChi2() < chiNdof_cut && muit->GlobalChi2() >= chiNdofMIN_cut )) pass_selection = false;
-      if(m_debug&&apply_chi2cut && !( muit->GlobalChi2() <chiNdof_cut && muit->GlobalChi2()  >=chiNdofMIN_cut)) cout << "Fails chi2 cut " << endl;
+      if(DebugPrint && apply_chi2cut && !( muit->GlobalChi2() <chiNdof_cut && muit->GlobalChi2()  >=chiNdofMIN_cut)) cout << "Fails chi2 cut " << endl;
 
       
       //// ADD EXTRA  cut on D0sig? or same vertex?     
@@ -486,6 +496,7 @@ bool MuonSelection::PassID(TString id, snu::KMuon mu, bool cutondxy, bool cutond
   }
 
   else if (id == "MUON_POG_MEDIUM") {
+    if(!(mu.IsMedium())) passID=false;//IF ID var for med. is saved this could be changed.
   }
 
   else if (id == "MUON_POG_TIGHT") {

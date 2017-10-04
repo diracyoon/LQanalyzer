@@ -4,16 +4,16 @@
 #include <map>
 
 map<TString, TString>  GetLQMap(TString listpath);
-map<TString, TString>  GetLQMap2016(TString listpath, bool sig);
+map<TString, TString>  GetLQMap2016(TString listpath, int sig);
 map<TString, Double_t>  GetXSecMap(TString listpath);
-map<TString, Double_t>  GetXSecMap2016(TString listpath, bool sig);
-map<TString, TString>  GetMissingMap(TString cversion,TString listpath, bool sig);
-vector<TString>  GetAvailableMap(TString cversion,TString listpath, bool sig);
-map<TString, TString>  GetDatasetNames(TString cversion,TString listpath, bool sig);
+map<TString, Double_t>  GetXSecMap2016(TString listpath, int sig);
+map<TString, TString>  GetMissingMap(TString cversion,TString listpath, int sig);
+vector<TString>  GetAvailableMap(TString cversion,TString listpath, int sig);
+map<TString, TString>  GetDatasetNames(TString cversion,TString listpath, int sig);
 map<TString, TString>  GetTriLepMap(TString listpath);
-map<TString, TString>  GetTriLepMap2016(TString listpath, bool sig);
+map<TString, TString>  GetTriLepMap2016(TString listpath, int sig);
 
-bool CheckMaps(TString listpath,bool sig);
+bool CheckMaps(TString listpath,int sig);
 
 
 bool IsSignal(TString samplename){
@@ -24,7 +24,7 @@ bool IsSignal(TString samplename){
   return false;
 }
 
-bool CheckMaps(TString listpath, bool sig){
+bool CheckMaps(TString listpath, int sig){
   
   // Function checks the initialisation of the maps are consistent
   map<TString,  Double_t> mapxs = GetXSecMap2016(listpath, sig);
@@ -54,7 +54,7 @@ bool CheckMaps(TString listpath, bool sig){
   return failcheck;
 }
 
-map<TString,  Double_t>  GetXSecMap2016(TString datasetfile, bool sig){
+map<TString,  Double_t>  GetXSecMap2016(TString datasetfile, int sig){
   map<TString,  Double_t> dirmap;
 
   ifstream datasetname_file(datasetfile.Data());
@@ -72,12 +72,16 @@ map<TString,  Double_t>  GetXSecMap2016(TString datasetfile, bool sig){
     datasetname_file >> xsec;
     datasetname_file >> fullname;
     if(samplealias=="END") break;
-    if(sig&&IsSignal(samplealias))    {
+    if(sig==1&&IsSignal(samplealias))    {
       if (! datasetname.empty())  dirmap[TString(datasetname)] = xsec;
     }
-    if(!sig&&!IsSignal(samplealias))    {
+    if(sig==2&&!IsSignal(samplealias))    {
       if (! datasetname.empty())  dirmap[TString(datasetname)] = xsec;
     }
+    if(sig==0){
+      if (! datasetname.empty())  dirmap[TString(datasetname)] = xsec;
+    }
+
 
   }
   /*
@@ -374,7 +378,7 @@ map<TString,  Double_t>  GetXSecMap(TString datasetfile){
    return dirmap;
 }
 
-vector<TString>  GetAvailableMap(TString cversion, TString listpath, bool sig){
+vector<TString>  GetAvailableMap(TString cversion, TString listpath, int sig){
   vector<TString> available;
 
   if(cversion.Contains("v7-4"))   return available;
@@ -462,7 +466,7 @@ vector<TString>  GetAvailableMap(TString cversion, TString listpath, bool sig){
   return available;
 }
 
-map<TString, TString>  GetDatasetNames(TString cversion, TString listpath, bool sig){
+map<TString, TString>  GetDatasetNames(TString cversion, TString listpath, int sig){
 
   bool cluster = false;
   TString analysisdir = TString(getenv("HOSTNAME"));
@@ -517,7 +521,7 @@ map<TString, TString>  GetDatasetNames(TString cversion, TString listpath, bool 
 }
   
 
-map<TString, TString>  GetMissingMap(TString cversion, TString listpath, bool sig){
+map<TString, TString>  GetMissingMap(TString cversion, TString listpath, int sig){
 
   map<TString, TString> map_missing;
 
@@ -594,7 +598,7 @@ map<TString, TString>  GetMissingMap(TString cversion, TString listpath, bool si
 }
 
 
-map<TString, TString>  GetTriLepMap2016(TString listpath,bool  sig){
+map<TString, TString>  GetTriLepMap2016(TString listpath,int  sig){
 
 
   map<TString, TString> trimap;
@@ -615,12 +619,16 @@ map<TString, TString>  GetTriLepMap2016(TString listpath,bool  sig){
     datasetname_file >>fullname;
 
     if(samplealias=="END") break;
-    if(sig&&IsSignal(samplealias))    {
+    if(sig==1&&IsSignal(samplealias))    {
       if (! datasetname.empty()) trimap[TString(datasetname)] = samplealias;
     }
-    if(!sig&&!IsSignal(samplealias))    {
+    if(sig==2&&!IsSignal(samplealias))    {
       if (! datasetname.empty()) trimap[TString(datasetname)] = samplealias;
     }
+    if(sig==0){
+      if (! datasetname.empty()) trimap[TString(datasetname)] = samplealias;
+    }
+
 
   }
 
@@ -669,7 +677,7 @@ map<TString, TString>  GetTriLepMap(){
 }
   
 
-map<TString, TString>  GetLQMap2016(TString datasetfile, bool sig){
+map<TString, TString>  GetLQMap2016(TString datasetfile, int sig){
 
   map<TString, TString> lqmap;
 
@@ -689,12 +697,17 @@ map<TString, TString>  GetLQMap2016(TString datasetfile, bool sig){
     datasetname_file >>fullname;
 
     if(samplealias=="END") break;
-    if(sig&&IsSignal(samplealias))    {
+    if(sig==1&&IsSignal(samplealias))    {
       if (! datasetname.empty()) lqmap[TString(datasetname)] = samplealias;
     }
-    if(!sig&&!IsSignal(samplealias))    {
+    if(sig==2&&!IsSignal(samplealias))    {
       if (! datasetname.empty()) lqmap[TString(datasetname)] = samplealias;
     }
+    if(sig==0){
+      if (! datasetname.empty()) lqmap[TString(datasetname)] = samplealias;
+    }
+
+
 
   }
 

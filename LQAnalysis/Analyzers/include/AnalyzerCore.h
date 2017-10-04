@@ -147,7 +147,7 @@ class AnalyzerCore : public LQCycleBase {
   int NBJet(std::vector<snu::KJet> jets,  snu::KJet::Tagger tag=snu::KJet::CSVv2, snu::KJet::WORKING_POINT wp = snu::KJet::Medium, int mcperiod=-1);
 
   bool IsBTagged(snu::KJet jet,  snu::KJet::Tagger tag, snu::KJet::WORKING_POINT wp, int mcperiod=-1);
-  float BTagScaleFactor_1a(std::vector<snu::KJet> jetColl, snu::KJet::Tagger tag, snu::KJet::WORKING_POINT wp, int mcperiod=-1);
+  float BTagScaleFactor_1a(std::vector<snu::KJet> jetColl, snu::KJet::Tagger tag, snu::KJet::WORKING_POINT wp, int mcperiod=-1, TString Option="");
 
   int AssignnNumberOfTruth();
   bool IsSignal();
@@ -194,11 +194,11 @@ class AnalyzerCore : public LQCycleBase {
   float GetCFweight(int syst, std::vector<snu::KElectron> electrons, bool apply_sf, TString el_ID);
   float GetCFRates(double el_pt, double el_eta, TString el_ID);
 
-  float CorrectedMETRochester(std::vector<snu::KMuon> muons , bool updatemet);
-  float CorrectedMETElectron(std::vector<snu::KElectron> electrons,  int syst=0);
-  float CorrectedMETMuon(std::vector<snu::KMuon> muons ,int syst=0);
-  float CorrectedMETJES(std::vector<snu::KJet> jets ,int syst=0);
-  float CorrectedMETJER(std::vector<snu::KJet> jets ,int syst=0);
+  void CorrectedMETRochester(std::vector<snu::KMuon> muons);
+  void CorrectedMETElectron(int syst,std::vector<snu::KElectron> electrons, double& OrignialMET, double& OriginalMETPhi);
+  void CorrectedMETMuon(int syst,std::vector<snu::KMuon> muons, double& OrignialMET, double& OriginalMETPhi) ;
+  void CorrectedMETJES(int syst,std::vector<snu::KJet> jets , double& OrignialMET, double& OriginalMETPhi);
+  void CorrectedMETJER(int syst,std::vector<snu::KJet> jets , double& OrignialMET, double& OriginalMETPhi);
 
 
   void CorrectMuonMomentum(vector<snu::KMuon>& k_muons);

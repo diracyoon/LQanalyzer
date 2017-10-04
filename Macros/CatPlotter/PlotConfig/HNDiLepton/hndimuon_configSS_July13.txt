@@ -1,6 +1,6 @@
 ###      MakeCleverHistograms(sighist_mm, "DiMuon_SSPreselection"+dimuonIDs.at(i));
 #**************************************************************************************
-# cut SSMM_DiJet
+# cut SSMM_DiJet_xc
 # samples HNDiLepton/hndimu_ss_config_allmc.txt
 # skim SKTree_HNDiLepSkim
 # stream DoubleMuon

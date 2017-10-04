@@ -163,23 +163,36 @@ void ElectronSelection::SelectElectrons(std::vector<KElectron>& leptonColl, TStr
 
 
 
-void ElectronSelection::Selection(std::vector<KElectron>& leptonColl , bool m_debug) {
+void ElectronSelection::Selection(std::vector<KElectron>& leptonColl, TString Option){
 
   std::vector<KElectron> allelectrons = k_lqevent.GetElectrons();
+
+  int  SystDir=0;
+  bool Syst_ElEn=false, DebugPrint=false;
+  if(Option.Contains("Debug")) DebugPrint=true;
+  if(Option.Contains("Syst")){
+    if     (Option.Contains("Up"))   SystDir   = 1;
+    else if(Option.Contains("Down")) SystDir   =-1;
+    if     (Option.Contains("ElEn")) Syst_ElEn = true;
+  }
 
   for (std::vector<KElectron>::iterator el = allelectrons.begin(); el!=allelectrons.end(); el++){
 
     bool pass_selection = true;
 
+    if     (Syst_ElEn && SystDir>0) *el *= el->PtShiftedUp();
+    else if(Syst_ElEn && SystDir<0) *el *= el->PtShiftedDown();
+
     // ID cut
     if(apply_ID){
       if     (GetString(k_id).Contains("POG"))             ElectronID = PassID(*el, k_id);
+      else if(GetString(k_id).Contains("HctoWA"))          ElectronID = PassID(*el, k_id);
       else if(GetString(k_id).Contains("ELECTRON_HN_MVA")) ElectronID = PassID(*el, k_id);
       else ElectronID = PassUserID( *el,GetString(k_id) , GetString(k_id), apply_chargeconst, apply_convcut,relIsoBarrel_max,relIsoEndcap_max,dxyBarrel_max,dxyEndcap_max,dzBarrel_max,dzEndcap_max, 999.,999.);
 
       if(!ElectronID) {
         pass_selection = false;
-        if(m_debug)cout << "Selection: Fail ID Cut" << endl;
+        if(DebugPrint) cout << "Selection: Fail ID Cut" << endl;
       }
     }
 
@@ -197,11 +210,11 @@ void ElectronSelection::Selection(std::vector<KElectron>& leptonColl , bool m_de
 
     if(apply_ptcut && !(el->Pt() >= pt_cut_min && el->Pt() < pt_cut_max)){
       pass_selection = false;
-      if(m_debug)cout << "Selection: Fail Pt Cut" << endl;
+      if(DebugPrint) cout << "Selection: Fail Pt Cut" << endl;
     }
     if(apply_etacut && !(fabs(el->SCEta()) < eta_cut)) {
       pass_selection = false;
-      if(m_debug)cout << "Selection: Fail Eta Cut" << endl;
+      if(DebugPrint) cout << "Selection: Fail Eta Cut" << endl;
     }
 
     //Whether to include EE-EBtransition region(Default: not)
@@ -211,13 +224,13 @@ void ElectronSelection::Selection(std::vector<KElectron>& leptonColl , bool m_de
     // Check charge consistancy between different detectors
     if(apply_chargeconst && !el->GsfCtfScPixChargeConsistency()){
       pass_selection = false;
-      if(m_debug)cout << "Selection: Fail charge Cut" << endl;
+      if(DebugPrint) cout << "Selection: Fail charge Cut" << endl;
     }
     // extra cut to reduce conversions
     // https://twiki.cern.ch/twiki/bin/view/CMS/ConversionTools
     if(apply_convcut && (!el->PassesConvVeto()) ) {
       pass_selection = false;
-      if(m_debug)cout << "Selection: Fail Conversion Cut" << endl;
+      if(DebugPrint) cout << "Selection: Fail Conversion Cut" << endl;
     }
 
     //d0 Significance
@@ -240,15 +253,15 @@ void ElectronSelection::Selection(std::vector<KElectron>& leptonColl , bool m_de
     else{
       if(apply_relisocut   && !(reliso < relIso_cut && reliso >= relIsoMIN_cut)){
         pass_selection = false;
-        if(m_debug)cout << "Selection: Fail Isolation Cut" << endl;
+        if(DebugPrint) cout << "Selection: Fail Isolation Cut" << endl;
       }
       if(apply_dzcut       && !(fabs(el->dz())<  dz_cut )) {
         pass_selection = false;
-        if(m_debug)cout << "Selection: Fail dZ Cut" << endl;
+        if(DebugPrint) cout << "Selection: Fail dZ Cut" << endl;
       }
       if(apply_dxycut      && !( fabs(el->dxy())< dxy_cut )) {
         pass_selection = false;
-        if(m_debug)cout << "Selection: Fail dxy Cut" << endl;
+        if(DebugPrint) cout << "Selection: Fail dxy Cut" << endl;
       }
     }
 
@@ -673,6 +686,11 @@ bool ElectronSelection::PassID(snu::KElectron el, ID id){
   else if( id == ELECTRON_POG_MVA_WP80 && (!el.PassNotrigMVATight())  ){ pass_selection = false; }
   else if( id == ELECTRON_HN_MVA_LOOSE && (!el.PassTrigMVAHNLoose())  ){ pass_selection = false; }
   else if( id == ELECTRON_HN_MVA_TIGHT && (!el.PassTrigMVAHNTightv4())  ){ pass_selection = false; }
+  else if( id == ELECTRON_HctoWA_FAKELOOSE ){
+    if     ( fabs(el.Eta())<0.8   ){ if( el.MVA()<-0.92 ) pass_selection=false; }
+    else if( fabs(el.Eta())<1.479 ){ if( el.MVA()<-0.85 ) pass_selection=false; }
+    else if( fabs(el.Eta())<2.5   ){ if( el.MVA()<-0.76 ) pass_selection=false; }
+  }
 
   return pass_selection;
 

@@ -57,19 +57,29 @@ void JetSelection::Selection(std::vector<KJet>& jetColl){
 
 }  
 
-void JetSelection::Selection(std::vector<KJet>& jetColl, bool LepVeto, std::vector<KMuon>& muonColl, std::vector<KElectron>& electronColl) {
+void JetSelection::Selection(std::vector<KJet>& jetColl, bool LepVeto, std::vector<KMuon>& muonColl, std::vector<KElectron>& electronColl, TString Option){
  
   std::vector<KJet> alljets = k_lqevent.GetJets();
   
   std::vector<KJet> prejetColl; 
+  int  SystDir=0;
+  bool Syst_JES=false, Syst_JER=false;
+  if(Option.Contains("Syst")){
+    if     (Option.Contains("Up"))   SystDir= 1;
+    else if(Option.Contains("Down")) SystDir=-1;
+    if     (Option.Contains("JES"))  Syst_JES=true;
+    if     (Option.Contains("JER"))  Syst_JER=true;
+  }
 
   for (std::vector<KJet>::iterator jit = alljets.begin(); jit!=alljets.end(); jit++){
+
+    if     (Syst_JES && SystDir>0) *jit *= jit->ScaledUpEnergy();
+    else if(Syst_JES && SystDir<0) *jit *= jit->ScaledDownEnergy();
+    else if(Syst_JER && SystDir>0) *jit *= jit->SmearedResUp();
+    else if(Syst_JER && SystDir<0) *jit *= jit->SmearedResDown();
     
     bool IsNotPileUpJet = true;
-    if(applypileuptool){
-      IsNotPileUpJet = jit->PassPileUpMVA(PUJetIDWP);
-    }
-
+    if(applypileuptool) IsNotPileUpJet = jit->PassPileUpMVA(PUJetIDWP);
     if(apply_ID) {
       if ( jit->Pt() >= pt_cut_min && jit->Pt() < pt_cut_max &&
 	   fabs(jit->Eta()) < eta_cut

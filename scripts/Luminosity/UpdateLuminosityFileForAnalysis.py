@@ -71,13 +71,13 @@ def CheckForDuplicates(printDuplicates):
         os.system("chmod 777 " + rd_samplelist)
         os.system("rm " + rd_samplelist)
 
-def UpdateLumiFile(modlistpath, catversion,NewSampleList):
+def UpdateLumiFile(modlistpath, catversion,NewSampleList,whichfile):
 
     ### xseclist should contain lines that are updated in xsec
     ### samplelist should contain lines for new samples
-    samplelist=os.getenv("LQANALYZER_DATASETFILE_DIR") +"/datasets_snu_CAT_mc_"+catversion+".txt"
+    samplelist=os.getenv("LQANALYZER_DATASETFILE_DIR") +"/datasets_snu"+whichfile+"_CAT_mc_"+catversion+".txt"
     os.system("chmod 777 "  + samplelist)
-    newsamplelist=os.getenv("LQANALYZER_DATASETFILE_DIR") +"/datasets_snu_CAT_mc_"+catversion+"new.txt"                                                               
+    newsamplelist=os.getenv("LQANALYZER_DATASETFILE_DIR") +"/datasets_snu"+whichfile+"_CAT_mc_"+catversion+"new.txt"                                                               
     #samplelist="/data1/LQAnalyzer_rootfiles_for_analysis/CATAnalysis2016/datasets_snu_CAT_mc_"+catversion+".txt"
     #newsamplelist="/data1/LQAnalyzer_rootfiles_for_analysis/CATAnalysis2016/datasets_snu_CAT_mc_"+catversion+"tmp.txt"
     
@@ -440,7 +440,15 @@ if os.path.exists(path_full_sample_list):
         os.system("source " + os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/runGetEffLumi.sh " + path_newfile + " new ")
         print "source " + os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/runGetEffLumi.sh " + path_newfile + " new "
         print "\n"
-        if not  os.path.exists(os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/datasets_snu_CAT_mc_" + catversion + "new.txt"):
+        
+        file_exists=False
+        if   os.path.exists(os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/datasets_snu_nonsig_CAT_mc_" + catversion + "new.txt"):
+            file_exists=True
+        if   os.path.exists(os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/datasets_snu_sig_CAT_mc_" + catversion + "new.txt"):
+            file_exists=True
+
+
+        if not  file_exists:
             print  os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/runGetEffLumi.sh was meant to produce file "+ os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/datasets_snu_CAT_mc_" + catversion + "new.txt"
             print "This file does not exists: exiting...."
             sys.exit()
@@ -448,8 +456,12 @@ if os.path.exists(path_full_sample_list):
             ### update lumifile:
             isnewsample= len(newsample_list) > 0
             
-            UpdateLumiFile(os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/datasets_snu_CAT_mc_" + catversion + "new.txt", catversion, newsample_list)
+            UpdateLumiFile(os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/datasets_snu_nonsig_CAT_mc_" + catversion + "new.txt", catversion, newsample_list,"_nonsig")
+            UpdateLumiFile(os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/datasets_snu_sig_CAT_mc_" + catversion + "new.txt", catversion, newsample_list,"_sig")
+            UpdateLumiFile(os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/datasets_snu_CAT_mc_" + catversion + "new.txt", catversion, newsample_list,"")
 
+            os.system("rm " + os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/datasets_snu_nonsig_CAT_mc_" + catversion + "new.txt")
+            os.system("rm " + os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/datasets_snu_sig_CAT_mc_" + catversion + "new.txt")
             os.system("rm " + os.getenv("LQANALYZER_DIR")+"/scripts/Luminosity/datasets_snu_CAT_mc_" + catversion + "new.txt")
             samplelist=os.getenv("LQANALYZER_DATASETFILE_DIR") +"/datasets_snu_CAT_mc_"+catversion+".txt"
             os.system("chmod 777 " + samplelist)

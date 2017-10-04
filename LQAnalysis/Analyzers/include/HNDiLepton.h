@@ -31,7 +31,7 @@ class HNDiLepton : public AnalyzerCore {
 
   void InitialiseAnalysis() throw( LQError );
   void MakeHistograms();
-  void FillEventCutFlow(int cf,TString cut,  float weight);
+  void FillEventCutFlow(int cf,TString cut,  float weight, TString label);
   void FillEventCutFlow(TString cut, TString label , float weight);
 
   float WeightCFEvent(std::vector<snu::KElectron> electrons, bool runchargeflip);  
@@ -58,8 +58,8 @@ class HNDiLepton : public AnalyzerCore {
   void OptimiseID(bool isss);
 
   float MMWeight(std::vector<snu::KMuon> muons,TString id);
-  float EEWeight(TString id);
-  float EMWeight(TString elid, TString muid);
+  float EEWeight( std::vector<snu::KElectron> electrons, TString id);
+  float EMWeight( std::vector<snu::KElectron> electrons, std::vector<snu::KMuon> muons,TString elid, TString muid);
 
   void counter(TString cut, float w);
 
@@ -69,6 +69,8 @@ class HNDiLepton : public AnalyzerCore {
   bool _ee_channel;
   bool _mm_channel;
   bool _m_channel;
+  bool _e_channel;
+  bool _em_channel;
 
   TString _m_tightid;
   TString _m_looseid;

@@ -139,12 +139,16 @@ void FatJetSelection::SelectFatJets(std::vector<KFatJet>& jetColl, std::vector<K
 
   int icut(0);
   float tau21cut(-999.);
+  float masscut_min(-999.);
+  float masscut_max(-999.);
   if (ptcut == -999. || etacut == -999.){
     for(unsigned int iv=0; iv < vidf.size(); iv++){
       if(!Check(vidf[iv].second)) continue;
       if (vidf[iv].first =="ptmin") { icut++; if(ptcut == -999.)ptcut=vidf[iv].second;}
       if (vidf[iv].first =="|etamax|") {icut++;  if (etacut == -999.)etacut=vidf[iv].second;}
       if (vidf[iv].first =="tau21") {icut++;  tau21cut=vidf[iv].second;}
+      if (vidf[iv].first =="mass_min") {icut++;  masscut_min=vidf[iv].second;}
+      if (vidf[iv].first =="mass_max") {icut++;  masscut_max=vidf[iv].second;}
       if(icut ==3) break;
     }
   }
@@ -156,8 +160,8 @@ void FatJetSelection::SelectFatJets(std::vector<KFatJet>& jetColl, std::vector<K
     if (!PassUserID(*jit, vids)) pass_selection=false;
 
     if(jit->Tau2()/jit->Tau1() > tau21cut) pass_selection=false;
-    if(jit->PrunedMass() > 95)  pass_selection=false;
-    if(jit->PrunedMass() < 65)  pass_selection=false;
+    if(jit->PrunedMass() > masscut_min)  pass_selection=false;
+    if(jit->PrunedMass() < masscut_max)  pass_selection=false;
     //cout << jit->Pt() << " " << jit->Eta() << " " << jit->PrunedMass() << " " << jit->Tau2()/jit->Tau1() << endl;
     if ( (jit->Pt() >= ptcut)  && fabs(jit->Eta()) < etacut && pass_selection )  pre_jetColl.push_back(*jit);
 

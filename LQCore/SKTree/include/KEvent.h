@@ -120,15 +120,17 @@ namespace snu {
 
     Double_t PFMETShifted (met_syst type,syst_dir dir) const;
     Double_t PFSumETShifted(met_syst type,syst_dir dir) const;
-    Double_t MET(met_type type=pfmet) const;
-    Double_t METPhi(met_type type=pfmet) const;
-    Double_t SumET(met_type type=pfmet) const;
+    Double_t MET(bool uncorrected=false) const;
+    Double_t METPhi( bool uncorrected=false) const;
+    Double_t SumET() const;
     
     inline Bool_t PropagatedRochesterToMET() const {return prop_metrc;}
     
     inline Double_t Rho() const {return k_rho;}
     // To make backward compatible
-    inline Double_t PFMET() const {return MET(pfmet);}
+    inline Double_t PFMET(bool uncorrected=false) const {return MET(uncorrected);}
+    inline Double_t PFMETPhi(bool uncorrected=false) const {return METPhi(uncorrected);}
+
     ///k_PF_MET_JetRes_up is same as MET in miniaod
     inline Double_t PFMETUnSmeared() const {return k_PF_MET_JetRes_up;}
     inline Double_t PFMETx() const {return k_PF_METx;}

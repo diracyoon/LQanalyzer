@@ -26,7 +26,7 @@ float GetSumWeights(std::string filename);
 map<TString, Double_t> map_lumi;
 map<TString, Double_t> neventmap;
 map<TString, Double_t> n_w_eventmap;
-void GetEffectiveLuminosity(TString path_of_list, bool sig,  TString tag,TString version="") {
+void GetEffectiveLuminosity(TString path_of_list, int sig,  TString tag,TString version="") {
   
   bool debug = true;
   map_lumi.clear();
@@ -278,7 +278,8 @@ void GetEffectiveLuminosity(TString path_of_list, bool sig,  TString tag,TString
   
   ofstream lumi_file;
   string lfile =  "datasets_snu_nonsig_CAT_mc_" + string(version.Data()) + string(tag)+".txt";
-  if(sig) lfile =  "datasets_snu_sig_CAT_mc_" + string(version.Data()) + string(tag)+".txt";
+  if(sig==1) lfile =  "datasets_snu_sig_CAT_mc_" + string(version.Data()) + string(tag)+".txt";
+  if(sig==0) lfile =  "datasets_snu_CAT_mc_" + string(version.Data()) + string(tag)+".txt";
 
   if(cluster) lfile =  "datasets_snu_cluster_CAT_mc_" + string(version.Data()) + ".txt";
 
@@ -472,7 +473,8 @@ void GetEffectiveLuminosity(TString path_of_list, bool sig,  TString tag,TString
 
   string lqdir = getenv("LQANALYZER_DIR");
   string lfile2 =  lqdir + "/LQRun/txt/datasets_snu_nonsig_CAT_mc_" + string(version.Data()) + ".txt";
-  if(sig) lfile2 =  lqdir + "/LQRun/txt/datasets_snu_sig_CAT_mc_" + string(version.Data()) + ".txt";
+  if(sig==1) lfile2 =  lqdir + "/LQRun/txt/datasets_snu_sig_CAT_mc_" + string(version.Data()) + ".txt";
+  if(sig==0) lfile2 =  lqdir + "/LQRun/txt/datasets_snu_CAT_mc_" + string(version.Data()) + ".txt";
 
   if(cluster) lfile2 =  lqdir + "/LQRun/txt/Cluster/datasets_snu_cluster_CAT_mc_" + string(version.Data()) + ".txt";
 

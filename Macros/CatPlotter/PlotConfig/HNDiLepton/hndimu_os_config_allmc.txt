@@ -27,7 +27,6 @@ WZZ                       |   Triboson                                          
 WW                        |   Diboson                                           |  diboson               |  kSpring-1     | 0.2     |
 ZZTo4L_powheg             |   Diboson                                                |  diboson             |  kSpring-1     | 0.20     |
 WZTo3LNu_powheg           |  Diboson                                                |  diboson             |  kSpring-1     | 0.20     |
-ggZZto4mu                 |   Diboson                                                |  diboson             |  kSpring-1     | 0.20     |
 WpWpQCD                   |   Diboson                                           |  diboson               |  kSpring-1     | 0.2     |
 WpWpEWK                   |   Diboson                                           |  diboson               |  kSpring-1     | 0.2     |
 ZGto2LG                          |   Diboson                                           |  diboson               |  74     | 0.2     |
@@ -37,4 +36,4 @@ DYJets_10to50             |   DY #rightarrow ll (m < 50)               |  DYlow 
 DYJets                    |   DY #rightarrow ll                     |  DY           |  kYellow     | 0.15    |
 DoubleMuon_SKnonprompt    |   Misid. Lepton Background                          |  DoubleMuon_SKnonprompt | 870  | 0.3 |
 END
-
+ggZZto4mu                 |   Diboson                                                |  diboson             |  kSpring-1     | 0.20     |

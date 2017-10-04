@@ -69,6 +69,7 @@ TString BaseSelection::GetString(ID id){
   if ( id == MUON_POG_TIGHT) return  "MUON_POG_TIGHT";
   if ( id == ELECTRON_POG_MVA_WP80 ) return "ELECTRON_POG_MVA_WP80";
   if ( id == ELECTRON_POG_MVA_WP90 ) return "ELECTRON_POG_MVA_WP90"; 
+  if ( id == ELECTRON_HctoWA_FAKELOOSE ) return "ELECTRON_HctoWA_FAKELOOSE";
 
 
   if ( id == MUON_TOP_VETO) return  "MUON_TOP_VETO";

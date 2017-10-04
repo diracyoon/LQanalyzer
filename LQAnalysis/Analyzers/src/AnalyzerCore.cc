@@ -369,9 +369,9 @@ void AnalyzerCore::SetupLuminosityMap(bool initialsetup, TString forceperiod){
   else{
     if(singleperiod== "B")   lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_272007_275376.txt";
     else if(singleperiod=="C")lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_275657_276283.txt";
-    else if(singleperiod=="D")lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_277772_278808.txt";
+    else if(singleperiod=="D")lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_276315_276811.txt";
     else if(singleperiod=="E")lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_276831_277420.txt";
-    else if(singleperiod=="F")lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_276315_276811.txt";
+    else if(singleperiod=="F")lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_277772_278808.txt";
     else if(singleperiod=="G")lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_280919_284044.txt";
     else if(singleperiod.Contains("H"))lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_278820_280385.txt";
     else if(singleperiod=="GH")lumitriggerpath=lqdir + "/data/Luminosity/"+getenv("yeartag")+"/triggers_catversion_" + getenv("CATVERSION")+"_280919_280385.txt";
@@ -427,18 +427,20 @@ float AnalyzerCore::MC_CR_Correction(int syst){
   if(syst==1) fsyst=1.;
   if(syst==-1) fsyst=-1.;
 
-  if(k_sample_name.Contains("WZTo3LNu_powheg")) return 0.995791 + fsyst*0.0631857;
-  if(k_sample_name.Contains("ZGto2LG")) return  0.830936+ fsyst*0.11205;
-  if(k_sample_name.Contains("WGtoLNuG")) return 0.830936  + fsyst*0.11205;
-  if(k_sample_name.Contains("ZZTo4L_powheg")) return 0.922903  + fsyst*0.0829533;
-  if(k_sample_name.Contains("ggZZto2e2mu")) return 0.922903  + fsyst*0.0829533;
-  if(k_sample_name.Contains("ggZZto2e2nu")) return 0.922903  + fsyst*0.0829533;
-  if(k_sample_name.Contains("ggZZto2e2tau")) return 0.922903  + fsyst*0.0829533;
-  if(k_sample_name.Contains("ggZZto2mu2nu")) return 0.922903  + fsyst*0.0829533;
-  if(k_sample_name.Contains("ggZZto2mu2tau")) return 0.922903  + fsyst*0.0829533;
-  if(k_sample_name.Contains("ggZZto4e")) return 0.922903  + fsyst*0.0829533;
-  if(k_sample_name.Contains("ggZZto4mu")) return 0.922903  + fsyst*0.0829533;
-  if(k_sample_name.Contains("ggZZto4tau")) return 0.922903  + fsyst*0.0829533;
+  ///  updated 2 Oct
+
+  if(k_sample_name.Contains("WZTo3LNu_powheg")) return 0.974439  + fsyst*0.061763;
+  if(k_sample_name.Contains("ZGto2LG")) return  0.822969 + fsyst*0.141269;
+  if(k_sample_name.Contains("WGtoLNuG")) return 1.;
+  if(k_sample_name.Contains("ZZTo4L_powheg")) return 0.922148 + fsyst*0.0859548;
+  if(k_sample_name.Contains("ggZZto2e2mu")) return 0.922148 + fsyst*0.0859548;
+  if(k_sample_name.Contains("ggZZto2e2nu")) return 0.922148 + fsyst*0.0859548;
+  if(k_sample_name.Contains("ggZZto2e2tau")) return 0.922148 + fsyst*0.0859548;
+  if(k_sample_name.Contains("ggZZto2mu2nu")) return 0.922148 + fsyst*0.0859548;
+  if(k_sample_name.Contains("ggZZto2mu2tau")) return 0.922148 + fsyst*0.0859548;
+  if(k_sample_name.Contains("ggZZto4e")) return 0.922148 + fsyst*0.0859548;
+  if(k_sample_name.Contains("ggZZto4mu")) return 0.922148 + fsyst*0.0859548;
+  if(k_sample_name.Contains("ggZZto4tau")) return 0.922148 + fsyst*0.0859548;
   
   return 1.;
 }
@@ -484,7 +486,7 @@ float AnalyzerCore::GetKFactor(){
     
 }
 
-float AnalyzerCore::CorrectedMETRochester( std::vector<snu::KMuon> muall,bool update_met){
+void  AnalyzerCore::CorrectedMETRochester( std::vector<snu::KMuon> muall){
 
   /// function returns corrected met + can be used to set event met to corrected met
 
@@ -506,24 +508,25 @@ float AnalyzerCore::CorrectedMETRochester( std::vector<snu::KMuon> muall,bool up
     met_y = met_y + py_orig - py_corrected;	
   }
   
-  if(update_met){
-    if(!eventbase->GetEvent().PropagatedRochesterToMET()){
-      snu::KEvent tempev = eventbase->GetEvent();
-      tempev.SetMET(snu::KEvent::pfmet,  sqrt(met_x*met_x + met_y*met_y), eventbase->GetEvent().METPhi(), eventbase->GetEvent().SumET());
-      tempev.SetPFMETx(met_x);
-      tempev.SetPFMETy(met_y);
-      tempev.SetPropagatedRochesterToMET(true);
-      eventbase->SetEventBase(tempev);
-    }
+  if(!eventbase->GetEvent().PropagatedRochesterToMET()){
+    snu::KEvent tempev = eventbase->GetEvent();
+    tempev.SetMET(snu::KEvent::pfmet,  sqrt(met_x*met_x + met_y*met_y), TMath::ATan2(met_y,met_x), eventbase->GetEvent().SumET());
+    tempev.SetPFMETx(met_x);
+    tempev.SetPFMETy(met_y);
+    tempev.SetPropagatedRochesterToMET(true);
+    eventbase->SetEventBase(tempev);
   }
-  return sqrt(met_x*met_x + met_y*met_y);
+
+  return;
 }   
 
 
 
 
 
-float AnalyzerCore::CorrectedMETElectron(std::vector<snu::KElectron> elall, int sys){
+void  AnalyzerCore::CorrectedMETElectron(int sys, std::vector<snu::KElectron> elall,  double& OrignialMET, double& OriginalMETPhi){
+
+  if(sys==0) return;
 
   float met_x =eventbase->GetEvent().PFMETx();
   float met_y =eventbase->GetEvent().PFMETy();
@@ -547,17 +550,26 @@ float AnalyzerCore::CorrectedMETElectron(std::vector<snu::KElectron> elall, int 
   }
   met_x = met_x + px_orig - px_shifted;
   met_y = met_y + py_orig - py_shifted;
-
-
-  return sqrt(met_x*met_x + met_y*met_y);
+  OrignialMET =  sqrt(met_x*met_x + met_y*met_y);
+  OriginalMETPhi = TMath::ATan2(met_y,met_x);
+  
 
 }
 
-float AnalyzerCore::CorrectedMETMuon( std::vector<snu::KMuon> muall, int sys){
+void  AnalyzerCore::CorrectedMETMuon( int sys, std::vector<snu::KMuon> muall,   double& OrignialMET, double& OriginalMETPhi){
   
+  if(sys==0) return;
+  
+  float met_x1 = OrignialMET*TMath::Cos(OriginalMETPhi);
+  float met_y1 = OrignialMET*TMath::Sin(OriginalMETPhi);
+
+  cout << "MET " << OrignialMET << " " << eventbase->GetEvent().PFMET() << endl;
+
   float met_x =eventbase->GetEvent().PFMETx();
   float met_y =eventbase->GetEvent().PFMETy();
   
+  cout << met_x1 << " " << met_x << endl;
+
   float px_orig(0.), py_orig(0.),px_shifted(0.), py_shifted(0.);
   for(unsigned int imu=0; imu < muall.size() ; imu++){
     
@@ -575,14 +587,16 @@ float AnalyzerCore::CorrectedMETMuon( std::vector<snu::KMuon> muall, int sys){
   met_x = met_x + px_orig - px_shifted;
   met_y = met_y + py_orig - py_shifted;
   
-  
-  return sqrt(met_x*met_x + met_y*met_y);
-  
+  OrignialMET =  sqrt(met_x*met_x + met_y*met_y);
+  OriginalMETPhi = TMath::ATan2(met_y,met_x);
 }
 
 
 
-float AnalyzerCore::CorrectedMETJES(vector<snu::KJet> jetall, int sys){
+void  AnalyzerCore::CorrectedMETJES(int sys, vector<snu::KJet> jetall, double& OrignialMET, double& OriginalMETPhi){
+
+
+  if(sys==0) return;
 
   float met_x =eventbase->GetEvent().PFMETx();
   float met_y =eventbase->GetEvent().PFMETy();
@@ -609,13 +623,15 @@ float AnalyzerCore::CorrectedMETJES(vector<snu::KJet> jetall, int sys){
   met_x = met_x + px_orig - px_shifted;
   met_y = met_y + py_orig - py_shifted;
 
+  OrignialMET =  sqrt(met_x*met_x + met_y*met_y);
+  OriginalMETPhi = TMath::ATan2(met_y,met_x);
 
-  return sqrt(met_x*met_x + met_y*met_y);
 
 }
 
 
-float AnalyzerCore::CorrectedMETJER(vector<snu::KJet> jetall, int sys){
+void AnalyzerCore::CorrectedMETJER(int sys, vector<snu::KJet> jetall, double& OrignialMET, double& OriginalMETPhi){
+
 
   float met_x =eventbase->GetEvent().PFMETx();
   float met_y =eventbase->GetEvent().PFMETy();
@@ -642,7 +658,9 @@ float AnalyzerCore::CorrectedMETJER(vector<snu::KJet> jetall, int sys){
   met_y = met_y + py_orig - py_shifted;
 
 
-  return sqrt(met_x*met_x + met_y*met_y);
+  OrignialMET =  sqrt(met_x*met_x + met_y*met_y);
+  OriginalMETPhi = TMath::ATan2(met_y,met_x);
+
 
 }
 
@@ -1372,8 +1390,12 @@ std::map<TString,BTagSFUtil*> AnalyzerCore::SetupBTagger(std::vector<TString> ta
   for(std::vector<TString>::const_iterator it = taggers.begin(); it != taggers.end(); it++){
     for(std::vector<TString>::const_iterator it2 = wps.begin(); it2 != wps.end(); it2++){
       if (it->Contains("CSVv2")){
-	tmpmap[*it + "_" + *it2 + "_lf"]= new BTagSFUtil("incl", (*it + "_BtoF").Data(), (*it + "_GtoH").Data(),  it2->Data());
-	tmpmap[*it +  "_" + *it2 + "_hf"]= new BTagSFUtil("mujets", (*it + "_BtoF").Data(),  (*it + "_GtoH").Data(), it2->Data());
+        tmpmap[*it + "_" + *it2 + "_lf"]          = new BTagSFUtil("incl"  , (*it + "_BtoF").Data(), (*it + "_GtoH").Data(), it2->Data());
+        tmpmap[*it + "_" + *it2 + "_hf"]          = new BTagSFUtil("mujets", (*it + "_BtoF").Data(), (*it + "_GtoH").Data(), it2->Data());
+        tmpmap[*it + "_" + *it2 + "_lf_systup"]   = new BTagSFUtil("incl"  , (*it + "_BtoF").Data(), (*it + "_GtoH").Data(), it2->Data(),  3);  
+        tmpmap[*it + "_" + *it2 + "_hf_systup"]   = new BTagSFUtil("mujets", (*it + "_BtoF").Data(), (*it + "_GtoH").Data(), it2->Data(),  1);  
+        tmpmap[*it + "_" + *it2 + "_lf_systdown"] = new BTagSFUtil("incl"  , (*it + "_BtoF").Data(), (*it + "_GtoH").Data(), it2->Data(), -3); 
+        tmpmap[*it + "_" + *it2 + "_hf_systdown"] = new BTagSFUtil("mujets", (*it + "_BtoF").Data(), (*it + "_GtoH").Data(), it2->Data(), -1);
 	// tmpmap[*it +  "_" + *it2 + "_hfcomb"]= new BTagSFUtil("comb", it->Data(), it2->Data());                /// SWITCH ON IF USER NEEDS THIS METHOD  
 	// tmpmap[*it +  "_" + *it2 + "iterativefit"]= new BTagSFUtil("iterativefit", it->Data(), it2->Data());   /// SWITCH ON IF USER NEEDS THIS METHOD
       }
@@ -3926,7 +3948,7 @@ bool AnalyzerCore::IsBTagged(snu::KJet jet,  KJet::Tagger tag, KJet::WORKING_POI
 }
 
 
-float AnalyzerCore::BTagScaleFactor_1a(std::vector<snu::KJet> jetColl, KJet::Tagger tag, KJet::WORKING_POINT wp, int mcperiod){
+float AnalyzerCore::BTagScaleFactor_1a(std::vector<snu::KJet> jetColl, KJet::Tagger tag, KJet::WORKING_POINT wp, int mcperiod, TString Option){
 
   //BTag SF from 1a method.
   //This is coded for H+->WA analysis. I'm fine with anybody else using this function, but be aware that HN analyses decided to use 2a method.
@@ -3949,8 +3971,20 @@ float AnalyzerCore::BTagScaleFactor_1a(std::vector<snu::KJet> jetColl, KJet::Tag
   if(tag== snu::KJet::CSVv2)  tag_string ="CSVv2Moriond17_2017_1_26";
   if(tag== snu::KJet::cMVAv2) tag_string ="cMVAv2Moriond17_2017_1_26";
 
-  btag_key_lf = tag_string+"_"+wp_string+"_lf";
-  btag_key_hf = tag_string+"_"+wp_string+"_hf";
+  TString Str_SystDir_L="", Str_SystDir_BC="";
+  if(Option.Contains("Syst")){
+    if(Option.Contains("Up")){
+      if     (Option.Contains("LTag"))  Str_SystDir_L ="_systup";
+      else if(Option.Contains("BCTag")) Str_SystDir_BC="_systup";
+    }
+    else if(Option.Contains("Down")){
+      if     (Option.Contains("LTag"))  Str_SystDir_L ="_systdown";
+      else if(Option.Contains("BCTag")) Str_SystDir_BC="_systdown";
+    }
+  }
+
+  btag_key_lf = tag_string+"_"+wp_string+"_lf"+Str_SystDir_L;
+  btag_key_hf = tag_string+"_"+wp_string+"_hf"+Str_SystDir_BC;
   std::map<TString,BTagSFUtil*>::iterator it_lf = MapBTagSF.find(btag_key_lf);
   std::map<TString,BTagSFUtil*>::iterator it_hf = MapBTagSF.find(btag_key_hf);
 

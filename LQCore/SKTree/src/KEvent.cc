@@ -315,11 +315,11 @@ KEvent& KEvent::operator= (const KEvent& p)
            
 
       
-      k_PF_MET= p.MET(pfmet);
+      k_PF_MET= p.MET();
       k_PF_METx= p.PFMETx();
       k_PF_METy= p.PFMETy();
-      k_PF_METphi= p.METPhi(pfmet);
-      k_PF_SumET = p.SumET(pfmet);
+      k_PF_METphi= p.METPhi();
+      k_PF_SumET = p.SumET();
       k_PF_MET_MuonEn_up = p.PFMETShifted(MuonEn,up);
       k_PF_MET_MuonEn_down = p.PFMETShifted(MuonEn,down);
       k_PF_MET_ElectronEn_up = p.PFMETShifted(ElectronEn,up);
@@ -663,26 +663,26 @@ Double_t KEvent::PFSumETShifted(met_syst type,syst_dir dir) const{
 }
 
 
-Double_t KEvent::MET(met_type type) const{
+Double_t KEvent::MET(bool uncorrected) const{
   
-
-  if (type == pfmet) return k_PF_MET;
+  if(uncorrected) return {sqrt(pow(k_PF_METx,2.)+ pow(k_PF_METy,2.))};
+  else  return k_PF_MET;
   
   return -999.;
 }
  
-Double_t KEvent::METPhi(met_type type) const{
+Double_t KEvent::METPhi(bool uncorrected) const{
   
-
-  if (type == pfmet) return k_PF_METphi;
+  if(uncorrected) return {TMath::ATan2(k_PF_METy,k_PF_METx)};
+  else  return k_PF_METphi;
 
   return -999.;
 }
 
-Double_t KEvent::SumET(met_type type) const{
+Double_t KEvent::SumET() const{
   
  
-  if (type == pfmet) return k_PF_SumET;
+  return k_PF_SumET;
   return -999.;
 }
 

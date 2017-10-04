@@ -27,7 +27,7 @@ void MakeInputListForSubmitScript(){
     
   TString path_of_list=TString(getenv("LQANALYZER_DATASET_DIR"))+ "/cattuplist_"+TString(getenv("CATVERSION"))+".txt";  
 
-  map<TString, TString> lqmap_tmp = GetLQMap2016(path_of_list);
+  map<TString, TString> lqmap_tmp = GetLQMap2016(path_of_list,0);
   map<TString, TString> lqmap;
   for(std::map<TString, TString>::iterator mit =lqmap_tmp.begin(); mit != lqmap_tmp.end();++mit){
     TString def_version = TString(getenv("CATVERSION"));

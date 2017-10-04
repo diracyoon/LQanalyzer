@@ -3187,11 +3187,9 @@ else:
                                 cut_line=True
                         if cut_line:
                             if sl == 2:
-                                print src_line[sl]
                                 samplename.append(hs + ((40 - len(hs))*" ") )
                                 sample_sum.append(float(src_line[sl]))
                             if sl == 3:
-                                print src_line[sl] + "err"
                                 sample_err.append(float(src_line[sl]))
                     
         file_read_counter.close()
@@ -3201,7 +3199,6 @@ else:
         total_sum=0.
         total_err=0.;
 
-        print len(samplename) + " : " + len(sample_sum) + " : " + len(sample_err)
         if len(samplename) == len(sample_sum):
             for sn in range(0,len(samplename)):
                 print samplename[sn] +  str(sample_sum[sn])

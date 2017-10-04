@@ -2,12 +2,11 @@
 DoubleMuon_SKnonprompt    |   Misid. Lepton Background                          |  DoubleMuon_SKnonprompt | 870  | 0.3 |
 ZZTo4L_powheg             |   Diboson                                                |  diboson             |  kGreen     | 0.20     |
 WZTo3LNu_powheg		  |  Diboson                                                |  diboson             |  kGreen     | 0.20     |
-ggZZto4mu                 |   Diboson                                                |  diboson             |  kGreen     | 0.20     |
 WpWpQCD                   |    Diboson                                                |  diboson             |  kGreen     |     0.15     |
 WpWpEWK                   |    Diboson                                                |  diboson             |  kGreen     |     0.15     |
 ww_ds                     |   Diboson                                           |  diboson               |  kGreen    | 0.15     |
-ZGto2LG                   |   Xg                                          |  zg               |  kRed     | 0.15     |
-WGtoLNuG                  |   Xg                                           |  wg               |  kRed     | 0.15     |
+ZGto2LG                   |   Xg                                          |  zg               |  kOrange     | 0.15     |
+WGtoLNuG                  |   Xg                                           |  wg               |  kOrange     | 0.15     |
 ttZToLL_M-10		  |   Top						|  top			| kRed | 0.2 | 
 tZq			  |   Top                                               |  top                  | kRed | 0.2 |
 TTG                       |   Top             |  top              |  kRed     |       0.2     |

@@ -18,7 +18,7 @@ class ElectronSelection : public BaseSelection {
   ElectronSelection& operator= (const ElectronSelection& obj);
   ElectronSelection(const ElectronSelection& bs);
   
-  void Selection(std::vector<snu::KElectron>& leptonColl, bool m_debug= false);		 
+  void Selection(std::vector<snu::KElectron>& leptonColl, TString Option="");
   void BasicSelection(std::vector<snu::KElectron>& leptonColl, bool m_debug= false);
   void SkimSelection(std::vector<snu::KElectron>& leptonColl, bool m_debug= false);
 

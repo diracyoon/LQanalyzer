@@ -36,7 +36,7 @@ class MuonSelection : public BaseSelection {
 
   
   //// General Selection
-  void Selection(std::vector<snu::KMuon>& leptonColl, bool applyrochester=true,bool m_debug = false); 
+  void Selection(std::vector<snu::KMuon>& leptonColl, bool applyrochester=true, TString Option="");
 
   /// selection for treemaker
   void BasicSelection(std::vector<snu::KMuon>& leptonColl, bool m_debug = false);
