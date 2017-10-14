@@ -108,16 +108,20 @@ void Validation_CH_MuJet::ExecuteEvents() throw(LQError)
   /*Pre-selection*/
   /////////////////
 
+  //minimum met requirement
+  //if(met<20) throw LQError("Fail minimum met requirement", LQError::SkipEvent);
+  //FillCutFlow("Minimum_MET", weight);
+
   //eletron veto
   if(vector_electron_veto.size()!=0) throw LQError("Fail eletron veto", LQError::SkipEvent);
   FillCutFlow("Electron_veto", weight);
 
   //exact one muon
-  if(vector_muon_tight.size()!=1 || vector_muon_loose.size()>1) throw LQError("Fail only one tight muon", LQError::SkipEvent);
-  FillCutFlow("One_tight_muon", weight);
+  if(vector_muon_loose.size()!=1) throw LQError("Fail only one loose muon", LQError::SkipEvent);
+  FillCutFlow("One_loose_muon", weight);
   
-  //muon pt>20
-  if(vector_muon_tight.at(0).Pt()<20) throw LQError("Fail muon pt requirement", LQError::SkipEvent);
+  //muon pt>30
+  if(vector_muon_loose.at(0).Pt()<30) throw LQError("Fail muon pt requirement", LQError::SkipEvent);
   FillCutFlow("Muon_Pt", weight);
 
   //at least four hard jet
@@ -145,40 +149,43 @@ void Validation_CH_MuJet::ExecuteEvents() throw(LQError)
   /////////////////
 
   //Top pair pt reweighting
-  Bool_t chk_top_found = kFALSE;
-  Bool_t chk_a_top_found = kFALSE;
-  Double_t top_pt;
-  Double_t a_top_pt;
-  for(UInt_t i=0; i<vector_truth.size(); i++)
-    {
-      if(vector_truth.at(i).PdgId()==PDG_TOP && vector_truth.at(i).GenStatus()==22)
-	{
-	  top_pt = vector_truth.at(i).Pt();
-	  chk_top_found = kTRUE;
-	}
-
-      if(vector_truth.at(i).PdgId()==PDG_A_TOP && vector_truth.at(i).GenStatus()==22)
-        {
-          a_top_pt = vector_truth.at(i).Pt();
-          chk_a_top_found= kTRUE;
-        }
-    }
-
   Double_t top_pair_reweight = 1;
-  if(k_isdata==kFALSE && chk_top_found==kTRUE && chk_a_top_found==kTRUE && top_pt<400 && a_top_pt<400) top_pair_reweight = Top_Pair_Reweight(top_pt, a_top_pt);
-  
-  //Trigger scale factor
-  Double_t trigger_sf[3] = { 1, 1, 1};
   if(k_isdata==kFALSE)
     {
-      trigger_sf[0] = mcdata_correction->TriggerScaleFactor(vector_electron_tight, vector_muon_tight, "HLT_IsoMu24_v", -1);
-      trigger_sf[1] = mcdata_correction->TriggerScaleFactor(vector_electron_tight, vector_muon_tight, "HLT_IsoMu24_v", 0);
-      trigger_sf[2] = mcdata_correction->TriggerScaleFactor(vector_electron_tight, vector_muon_tight, "HLT_IsoMu24_v", 1);
+      Bool_t chk_top_found = kFALSE;
+      Bool_t chk_a_top_found = kFALSE;
+      Double_t top_pt;
+      Double_t a_top_pt;
+      for(UInt_t i=0; i<vector_truth.size(); i++)
+	{
+	  if(vector_truth.at(i).PdgId()==PDG_TOP && vector_truth.at(i).GenStatus()==22)
+	    {
+	      top_pt = vector_truth.at(i).Pt();
+	      chk_top_found = kTRUE;
+	    }
+	  
+	  if(vector_truth.at(i).PdgId()==PDG_A_TOP && vector_truth.at(i).GenStatus()==22)
+	    {
+	      a_top_pt = vector_truth.at(i).Pt();
+	      chk_a_top_found= kTRUE;
+	    }
+	}
+
+      if(chk_top_found==kTRUE && chk_a_top_found==kTRUE && top_pt<400 && a_top_pt<400) top_pair_reweight = Top_Pair_Reweight(top_pt, a_top_pt);
     }
 
   //Weight by trigger scale factor
-  Double_t weight_by_trigger_sf = 1;
-  if(k_isdata==kFALSE) weight_by_trigger_sf =  WeightByTrigger("HLT_IsoMu24_v", TOTAL_LUMINOSITY);
+  Double_t weight_by_trigger = 1;
+  if(k_isdata==kFALSE) weight_by_trigger =  WeightByTrigger("HLT_IsoMu24_v", TOTAL_LUMINOSITY);
+  
+  //Trigger scale factor
+  Double_t trigger_sf[3] = {1, 1, 1};
+  if(k_isdata==kFALSE)
+    {
+      trigger_sf[0] = mcdata_correction->TriggerScaleFactor(vector_electron_tight, vector_muon_loose, "HLT_IsoMu24_v", -1);
+      trigger_sf[1] = mcdata_correction->TriggerScaleFactor(vector_electron_tight, vector_muon_loose, "HLT_IsoMu24_v", 0);
+      trigger_sf[2] = mcdata_correction->TriggerScaleFactor(vector_electron_tight, vector_muon_loose, "HLT_IsoMu24_v", 1);
+    }
 
   //Pileup reweight
   Double_t pileup_reweight[3] = {1, 1, 1}; 
@@ -193,75 +200,85 @@ void Validation_CH_MuJet::ExecuteEvents() throw(LQError)
   Double_t muon_id_sf[3] = {1, 1, 1};
   if(k_isdata==kFALSE)
     {
-      muon_id_sf[0] = mcdata_correction->MuonScaleFactor("MUON_POG_TIGHT", vector_muon_tight, -1);
-      muon_id_sf[1] = mcdata_correction->MuonScaleFactor("MUON_POG_TIGHT", vector_muon_tight, 0);
-      muon_id_sf[2] = mcdata_correction->MuonScaleFactor("MUON_POG_TIGHT", vector_muon_tight, 1);
+      muon_id_sf[0] = mcdata_correction->MuonScaleFactor("MUON_POG_LOOSE", vector_muon_loose, -1);
+      muon_id_sf[1] = mcdata_correction->MuonScaleFactor("MUON_POG_LOOSE", vector_muon_loose, 0);
+      muon_id_sf[2] = mcdata_correction->MuonScaleFactor("MUON_POG_LOOSE", vector_muon_loose, 1);
     }
   
   //Muon Iso. scale factor
   Double_t muon_iso_sf[3] = {1, 1, 1};
   if(k_isdata==kFALSE)
     {
-      muon_iso_sf[0] = mcdata_correction->MuonISOScaleFactor("MUON_POG_TIGHT", vector_muon_tight, -1);
-      muon_iso_sf[1] = mcdata_correction->MuonISOScaleFactor("MUON_POG_TIGHT", vector_muon_tight, 0);
-      muon_iso_sf[2] = mcdata_correction->MuonISOScaleFactor("MUON_POG_TIGHT", vector_muon_tight, 1);
+      muon_iso_sf[0] = mcdata_correction->MuonISOScaleFactor("MUON_POG_LOOSE", vector_muon_loose, -1);
+      muon_iso_sf[1] = mcdata_correction->MuonISOScaleFactor("MUON_POG_LOOSE", vector_muon_loose, 0);
+      muon_iso_sf[2] = mcdata_correction->MuonISOScaleFactor("MUON_POG_LOOSE", vector_muon_loose, 1);
     }
 
   //Muon tracking effi. scale factor
   Double_t muon_tracking_effi_sf = 1;
-  if(k_isdata==kFALSE) muon_tracking_effi_sf = mcdata_correction->MuonTrackingEffScaleFactor(vector_muon_tight);
+  if(k_isdata==kFALSE) muon_tracking_effi_sf = mcdata_correction->MuonTrackingEffScaleFactor(vector_muon_loose);
 
   //B-tagging scale factor
   Int_t mc_period = GetMCPeriod();
-  Double_t b_tag_sf = 1;
-  if(k_isdata==kFALSE) b_tag_sf = BTagScaleFactor_1a(vector_jet_hard, snu::KJet::CSVv2, snu::KJet::Medium , mc_period);
+  Double_t b_tag_reweight = 1;
+  if(k_isdata==kFALSE) b_tag_reweight = BTagScaleFactor_1a(vector_jet_hard, snu::KJet::CSVv2, snu::KJet::Medium , mc_period);
   
   ///////////////////////////
   /*saving ntuple variables*/
   ///////////////////////////
-  Double_t variables[31];
+  Double_t variables[18];
   
   //met
   variables[0] = met;
   
   //muon
-  KMuon muon = vector_muon_tight.at(0);
+  KMuon muon = vector_muon_loose.at(0);
   variables[1] = muon.Eta();
   variables[2] = muon.Pt();
-  
+  variables[3] = muon.RelIso04();
+
   //jets
-  for(Int_t i=0; i<4; i++)
-    {
-      KJet jet = vector_jet_hard.at(i);
-      variables[2*i+3] = jet.Eta();
-      variables[2*i+4] = jet.Pt();
-    }
+  KJet jet = vector_jet_hard.at(0);
+  variables[4] = jet.Eta();
+  variables[5] = jet.Pt();
+
+  jet = vector_jet_hard.at(1);
+  variables[6] = jet.Eta();
+  variables[7] = jet.Pt();
   
-  //
-  variables[11] = eventbase->GetEvent().nVertices();
-  variables[12] = n_b_tag;
+  jet = vector_jet_hard.at(2);
+  variables[8] = jet.Eta();
+  variables[9] = jet.Pt();
 
+  jet = vector_jet_hard.at(3);
+  variables[10] = jet.Eta();
+  variables[11] = jet.Pt();
+  
+  //other event realated variables
+  variables[12] = eventbase->GetEvent().nVertices();
+  variables[13] = n_b_tag;
+  
   //weight and scale factors
-  variables[13] = weight;
-  variables[14] = top_pair_reweight;
-  variables[15] = trigger_sf[0];
-  variables[16] = trigger_sf[1];
-  variables[17] = trigger_sf[2];
-  variables[18] = weight_by_trigger_sf;
-  variables[19] = MCweight;
-  variables[20] = pileup_reweight[0];
-  variables[21] = pileup_reweight[1];
-  variables[22] = pileup_reweight[2];
-  variables[23] = muon_id_sf[0];
-  variables[24] = muon_id_sf[1];
-  variables[25] = muon_id_sf[2];
-  variables[26] = muon_iso_sf[0];
-  variables[27] = muon_iso_sf[1];
-  variables[28] = muon_iso_sf[2];
-  variables[29] = muon_tracking_effi_sf; 
-  variables[30] = b_tag_sf;
+  variables[14] = weight;
+  variables[15] = MCweight;
+  variables[16] = top_pair_reweight;
+  variables[17] = weight_by_trigger;
+  //variables[18] = trigger_sf[0];
+  //variables[19] = trigger_sf[1];
+  //variables[20] = trigger_sf[2];
+  //variables[18] = pileup_reweight[0];
+  //variables[19] = pileup_reweight[1];
+  //variables[20] = pileup_reweight[2];
+  // variables[24] = muon_id_sf[0];
+  // variables[25] = muon_id_sf[1];
+  // variables[26] = muon_id_sf[2];
+  // variables[27] = muon_iso_sf[0];
+  // variables[28] = muon_iso_sf[1];
+  // variables[29] = muon_iso_sf[2];
+  // variables[30] = muon_tracking_effi_sf; 
+  // variables[31] = b_tag_reweight;
 
-  FillNtp("tuple_variables", variables);
+  //FillNtp("tuple_variables", variables);
 
   return;
 }//void Validation_CH_MuJet::ExecuteEvents()
@@ -284,7 +301,9 @@ void Validation_CH_MuJet::InitialiseAnalysis() throw(LQError)
   //Initialise histograms
   MakeHistograms();
 
-  MakeNtp("tuple_variables", "met:muon_eta:muon_pt:jet0_eta:jet0_pt:jet1_eta:jet1_pt:jet2_eta:jet2_pt:jet3_eta:jet3_pt:n_vertices:n_b_tag:weight:top_pair_reweight:trigger_sf_down:trigger_sf:trigger_sf_up:weight_by_trigger:mc_weight:pileup_reweight_down:pileup_reweight:pileup_reweight_up:muon_id_sf_down:muon_id_sf:muon_id_sf_up:muon_iso_sf_down:muon_iso_sf:muon_iso_sf_up:muon_tracking_eff_sf:b_tag_sf");
+  MakeNtp("tuple_variables", "met:muon_eta:muon_pt:muon_reliso04:jet0_eta:jet0_pt:jet1_eta:jet1_pt:jet2_eta:jet2_pt:jet3_eta:jet3_pt:n_vertices:n_b_tag:weight:mc_weight:top_pair_reweight:weight_by_trigger");//:pileup_reweight_down");//:pileup_reweight");//:pileup_reweight_up");
+
+//trigger_sf_down:trigger_sf:trigger_sf_up");//:pileup_reweight_down:pileup_reweight:pileup_reweight_up:muon_id_sf_down:muon_id_sf:muon_id_sf_up:muon_iso_sf_down:muon_iso_sf:muon_iso_sf_up:muon_tracking_eff_sf:b_tag_reweight");
 
   return;
 }//void Validation_CH_MuJet::InitialiseAnalysis()

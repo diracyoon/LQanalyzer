@@ -31,3 +31,8 @@ webpage https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2
 | MUON_HN_LOOSEv5               | 5.     | 2.4      |   0.        | 0.40        | 0.40       | true          | false          |  false         | 0.2        | 0.1        | 0.1          | 50.     | 999.         | 4.           |  true      |
 | MUON_HN_LOOSEv7_SIP3         | 10.     | 2.4      |   0.        | 0.40        | 0.40       | false          | false          |  true         | 0.2        | 0.1        | 0.1          | 50.     | 999.         | 3.0           |  true      |
 | MUON_HN_LOOSEv7_SIP3p5       | 10.     | 2.4      |   0.        | 0.40        | 0.40       | false          | false          |  true         | 0.2        | 0.1        | 0.1          | 50.     | 999.         | 3.5           |  true      |
+## HighdXY for Dilepton##
+| MUON_HN_Tight_HighdXY           | 10.     | 2.4      |   0.        | 0.07        | 0.07        | true          | false          |  false        | 1.0      | 0.04      | 0.04       | 10.     | 4.         | 999.         |  true      |
+| MUON_HN_Loose_HighdXY           | 10.     | 2.4      |   0.        | 0.40        | 0.40        | true          | false          |  false        | 1.0      | 0.04      | 0.04       | 10.     | 4.         | 999.         |  true      |
+| MUON_HN_Loose_HighdXY_Small     | 10.     | 2.4      |   0.        | 0.40        | 0.40        | true          | false          |  false        | 0.005      | 0.04      | 0.04       | 10.     | 999.         | 3.         |  true      |
+| MUON_HN_Loose_HighdXY_Small_loosest     | 5.     | 2.4      |   0.        | 1.0        | 1.0        | true          | false          |  false        | 0.005      | 0.04      | 0.04       | 10.     | 999.         | 3.         |  true      |
